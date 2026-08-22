@@ -25,7 +25,8 @@
 - [x] Add country-scoped auction creation with approved-product, currency, schedule, and ownership safeguards.
 - [x] Add scheduled auction-start processing, product activation, explicit cancellation, and public auction detail/history APIs.
 - [x] Queue auction broadcasts and add domain notifications for key auction lifecycle events.
-- [ ] Add PostgreSQL-backed auction lifecycle, close idempotency, and bid-concurrency test coverage.
+- [x] Add PostgreSQL-backed auction lifecycle, close idempotency, and bid-concurrency test coverage.
+- [x] Add a two-process PostgreSQL contention test proving identical bids create one winner and one minimum-increment rejection.
 - [x] Add country-scoped auction creation with approved-product, currency, schedule, and ownership safeguards.
 - [x] Add scheduled auction-start processing, product activation, explicit cancellation, and public auction detail/history APIs.
 - [x] Queue auction broadcasts and add domain notifications for key auction lifecycle events.
