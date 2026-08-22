@@ -72,6 +72,7 @@
 - [ ] Complete and verify a real Laravel Sanctum browser-auth adapter before claiming end-to-end seller creation, review, and scheduling from React.
 - [x] Add a Laravel API token session adapter with explicit login, logout, and current-user checks for browser-side Marketplace calls.
 - [x] Connect the account live-data view to the Laravel session adapter instead of Manus OAuth, with UI coverage for the authenticated and fallback states.
+- [x] Verify the Laravel API token lifecycle locally: login, authenticated current-user retrieval, logout token revocation, and rejection after revocation.
 - [x] Require at least one private product media record before allowing a seller to submit the product for moderation, with PostgreSQL feature coverage.
 - [x] Restore Laravel policy authorization support in the shared API controller and verify the full suite after the security fix.
 - [x] Install and configure a country-scoped Filament Admin Control Tower for roles, catalog moderation, auction operations, and finance support.
