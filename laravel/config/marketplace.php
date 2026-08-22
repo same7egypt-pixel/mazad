@@ -3,6 +3,9 @@
 return [
     'currency_precision' => 2,
     'default_commission_rate' => 10.00,
+    'payment_gateways' => [
+        // 'SA' => App\Domain\Payments\Gateways\ExampleGateway::class,
+    ],
     'auction' => [
         'ending_soon_minutes' => 15,
         'max_extension_seconds' => 120,

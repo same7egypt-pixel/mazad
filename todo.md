@@ -34,3 +34,7 @@
 - [x] Add tests that verify lifecycle transition broadcasts use the queued Reverb path.
 - [x] Add queue-level tests proving lifecycle broadcasts enqueue Laravel broadcast jobs rather than broadcasting synchronously.
 - [x] Add transaction-boundary tests proving lifecycle broadcasts are not dispatched before the outer database commit.
+- [ ] Add a country-aware payment gateway contract, signed webhook verification, and idempotent payment-state transitions.
+- [x] Add seller-wallet credit entries tied idempotently to settled order payments.
+- [x] Add buyer-facing payment initiation and finance-scoped withdrawal request and review APIs.
+- [x] Add PostgreSQL settlement tests covering webhook replay, wallet ledger idempotency, and withdrawal authorization.
