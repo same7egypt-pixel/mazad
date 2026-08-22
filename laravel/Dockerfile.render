@@ -9,7 +9,7 @@ RUN apt-get update \
 
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 COPY composer.json composer.lock ./
-RUN composer install --no-dev --no-interaction --no-plugins --prefer-dist --optimize-autoloader
+RUN composer install --no-dev --no-interaction --no-plugins --prefer-dist --optimize-autoloader --no-scripts
 
 FROM php:8.3-fpm-bookworm
 
@@ -40,6 +40,10 @@ COPY docker/php/php.ini /usr/local/etc/php/conf.d/99-auction-marketplace.ini
 COPY docker/render/nginx.conf.template /etc/nginx/templates/auction.conf.template
 COPY --chmod=755 docker/render/entrypoint.sh /usr/local/bin/render-entrypoint
 COPY --chmod=755 docker/render/start-web.sh /usr/local/bin/render-web
+
+RUN composer dump-autoload --no-dev --classmap-authoritative --no-scripts \
+    && php artisan package:discover --ansi \
+    && php artisan filament:upgrade
 
 RUN mkdir -p storage/framework/cache storage/framework/sessions storage/framework/views storage/logs bootstrap/cache \
     && chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache /var/lib/nginx /var/log/nginx /run
