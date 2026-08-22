@@ -6,6 +6,11 @@ return [
     'payment_gateways' => [
         // 'SA' => App\Domain\Payments\Gateways\ExampleGateway::class,
     ],
+    'hmac_webhook' => [
+        'gateway_name' => env('PAYMENT_HMAC_GATEWAY_NAME', 'generic-hmac'),
+        'secret' => env('PAYMENT_HMAC_WEBHOOK_SECRET'),
+        'signature_header' => env('PAYMENT_HMAC_SIGNATURE_HEADER', 'x-payment-signature'),
+    ],
     'auction' => [
         'ending_soon_minutes' => 15,
         'max_extension_seconds' => 120,

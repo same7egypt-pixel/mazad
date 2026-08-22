@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Domain\Payments\Contracts\PaymentGateway;
 use App\Domain\Payments\Data\GatewayCheckout;
 use App\Domain\Payments\Data\VerifiedPaymentWebhook;
+use App\Domain\Payments\Gateways\HmacJsonPaymentGateway;
 use App\Domain\Payments\Services\InitiatePayment;
 use App\Domain\Payments\Services\ProcessPaymentWebhook;
 use App\Domain\Payments\Services\RequestWithdrawal;
@@ -15,6 +16,7 @@ use App\Models\City;
 use App\Models\Country;
 use App\Models\Currency;
 use App\Models\Order;
+use App\Models\Payment;
 use App\Models\Product;
 use App\Models\User;
 use App\Models\Wallet;
@@ -52,6 +54,51 @@ class PaymentSettlementTest extends TestCase
         $this->assertDatabaseHas('orders', ['id' => $order->id, 'status' => 'paid']);
         $this->assertDatabaseHas('payments', ['id' => $payment->id, 'status' => 'succeeded', 'transaction_id' => 'txn-'.$payment->id]);
         $this->assertDatabaseHas('wallets', ['user_id' => $seller->id, 'currency_id' => $market['currency']->id, 'pending_balance' => '90.00']);
+        $this->assertDatabaseCount('wallet_transactions', 1);
+    }
+
+    public function test_signed_hmac_webhook_endpoint_settles_the_matching_payment_once_when_replayed(): void
+    {
+        $market = $this->marketplace();
+        config()->set('marketplace.payment_gateways', ['TS' => HmacJsonPaymentGateway::class]);
+        config()->set('marketplace.hmac_webhook', [
+            'gateway_name' => 'generic-hmac',
+            'secret' => 'test-hmac-secret',
+            'signature_header' => 'x-payment-signature',
+        ]);
+        $seller = $this->user($market, []);
+        $buyer = $this->user($market, []);
+        $order = $this->order($market, $seller, $buyer);
+        $payment = Payment::query()->create([
+            'order_id' => $order->id,
+            'country_id' => $market['country']->id,
+            'gateway' => 'generic-hmac',
+            'amount' => '100.00',
+            'currency' => 'TST',
+            'status' => 'pending',
+        ]);
+        $payload = json_encode([
+            'payment_id' => $payment->id,
+            'transaction_id' => 'hmac-txn-'.$payment->id,
+            'status' => 'succeeded',
+            'amount' => '100.00',
+            'currency' => 'TST',
+        ], JSON_THROW_ON_ERROR);
+        $server = [
+            'CONTENT_TYPE' => 'application/json',
+            'HTTP_ACCEPT' => 'application/json',
+            'HTTP_X_MARKETPLACE_COUNTRY' => (string) $market['country']->id,
+            'HTTP_X_PAYMENT_SIGNATURE' => hash_hmac('sha256', $payload, 'test-hmac-secret'),
+        ];
+
+        foreach ([1, 2] as $attempt) {
+            $this->call('POST', '/api/payment-webhooks/generic-hmac', [], [], [], $server, $payload)
+                ->assertOk()
+                ->assertJsonPath('payment_id', $payment->id)
+                ->assertJsonPath('status', 'succeeded');
+        }
+
+        $this->assertDatabaseHas('orders', ['id' => $order->id, 'status' => 'paid']);
         $this->assertDatabaseCount('wallet_transactions', 1);
     }
 
