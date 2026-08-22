@@ -33,9 +33,7 @@ Route::middleware(['marketplace.country'])->group(function (): void {
 
     Route::middleware('auth:sanctum')->group(function (): void {
         Route::post('/auth/logout', [AuthController::class, 'logout']);
-        Route::get('/user', function (Request $request) {
-            return $request->user();
-        });
+        Route::get('/user', [AuthController::class, 'user']);
         Route::get('/my/products', [ProductController::class, 'mine']);
         Route::post('/products', [ProductController::class, 'store']);
         Route::post('/products/{product}/submit-for-review', [ProductController::class, 'submitForReview']);

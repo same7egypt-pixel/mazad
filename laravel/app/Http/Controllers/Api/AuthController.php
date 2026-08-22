@@ -9,6 +9,7 @@ use App\Http\Requests\Auth\RegisterRequest;
 use App\Models\User;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 
@@ -55,5 +56,16 @@ class AuthController extends Controller
         request()->user()->currentAccessToken()?->delete();
 
         return response()->json(status: 204);
+    }
+
+    public function user(Request $request, MarketplaceContext $context): JsonResponse
+    {
+        $user = $request->user();
+
+        if ($user->country_id !== $context->id()) {
+            abort(403);
+        }
+
+        return response()->json($user);
     }
 }

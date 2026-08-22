@@ -4,9 +4,14 @@ import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/re
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({
+  clearLiveMarketplaceToken: vi.fn(),
   createLiveAuction: vi.fn(),
+  getLiveMarketplaceToken: vi.fn(),
+  getLiveMarketplaceUser: vi.fn(),
   getLiveSellerProducts: vi.fn(),
   getLiveSellerReferences: vi.fn(),
+  loginLiveMarketplace: vi.fn(),
+  logoutLiveMarketplace: vi.fn(),
   toastError: vi.fn(),
   toastInfo: vi.fn(),
   toastSuccess: vi.fn(),
@@ -17,12 +22,17 @@ vi.mock("@/_core/hooks/useAuth", () => ({
 }));
 
 vi.mock("@/lib/marketplaceApi", () => ({
+  clearLiveMarketplaceToken: mocks.clearLiveMarketplaceToken,
   createLiveAuction: mocks.createLiveAuction,
   createLiveProduct: vi.fn(),
+  getLiveMarketplaceToken: mocks.getLiveMarketplaceToken,
+  getLiveMarketplaceUser: mocks.getLiveMarketplaceUser,
   getLiveSellerReferences: mocks.getLiveSellerReferences,
   getLiveSellerProducts: mocks.getLiveSellerProducts,
   getSavedMarketplaceCountryId: () => 7,
   isLiveMarketplaceEnabled: () => true,
+  loginLiveMarketplace: mocks.loginLiveMarketplace,
+  logoutLiveMarketplace: mocks.logoutLiveMarketplace,
   submitLiveProductForReview: vi.fn(),
   uploadLiveProductMedia: vi.fn(),
 }));
@@ -51,6 +61,8 @@ const products = [
 ];
 
 async function renderReadySellerFlow() {
+  mocks.getLiveMarketplaceToken.mockReturnValue("token-abc");
+  mocks.getLiveMarketplaceUser.mockResolvedValue({ id: 44, name: "بائع Laravel", email: "seller@example.test", country_id: 7, city_id: 11, status: "active" });
   mocks.getLiveSellerReferences.mockResolvedValue(referenceData);
   mocks.getLiveSellerProducts.mockResolvedValue(products);
   render(<SellSetup />);
@@ -98,5 +110,23 @@ describe("مسار البائع الحي", () => {
     fireEvent.click(screen.getByRole("button", { name: "جدولة المزاد" }));
 
     await waitFor(() => expect(mocks.toastError).toHaveBeenCalledWith("تعذر جدولة المزاد. تحقق من اعتماد المنتج، صلاحية إنشاء المزادات، والتوقيتات المدخلة."));
+  });
+
+  it("يسجل دخول Laravel صراحةً قبل فتح التدفق الحي للبائع", async () => {
+    const user = { id: 44, name: "بائع Laravel", email: "seller@example.test", country_id: 7, city_id: 11, status: "active" };
+    mocks.getLiveMarketplaceToken.mockReturnValue(null);
+    mocks.loginLiveMarketplace.mockResolvedValue(user);
+    mocks.getLiveSellerReferences.mockResolvedValue(referenceData);
+    mocks.getLiveSellerProducts.mockResolvedValue([]);
+    render(<SellSetup />);
+
+    await screen.findByText("سجّل دخول Laravel لتفعيل الإرسال الحي");
+    fireEvent.change(screen.getByLabelText("البريد الإلكتروني"), { target: { value: user.email } });
+    fireEvent.change(screen.getByLabelText("كلمة المرور"), { target: { value: "secret-password" } });
+    fireEvent.click(screen.getByRole("button", { name: "دخول Laravel" }));
+
+    await waitFor(() => expect(mocks.loginLiveMarketplace).toHaveBeenCalledWith(7, user.email, "secret-password"));
+    expect(await screen.findByText("متصل باسم بائع Laravel")).toBeTruthy();
+    expect(mocks.toastSuccess).toHaveBeenCalled();
   });
 });

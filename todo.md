@@ -70,6 +70,7 @@
 - [x] Add a country-scoped seller product list and permit auction scheduling only for that seller's approved products, with API and UI coverage.
 - [x] Add frontend tests for loading seller products, eligible approved-product selection, and schedule success or failure states.
 - [ ] Complete and verify a real Laravel Sanctum browser-auth adapter before claiming end-to-end seller creation, review, and scheduling from React.
+- [x] Add a Laravel API token session adapter with explicit login, logout, and current-user checks for browser-side Marketplace calls.
 - [x] Require at least one private product media record before allowing a seller to submit the product for moderation, with PostgreSQL feature coverage.
 - [x] Restore Laravel policy authorization support in the shared API controller and verify the full suite after the security fix.
 - [x] Install and configure a country-scoped Filament Admin Control Tower for roles, catalog moderation, auction operations, and finance support.
@@ -79,6 +80,7 @@
 - [x] Add country-scoped read-only Filament resources for orders and shipments to support fulfillment operations without bypassing domain transitions.
 - [x] Add a finance-scoped Filament withdrawal review resource that reuses the existing withdrawal approval and rejection domain service.
 - [ ] Complete a same-day technical release pass: remaining operations resources, seller workflow validation, frontend/backend full test suite, dependency audit, and deployment readiness documentation.
+- [x] Add feature coverage that blocks private-media upload by a non-owner seller in the same marketplace country.
 - [x] Publish an explicit production activation checklist for the still-external Laravel API URL, payment provider credentials, webhook secrets, carrier credentials, and launch-country decisions.
 - [x] Wire AuctionDetail to Laravel auction and bid-history endpoints with the same safe fallback behavior used by discovery.
 - [x] Add a shared marketplace data-source boundary and tests proving discovery and auction detail fall back safely when the live API is unavailable.

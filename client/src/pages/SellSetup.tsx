@@ -1,14 +1,18 @@
-import { startLogin } from "@/const";
-import { useAuth } from "@/_core/hooks/useAuth";
 import { demoCountryOptions } from "@/data/marketplaceDemo";
 import {
+  clearLiveMarketplaceToken,
   createLiveAuction,
   createLiveProduct,
+  getLiveMarketplaceToken,
+  getLiveMarketplaceUser,
   getLiveSellerReferences,
   getLiveSellerProducts,
   getSavedMarketplaceCountryId,
   isLiveMarketplaceEnabled,
+  loginLiveMarketplace,
+  logoutLiveMarketplace,
   submitLiveProductForReview,
+  type LiveMarketplaceUser,
   type LiveSellerProduct,
   type SellerReferenceData,
   uploadLiveProductMedia,
@@ -52,7 +56,6 @@ function MediaPicker({ label, helper, accept, icon: Icon, files, onChange }: {
 }
 
 export default function SellSetup() {
-  const { isAuthenticated, loading } = useAuth();
   const [step, setStep] = useState<1 | 2>(1);
   const [country, setCountry] = useState("sa");
   const [city, setCity] = useState("الرياض");
@@ -70,6 +73,11 @@ export default function SellSetup() {
   const [sellerReferences, setSellerReferences] = useState<SellerReferenceData | null>(null);
   const [sellerProducts, setSellerProducts] = useState<LiveSellerProduct[]>([]);
   const [selectedSellerProductId, setSelectedSellerProductId] = useState("");
+  const [liveSessionUser, setLiveSessionUser] = useState<LiveMarketplaceUser | null>(null);
+  const [isCheckingLiveSession, setIsCheckingLiveSession] = useState(true);
+  const [loginEmail, setLoginEmail] = useState("");
+  const [loginPassword, setLoginPassword] = useState("");
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isScheduling, setIsScheduling] = useState(false);
   const countryId = getSavedMarketplaceCountryId();
@@ -77,6 +85,27 @@ export default function SellSetup() {
   const cities = useMemo(() => sellerReferences?.cities.map((item) => item.name) || fallbackCities[country] || [], [country, sellerReferences]);
   const categories = useMemo(() => sellerReferences?.categories.map((item) => item.name) || fallbackCategories, [sellerReferences]);
   const allMediaFiles = [...imageFiles, ...videoFiles];
+
+  useEffect(() => {
+    if (!isLive || !getLiveMarketplaceToken()) {
+      setLiveSessionUser(null);
+      setIsCheckingLiveSession(false);
+      return;
+    }
+
+    let cancelled = false;
+    setIsCheckingLiveSession(true);
+    getLiveMarketplaceUser(countryId).then((user) => {
+      if (!cancelled) setLiveSessionUser(user);
+    }).catch(() => {
+      clearLiveMarketplaceToken();
+      if (!cancelled) setLiveSessionUser(null);
+    }).finally(() => {
+      if (!cancelled) setIsCheckingLiveSession(false);
+    });
+
+    return () => { cancelled = true; };
+  }, [countryId, isLive]);
 
   useEffect(() => {
     if (!isLive) return;
@@ -94,7 +123,7 @@ export default function SellSetup() {
   }, [countryId, isLive]);
 
   useEffect(() => {
-    if (!isLive || !isAuthenticated) {
+    if (!isLive || !liveSessionUser) {
       setSellerProducts([]);
       setSelectedSellerProductId("");
       return;
@@ -108,7 +137,7 @@ export default function SellSetup() {
     });
 
     return () => { cancelled = true; };
-  }, [countryId, isAuthenticated, isLive]);
+  }, [countryId, isLive, liveSessionUser]);
 
   const changeCountry = (nextCountry: string) => {
     setCountry(nextCountry);
@@ -117,7 +146,6 @@ export default function SellSetup() {
   };
 
   const continueToAuction = () => {
-    if (!isAuthenticated && !loading) return startLogin();
     if (!title.trim() || description.trim().length < 20) {
       toast.error("أكمل عنوان القطعة ووصفاً لا يقل عن 20 حرفاً أولاً.");
       return;
@@ -127,13 +155,12 @@ export default function SellSetup() {
 
   const submitListing = async (event: FormEvent) => {
     event.preventDefault();
-    if (!isAuthenticated && !loading) return startLogin();
     if (!startingPrice || !increment || !startTime || !endTime) {
       toast.error("أكمل سعر البداية والزيادة وتوقيت البداية والنهاية.");
       return;
     }
-    if (!isLive || !sellerReferences) {
-      toast.success("تم حفظ مسودة العرض فقط", { description: "لن يُنشأ منتج أو مزاد حقيقي قبل تفعيل عنوان Laravel API وربط مصادقة Sanctum." });
+    if (!isLive || !sellerReferences || !liveSessionUser) {
+      toast.success("تم حفظ مسودة العرض فقط", { description: "لن يُنشأ منتج أو مزاد حقيقي قبل تفعيل عنوان Laravel API وتسجيل الدخول إلى حساب Laravel." });
       return;
     }
     const cityReference = sellerReferences.cities.find((item) => item.name === city);
@@ -164,9 +191,8 @@ export default function SellSetup() {
 
   const scheduleApprovedProduct = async (event: FormEvent) => {
     event.preventDefault();
-    if (!isAuthenticated && !loading) return startLogin();
-    if (!isLive) {
-      toast.info("تحتاج جدولة المزاد إلى عنوان Laravel API وجلسة Sanctum حقيقية.");
+    if (!isLive || !liveSessionUser) {
+      toast.info("تحتاج جدولة المزاد إلى عنوان Laravel API وتسجيل دخول Laravel صالح.");
       return;
     }
     const product = sellerProducts.find((item) => item.id === Number(selectedSellerProductId));
@@ -198,7 +224,39 @@ export default function SellSetup() {
     }
   };
 
-  const dataSourceLabel = isLive && sellerReferences ? "ربط Laravel حي" : "عرض مؤقت غير منشور";
+  const loginToLiveMarketplace = async (event: FormEvent) => {
+    event.preventDefault();
+    if (!isLive) {
+      toast.info("يتطلب الدخول الحي عنوان Laravel API صالحاً.");
+      return;
+    }
+
+    setIsLoggingIn(true);
+    try {
+      const user = await loginLiveMarketplace(countryId, loginEmail.trim(), loginPassword);
+      setLiveSessionUser(user);
+      setLoginPassword("");
+      toast.success("تم تسجيل الدخول إلى حساب Laravel", { description: "يمكنك الآن إرسال المنتجات للمراجعة وجدولة المزادات المعتمدة." });
+    } catch {
+      toast.error("تعذر تسجيل الدخول إلى Laravel. تحقق من البريد وكلمة المرور وسياق الدولة.");
+    } finally {
+      setIsLoggingIn(false);
+    }
+  };
+
+  const logoutFromLiveMarketplace = async () => {
+    try {
+      await logoutLiveMarketplace(countryId);
+    } catch {
+      // The token is cleared locally by the adapter even if the API is unavailable.
+    }
+    setLiveSessionUser(null);
+    setSellerProducts([]);
+    setSelectedSellerProductId("");
+    toast.info("تم إنهاء جلسة Laravel لهذا المتصفح.");
+  };
+
+  const dataSourceLabel = isLive && sellerReferences && liveSessionUser ? "ربط Laravel حي" : "عرض مؤقت غير منشور";
   const selectedCondition = conditionOptions.find((item) => item.value === condition)?.label || condition;
   const approvedProducts = sellerProducts.filter((product) => product.status === "approved" && !product.auction);
 
@@ -209,6 +267,9 @@ export default function SellSetup() {
     </header>
     <section className="market-container pb-20 pt-4"><div className="mx-auto max-w-5xl">
       <div className="flex flex-wrap items-start justify-between gap-4"><div><p className="text-xs font-bold tracking-[.16em] text-[#d96d46]">مسار البائع</p><h1 className="mt-2 font-serif text-4xl md:text-5xl">ابدأ من القطعة، ثم جهّز مزادك.</h1><p className="mt-4 max-w-2xl text-sm leading-7 text-[#66777b]">ينشئ الربط الحي منتجاً ووسائط خاصة ثم يرسله للمراجعة. لا تصبح جدولة المزاد متاحة إلا بعد الاعتماد.</p></div><span className="rounded-full bg-[#fff0e8] px-3 py-2 text-xs font-bold text-[#c45e39]">{dataSourceLabel}</span></div>
+      {isLive && <section className="mt-6 rounded-2xl border border-[#143039]/10 bg-white p-5 shadow-[0_8px_24px_rgba(20,48,57,.05)]"><div className="flex flex-wrap items-center justify-between gap-3"><div><p className="text-xs font-bold tracking-[.12em] text-[#d96d46]">جلسة Marketplace الحية</p><h2 className="mt-1 font-serif text-2xl">{isCheckingLiveSession ? "جارٍ التحقق من جلسة Laravel…" : liveSessionUser ? `متصل باسم ${liveSessionUser.name}` : "سجّل دخول Laravel لتفعيل الإرسال الحي"}</h2><p className="mt-1 text-xs leading-5 text-[#6d7f83]">جلسة Laravel مستقلة عن تسجيل OAuth الظاهر في الواجهة؛ تستخدم رمزاً مؤقتاً في جلسة هذا المتصفح فقط.</p></div>{liveSessionUser && <button type="button" onClick={logoutFromLiveMarketplace} className="rounded-xl border border-[#143039]/15 px-4 py-2 text-sm font-bold">إنهاء جلسة Laravel</button>}</div>
+        {!isCheckingLiveSession && !liveSessionUser && <form onSubmit={loginToLiveMarketplace} className="mt-5 grid gap-3 md:grid-cols-[1fr_1fr_auto]"><label className="grid gap-1 text-xs font-bold">البريد الإلكتروني<input value={loginEmail} onChange={(event) => setLoginEmail(event.target.value)} type="email" required className="rounded-xl border border-[#143039]/15 px-3 py-2.5 text-sm font-normal outline-none focus:border-[#d96d46]" /></label><label className="grid gap-1 text-xs font-bold">كلمة المرور<input value={loginPassword} onChange={(event) => setLoginPassword(event.target.value)} type="password" required className="rounded-xl border border-[#143039]/15 px-3 py-2.5 text-sm font-normal outline-none focus:border-[#d96d46]" /></label><button type="submit" disabled={isLoggingIn} className="mt-auto rounded-xl bg-[#12313a] px-5 py-2.5 text-sm font-bold text-white disabled:opacity-60">{isLoggingIn ? "جارٍ الدخول…" : "دخول Laravel"}</button></form>}
+      </section>}
       <div className="mt-9 grid gap-8 lg:grid-cols-[.72fr_1.28fr]">
         <aside className="rounded-[1.5rem] bg-[#12313a] p-6 text-white"><p className="text-xs font-bold tracking-[.14em] text-[#c7dcae]">رحلة الإدراج</p><ol className="mt-7 space-y-5">{[[1, "تفاصيل القطعة", "العنوان والوصف والفئة والموقع"], [2, "إعداد المزاد", "السعر والتوقيت والحدود"]].map(([number, label, copy]) => <li key={number} className="flex gap-3"><span className={`grid h-8 w-8 shrink-0 place-items-center rounded-full text-xs font-bold ${step === Number(number) ? "bg-[#d96d46] text-white" : step > Number(number) ? "bg-[#c7dcae] text-[#12313a]" : "bg-white/10 text-[#cfe0dc]"}`}>{step > Number(number) ? <Check size={15} /> : number}</span><div><h2 className="font-serif text-xl">{label}</h2><p className="mt-1 text-xs leading-5 text-[#cfe0dc]">{copy}</p></div></li>)}</ol><div className="mt-9 rounded-2xl bg-white/8 p-4 text-xs leading-6 text-[#cfe0dc]"><ShieldCheck className="mb-2 text-[#c7dcae]" size={18} />الحالة الحية تنتقل من مسودة إلى مراجعة واعتماد ثم مزاد حي وفق سياسات السوق والدولة.</div></aside>
         <form onSubmit={submitListing} className="rounded-[1.5rem] bg-white p-6 shadow-[0_12px_40px_rgba(20,48,57,.08)] md:p-8">
@@ -230,7 +291,7 @@ export default function SellSetup() {
           </>}
         </form>
       </div>
-      {isLive && isAuthenticated && <section className="mt-8 rounded-[1.5rem] border border-[#143039]/10 bg-white p-6 shadow-[0_12px_40px_rgba(20,48,57,.06)] md:p-8">
+      {isLive && liveSessionUser && <section className="mt-8 rounded-[1.5rem] border border-[#143039]/10 bg-white p-6 shadow-[0_12px_40px_rgba(20,48,57,.06)] md:p-8">
         <div className="flex flex-wrap items-start justify-between gap-3"><div><p className="text-xs font-bold tracking-[.14em] text-[#d96d46]">بعد الاعتماد</p><h2 className="mt-1 font-serif text-3xl">منتجاتك الحية</h2><p className="mt-2 max-w-2xl text-sm leading-6 text-[#66777b]">يمكنك جدولة مزاد فقط لمنتج تملكه وحالته <strong>معتمد</strong> وليس له مزاد سابق. المنتجات في المراجعة أو المرفوضة تبقى للمتابعة داخل لوحة الإدارة.</p></div><span className="rounded-full bg-[#edf0e8] px-3 py-2 text-xs font-bold text-[#4e6967]">{sellerProducts.length} منتج</span></div>
         {sellerProducts.length === 0 ? <p className="mt-6 rounded-xl bg-[#f4f3ed] p-4 text-sm leading-6 text-[#66777b]">لا توجد منتجات حية لهذا الحساب في البلد المختار بعد. أرسل منتجاً للمراجعة أولاً، ثم عد هنا بعد اعتماده.</p> : <div className="mt-6 grid gap-3">{sellerProducts.map((product) => <button type="button" key={product.id} onClick={() => !product.auction && product.status === "approved" && setSelectedSellerProductId(String(product.id))} className={`flex flex-wrap items-center justify-between gap-3 rounded-xl border p-4 text-right transition ${selectedSellerProductId === String(product.id) ? "border-[#d96d46] bg-[#fff5f0]" : "border-[#143039]/10 bg-[#f7f6f1]"} ${product.status === "approved" && !product.auction ? "cursor-pointer" : "cursor-default opacity-75"}`}><span><strong className="block text-sm">{product.title}</strong><span className="mt-1 block text-xs text-[#6d7f83]">{product.category?.name || "فئة غير محددة"} · {product.city?.name || "مدينة غير محددة"}</span></span><span className="rounded-full bg-white px-3 py-1 text-xs font-bold text-[#4e6967]">{product.auction ? `مرتبط بمزاد ${product.auction.status}` : product.status === "approved" ? "جاهز للجدولة" : product.status}</span></button>)}</div>}
         <form onSubmit={scheduleApprovedProduct} className="mt-7 rounded-2xl bg-[#12313a] p-5 text-white"><div className="flex items-center gap-2"><Gavel size={18} className="text-[#c7dcae]" /><h3 className="font-serif text-2xl">جدولة مزاد لمنتج معتمد</h3></div><p className="mt-2 text-xs leading-5 text-[#cfe0dc]">تُستخدم أسعار وتوقيتات إعداد المزاد أعلاه. اختر منتجاً معتمداً ثم أرسل طلب الجدولة.</p><div className="mt-5 grid gap-4 md:grid-cols-[1fr_auto]"><label className="grid gap-2 text-sm font-semibold">المنتج المعتمد<select value={selectedSellerProductId} onChange={(event) => setSelectedSellerProductId(event.target.value)} className="rounded-xl bg-white px-4 py-3 text-[#143039] outline-none"><option value="">اختر منتجاً معتمداً</option>{approvedProducts.map((product) => <option key={product.id} value={product.id}>{product.title}</option>)}</select></label><button type="submit" disabled={isScheduling || approvedProducts.length === 0} className="mt-auto flex h-[48px] items-center justify-center gap-2 rounded-xl bg-[#d96d46] px-5 text-sm font-bold text-white disabled:cursor-not-allowed disabled:opacity-60"><Gavel size={17} />{isScheduling ? "جارٍ الجدولة…" : "جدولة المزاد"}</button></div></form>

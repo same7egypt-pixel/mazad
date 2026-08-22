@@ -32,6 +32,7 @@ type LaravelBid = { id: number; amount: string | number; created_at: string };
 export type MarketplaceCountry = { id: number; code: string; name: string; currency?: { code?: string | null; symbol?: string | null } | null };
 
 const marketplaceCountryStorageKey = "mazad.marketplace-country-id";
+const laravelApiTokenStorageKey = "mazad.laravel-api-token";
 
 function normalizeBaseUrl(value: string | undefined): string | null {
   if (!value) return null;
@@ -57,6 +58,28 @@ export function getSavedMarketplaceCountryId(): number {
   if (typeof window === "undefined") return 0;
   const countryId = Number(window.localStorage.getItem(marketplaceCountryStorageKey));
   return Number.isInteger(countryId) && countryId > 0 ? countryId : 0;
+}
+
+export type LiveMarketplaceUser = {
+  id: number;
+  name: string;
+  email: string;
+  country_id: number | null;
+  city_id: number | null;
+  status?: string;
+};
+
+export function getLiveMarketplaceToken(): string | null {
+  if (typeof window === "undefined") return null;
+  return window.sessionStorage.getItem(laravelApiTokenStorageKey);
+}
+
+function saveLiveMarketplaceToken(token: string): void {
+  if (typeof window !== "undefined") window.sessionStorage.setItem(laravelApiTokenStorageKey, token);
+}
+
+export function clearLiveMarketplaceToken(): void {
+  if (typeof window !== "undefined") window.sessionStorage.removeItem(laravelApiTokenStorageKey);
 }
 
 function formatMoney(amount: string | number, currency?: LaravelAuction["currency"]): string {
@@ -99,19 +122,44 @@ export function mapLaravelAuction(auction: LaravelAuction, countryCode: string):
 async function marketplaceRequest<T>(path: string, countryId?: number, init?: RequestInit): Promise<T> {
   if (!laravelApiBaseUrl) throw new Error("Laravel API URL is not configured.");
 
+  const headers = new Headers(init?.headers);
+  headers.set("Accept", "application/json");
+  if (countryId) headers.set("X-Marketplace-Country", String(countryId));
+  const token = getLiveMarketplaceToken();
+  if (token) headers.set("Authorization", `Bearer ${token}`);
+
   const response = await fetch(`${laravelApiBaseUrl}${path}`, {
     credentials: "include",
     ...init,
-    headers: {
-      Accept: "application/json",
-      ...(countryId ? { "X-Marketplace-Country": String(countryId) } : {}),
-      ...(init?.headers || {}),
-    },
+    headers,
   });
 
   if (!response.ok) throw new Error(`Laravel API request failed with status ${response.status}.`);
 
   return response.json() as Promise<T>;
+}
+
+export async function loginLiveMarketplace(countryId: number, email: string, password: string): Promise<LiveMarketplaceUser> {
+  const payload = await marketplaceRequest<{ user: LiveMarketplaceUser; token: string }>("/api/auth/login", countryId, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email, password, device_name: "Mazad Marketplace Web" }),
+  });
+
+  saveLiveMarketplaceToken(payload.token);
+  return payload.user;
+}
+
+export async function getLiveMarketplaceUser(countryId: number): Promise<LiveMarketplaceUser> {
+  return marketplaceRequest<LiveMarketplaceUser>("/api/user", countryId);
+}
+
+export async function logoutLiveMarketplace(countryId: number): Promise<void> {
+  try {
+    await marketplaceRequest<void>("/api/auth/logout", countryId, { method: "POST" });
+  } finally {
+    clearLiveMarketplaceToken();
+  }
 }
 
 export type SellerReferenceData = {
