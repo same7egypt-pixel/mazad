@@ -37,11 +37,21 @@ make test          # Run Laravel tests in the container
 make down          # Stop the local stack
 ```
 
+## Auction Lifecycle Verification
+
+The lifecycle suite uses PostgreSQL rather than SQLite because the auction services depend on row-level locks and transaction semantics. In the Compose environment, create a dedicated disposable test database and role matching the non-production `phpunit.xml` configuration, then run:
+
+```bash
+docker compose exec app php artisan test tests/Feature/AuctionLifecycleTest.php
+```
+
+The suite covers approved-product scheduling, state transitions, cancellation, idempotent order creation, minimum-increment validation, and queued bid broadcasting. It deliberately does not replace the pending multi-process bid-contention test.
+
 The local template contains development-only credentials and **must not** be copied unchanged to a shared, staging, or production environment. Set strong unique database, MinIO, Meilisearch, Reverb, and application-key values through the target deployment's secret manager. The project keeps the Compose services separate so production may replace them with managed equivalents without changing the application contracts.
 
 ## Local API Foundation
 
-All active API calls require the `X-Marketplace-Country` header. Registration and login are exposed at `POST /api/auth/register` and `POST /api/auth/login`. The registration flow expects the selected country identifier to match that header and validates that the chosen city belongs to the same active country.
+All active API calls require the `X-Marketplace-Country` header. Registration and login are exposed at `POST /api/auth/register` and `POST /api/auth/login`. The registration flow expects the selected country identifier to match that header and validates that the chosen city belongs to the same active country. Public auction reads are available through `GET /api/auctions`, `GET /api/auctions/{auction}`, and `GET /api/auctions/{auction}/bids`; authenticated sellers use `POST /api/auctions` and `POST /api/auctions/{auction}/cancel`.
 
 ## References
 

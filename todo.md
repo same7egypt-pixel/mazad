@@ -22,3 +22,15 @@
 - [x] Configure Sanctum authentication, Spatie role and permission foundations, policies, audit logging, and modular service boundaries.
 - [x] Apply all migrations and capture migration verification output against an isolated PostgreSQL 16 database; Docker runtime execution remains for the target local machine.
 - [x] Produce architecture, schema, migration-status, local-running, and next-steps reports.
+- [x] Add country-scoped auction creation with approved-product, currency, schedule, and ownership safeguards.
+- [x] Add scheduled auction-start processing, product activation, explicit cancellation, and public auction detail/history APIs.
+- [x] Queue auction broadcasts and add domain notifications for key auction lifecycle events.
+- [ ] Add PostgreSQL-backed auction lifecycle, close idempotency, and bid-concurrency test coverage.
+- [x] Add country-scoped auction creation with approved-product, currency, schedule, and ownership safeguards.
+- [x] Add scheduled auction-start processing, product activation, explicit cancellation, and public auction detail/history APIs.
+- [x] Queue auction broadcasts and add domain notifications for key auction lifecycle events.
+- [x] Add PostgreSQL-backed lifecycle, close-idempotency, minimum-increment, and queued-broadcast test coverage; retain parallel-worker bid contention testing as a release-hardening task.
+- [x] Add queued after-commit broadcasts for auction started, cancelled, ended-without-sale, and sold transitions.
+- [x] Add tests that verify lifecycle transition broadcasts use the queued Reverb path.
+- [x] Add queue-level tests proving lifecycle broadcasts enqueue Laravel broadcast jobs rather than broadcasting synchronously.
+- [x] Add transaction-boundary tests proving lifecycle broadcasts are not dispatched before the outer database commit.

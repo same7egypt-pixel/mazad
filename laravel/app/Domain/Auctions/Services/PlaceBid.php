@@ -3,6 +3,7 @@
 namespace App\Domain\Auctions\Services;
 
 use App\Domain\Auctions\Events\BidPlaced;
+use App\Domain\Core\Money\Decimal;
 use App\Models\Auction;
 use App\Models\Bid;
 use App\Models\User;
@@ -27,8 +28,8 @@ class PlaceBid
                 throw ValidationException::withMessages(['amount' => 'The bid amount must be a positive monetary value.']);
             }
 
-            $minimum = bcadd((string) $auction->current_price, (string) $auction->minimum_increment, 2);
-            if (bccomp($amount, $minimum, 2) < 0) {
+            $minimum = Decimal::add((string) $auction->current_price, (string) $auction->minimum_increment);
+            if (Decimal::compare($amount, $minimum) < 0) {
                 throw ValidationException::withMessages(['amount' => "The next bid must be at least {$minimum}."]);
             }
 
