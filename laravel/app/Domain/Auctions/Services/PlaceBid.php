@@ -4,6 +4,7 @@ namespace App\Domain\Auctions\Services;
 
 use App\Domain\Auctions\Events\BidPlaced;
 use App\Domain\Core\Money\Decimal;
+use App\Domain\Governance\Services\RecordBidActivity;
 use App\Models\Auction;
 use App\Models\Bid;
 use App\Models\User;
@@ -37,7 +38,10 @@ class PlaceBid
             $auction->forceFill(['current_price' => $amount, 'winner_id' => $bidder->id, 'bid_count' => $auction->bid_count + 1, 'version' => $auction->version + 1])->save();
             $auction->refresh();
 
-            DB::afterCommit(fn () => BidPlaced::dispatch($auction, $bid));
+            DB::afterCommit(function () use ($auction, $bid, $bidder): void {
+                BidPlaced::dispatch($auction, $bid);
+                app(RecordBidActivity::class)->handle($auction, $bid, $bidder);
+            });
 
             return $bid;
         }, 3);

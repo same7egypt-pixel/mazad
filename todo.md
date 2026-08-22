@@ -49,3 +49,6 @@
 - [x] Add completed-order review eligibility, counterparty validation, and duplicate-review protection.
 - [x] Add authenticated notification inbox APIs with read-state transitions and country-aware access.
 - [x] Add PostgreSQL tests for search filtering, review eligibility, and notification country isolation.
+- [x] Record country-scoped bid and marketplace activity with reviewable suspicious-bid signals.
+- [x] Add role-scoped fraud and audit log APIs with cross-country isolation.
+- [x] Add PostgreSQL tests for suspicious-signal creation and fraud-review authorization.

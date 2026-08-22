@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\AuctionController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\BidController;
+use App\Http\Controllers\Api\GovernanceController;
 use App\Http\Controllers\Api\ListingSearchController;
 use App\Http\Controllers\Api\NotificationController;
 use App\Http\Controllers\Api\PaymentController;
@@ -47,6 +48,8 @@ Route::middleware(['marketplace.country'])->group(function (): void {
         Route::post('/withdrawals/{withdrawal}/reject', [WalletController::class, 'rejectWithdrawal']);
         Route::get('/notifications', [NotificationController::class, 'index']);
         Route::post('/notifications/{notification}/read', [NotificationController::class, 'markRead']);
+        Route::get('/governance/fraud-signals', [GovernanceController::class, 'fraudSignals']);
+        Route::get('/governance/audit-logs', [GovernanceController::class, 'auditLogs']);
     });
 
     Route::post('/payment-webhooks/{gateway}', [PaymentController::class, 'webhook']);
