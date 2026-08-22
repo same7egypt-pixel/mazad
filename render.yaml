@@ -164,6 +164,8 @@ envVarGroups:
         value: production
       - key: APP_DEBUG
         value: "false"
+      - key: TRUSTED_PROXIES
+        value: "*"
       - key: APP_KEY
         sync: false
       - key: APP_URL

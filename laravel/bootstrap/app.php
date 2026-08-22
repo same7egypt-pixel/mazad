@@ -14,6 +14,12 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        $trustedProxies = trim((string) env('TRUSTED_PROXIES', ''));
+
+        if ($trustedProxies !== '') {
+            $middleware->trustProxies(at: $trustedProxies);
+        }
+
         $middleware->alias([
             'marketplace.country' => \App\Http\Middleware\ResolveMarketplaceCountry::class,
         ]);

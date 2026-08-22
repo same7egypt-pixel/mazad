@@ -19,6 +19,7 @@
 |---|---|
 | `APP_URL` | رابط خدمة `auction-api` العام، مثل `https://api.example.com`. |
 | `FRONTEND_URL` | رابط واجهة Marketplace، مثل `https://app.example.com`. |
+| `TRUSTED_PROXIES` | القيمة `*` لخدمة Render؛ تسمح لـLaravel بقراءة ترويسات الوكيل، ومنها `X-Forwarded-Proto`، لتوليد روابط HTTPS صحيحة خلف الوكيل العكسي. |
 | `CORS_ALLOWED_ORIGINS` | روابط الواجهات المسموح بها مفصولة بفاصلة، من دون مسار. |
 | `SANCTUM_STATEFUL_DOMAINS` | المضيفات فقط، مثل `app.example.com,api.example.com`، من دون `https://`. |
 | `SESSION_DOMAIN` | نطاق مشترك مثل `.example.com` عند استخدام نطاقات فرعية؛ اتركه فارغاً عند عدم وجود نطاق مشترك. |
