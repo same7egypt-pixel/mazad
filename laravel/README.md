@@ -1,58 +1,78 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Auction Marketplace Platform
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+منصة مزادات متعددة الدول مبنية بـ **Laravel 13 / PHP 8.3**. تحتوي على نطاقات للمنتجات والمزادات والمزايدات والطلبات والمدفوعات والمحافظ والشحن والبحث والإشعارات والحوكمة. الواجهة العربية العامة موجودة في جذر المستودع ضمن `client/` وتستخدم بيانات عرض مؤقتة حتى يتم إعداد عنوان Laravel API قابل للوصول من المتصفح.
 
-## About Laravel
+## البنية
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+| المكوّن | الاستخدام |
+|---|---|
+| Laravel + PostgreSQL | قواعد المجال والمعاملات وسياق الدولة والـAPI. |
+| Redis / Horizon | القوائم، jobs، البث، الجلسات والكاش. |
+| Reverb | تحديثات المزادات الفورية. |
+| Meilisearch / Scout | فهرسة والبحث المقيد بالسوق. |
+| S3-compatible storage | وسائط المنتجات الخاصة. |
+| Spatie Permission / Activitylog | الصلاحيات وتسجيل الأنشطة والتدقيق. |
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## التطوير المحلي
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+### المتطلبات
 
-## Learning Laravel
-
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
-
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
-
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
-
-## Agentic Development
-
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
+يلزم Docker Compose وDocker Engine، إضافة إلى Git. استخدم القيم المحلية في `docker/local.env.template` للتطوير فقط؛ لا تنسخها إلى الإنتاج.
 
 ```bash
-composer require laravel/boost --dev
-
-php artisan boost:install
+cd laravel
+cp docker/local.env.template .env
+docker compose up -d --build
+docker compose exec app php artisan migrate --seed
+docker compose exec app php artisan horizon:status
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+تعمل الخدمات المحلية بالمسارات التالية عادةً: Laravel عبر Nginx على `http://localhost:8000`، Reverb على `http://localhost:8080`، Meilisearch على `http://localhost:7700`، وMinIO على `http://localhost:9000`.
 
-## Contributing
+## الاختبارات
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+تستعمل اختبارات Laravel PostgreSQL للتحقق من السلوك الذي يعتمد أقفال الصفوف والمعاملات.
 
-## Code of Conduct
+```bash
+php artisan test
+./vendor/bin/pint --dirty
+composer audit
+```
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+تشمل التغطية الحالية دورة المزاد، المزايدة الذرية، تسوية المدفوعات وإعادة Webhook، الشحن، عزل البلد، البحث، الإشعارات، الحوكمة، واكتشاف الدول النشطة. اختبار التنازع المتوازي بين عدة Workers ما زال جزءاً من تقوية ما قبل الإطلاق.
 
-## Security Vulnerabilities
+## API والسياق متعدد الدول
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+تتطلب أغلب مسارات API الترويسة الرقمية التالية:
 
-## License
+```http
+X-Marketplace-Country: 1
+```
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+يمكن للواجهة أولاً استدعاء `GET /api/marketplaces/countries` لمعرفة الدول النشطة، ثم إرسال `id` المختار في كل طلب مقيّد بالسوق. لا تفترض معرف دولة في الواجهة.
+
+## نشر Render
+
+يتضمن جذر المستودع `render.yaml` لإعداد:
+
+- خدمة Laravel API عامة؛
+- Worker لـHorizon؛
+- Worker للـScheduler؛
+- خدمة Reverb WebSocket عامة؛
+- Meilisearch خاص مع قرص دائم؛
+- Render Key Value متوافق مع Redis/Valkey؛
+- PostgreSQL.
+
+استخدم `Dockerfile.render` في `laravel/` لجميع خدمات Laravel. راجع [RENDER_DEPLOYMENT.md](./docs/RENDER_DEPLOYMENT.md) للخطوات، ومراجعة المتغيرات، وأوامر الترحيل، والتخزين، والنطاقات، والإجراءات اللاحقة للنشر. يوضح `.env.production.example` شكل المتغيرات المطلوبة من دون أسرار حقيقية.
+
+## حالة المنتج وحدود الإطلاق
+
+توجد بنية مزاد حقيقية وخدمات خلفية واختبارات، لكن لا تعتبر المنصة جاهزة لتشغيل أموال أو شحن حقيقي قبل الآتي:
+
+1. تحديد دولة/دول الإطلاق، بوابة دفع تدعم الوسائل المطلوبة، ومزودي الشحن.
+2. إعداد أسرار الإنتاج وتحقق توقيع Webhook الفعلي لكل مزود.
+3. ربط الواجهة العامة بعنوان Laravel API وSanctum وCORS وReverb.
+4. إنهاء لوحة إدارة Filament، إدارة مرجعيات الدول، وإدارة الوسائط الكاملة.
+5. تنفيذ اختبار تنازع مزايدات متعدد العمال، مراجعة أمنية، واختبارات أداء قبل فتح التنفيذ المالي.
+
+لا تحتوي بيانات العرض الحالية على تقييمات أو مراجعات مستخدمين مزيفة. يشرح [FRONTEND_DEMO_DATA.md](./docs/FRONTEND_DEMO_DATA.md) خطة استبدال بيانات العرض ببيانات Laravel الحية.

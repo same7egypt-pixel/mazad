@@ -1,0 +1,6 @@
+FROM getmeili/meilisearch:v1.13
+
+ENV MEILI_HTTP_ADDR=0.0.0.0:7700 \
+    MEILI_DB_PATH=/meili_data
+
+EXPOSE 7700
