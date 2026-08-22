@@ -10,6 +10,10 @@
 - [x] Configure environment-driven Laravel CORS and Sanctum trusted origins, with automated preflight coverage for the future HTTPS staging frontend.
 - [x] Set a bounded default Sanctum token lifetime and cover rejection of an expired Marketplace API token.
 - [x] Configure Laravel trusted proxy headers for Render and cover HTTPS detection behind a reverse proxy.
+- [ ] Reject a non-HTTPS Laravel API base URL when the Marketplace frontend is built for production, with configuration coverage.
+- [ ] Publish the repository to GitHub, provision the Render Blueprint, configure production secrets, and verify the external Laravel HTTPS flow.
+- [x] Prepare a resource-constrained Render trial deployment that runs only the viable free-tier services and documents disabled production components.
+- [x] Remove Reverb and WebSocket-driven real-time updates from the free Render trial configuration, retaining HTTP refresh behavior only.
 - [ ] Implement countries, cities, currencies, categories, role-scoped administration, and country-context enforcement.
 - [ ] Implement product listing creation, media handling, draft-to-approval moderation, and seller controls.
 - [ ] Implement the auction lifecycle, atomic bid placement, bid history, winner selection, scheduled start/close processing, and real-time updates.

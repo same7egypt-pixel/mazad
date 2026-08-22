@@ -1,252 +1,72 @@
-# Render Blueprint for the Laravel services under ./laravel.
-# Before the first deploy, supply each env var marked sync: false in Render.
+# Render free-trial Blueprint: HTTP-only Laravel API plus one temporary Postgres database.
+# The full production topology remains documented in render.production.yaml and is not imported by default.
 services:
   - type: web
     runtime: docker
-    name: auction-api
+    name: mazad-trial-api
     region: frankfurt
-    plan: starter
+    plan: free
     dockerfilePath: laravel/Dockerfile.render
     dockerContext: laravel
     dockerCommand: /usr/local/bin/render-web
     preDeployCommand: php artisan migrate --force
     healthCheckPath: /up
     envVars:
-      - fromGroup: auction-production
-      - key: DB_URL
-        fromDatabase:
-          name: auction-postgres
-          property: connectionString
-      - key: REDIS_HOST
-        fromService:
-          type: keyvalue
-          name: auction-queue
-          property: host
-      - key: REDIS_PORT
-        fromService:
-          type: keyvalue
-          name: auction-queue
-          property: port
-      - key: MEILISEARCH_HOST
-        fromService:
-          type: pserv
-          name: auction-meilisearch
-          property: hostport
-
-  - type: worker
-    runtime: docker
-    name: auction-horizon
-    region: frankfurt
-    plan: starter
-    dockerfilePath: laravel/Dockerfile.render
-    dockerContext: laravel
-    dockerCommand: php artisan horizon
-    envVars:
-      - fromGroup: auction-production
-      - key: DB_URL
-        fromDatabase:
-          name: auction-postgres
-          property: connectionString
-      - key: REDIS_HOST
-        fromService:
-          type: keyvalue
-          name: auction-queue
-          property: host
-      - key: REDIS_PORT
-        fromService:
-          type: keyvalue
-          name: auction-queue
-          property: port
-      - key: MEILISEARCH_HOST
-        fromService:
-          type: pserv
-          name: auction-meilisearch
-          property: hostport
-
-  - type: worker
-    runtime: docker
-    name: auction-scheduler
-    region: frankfurt
-    plan: starter
-    dockerfilePath: laravel/Dockerfile.render
-    dockerContext: laravel
-    dockerCommand: php artisan schedule:work
-    envVars:
-      - fromGroup: auction-production
-      - key: DB_URL
-        fromDatabase:
-          name: auction-postgres
-          property: connectionString
-      - key: REDIS_HOST
-        fromService:
-          type: keyvalue
-          name: auction-queue
-          property: host
-      - key: REDIS_PORT
-        fromService:
-          type: keyvalue
-          name: auction-queue
-          property: port
-      - key: MEILISEARCH_HOST
-        fromService:
-          type: pserv
-          name: auction-meilisearch
-          property: hostport
-
-  - type: web
-    runtime: docker
-    name: auction-reverb
-    region: frankfurt
-    plan: starter
-    dockerfilePath: laravel/Dockerfile.render
-    dockerContext: laravel
-    dockerCommand: /bin/sh -lc 'php artisan reverb:start --host=0.0.0.0 --port="${PORT}"'
-    envVars:
-      - fromGroup: auction-production
-      - key: DB_URL
-        fromDatabase:
-          name: auction-postgres
-          property: connectionString
-      - key: REDIS_HOST
-        fromService:
-          type: keyvalue
-          name: auction-queue
-          property: host
-      - key: REDIS_PORT
-        fromService:
-          type: keyvalue
-          name: auction-queue
-          property: port
-      - key: MEILISEARCH_HOST
-        fromService:
-          type: pserv
-          name: auction-meilisearch
-          property: hostport
-
-  - type: pserv
-    runtime: docker
-    name: auction-meilisearch
-    region: frankfurt
-    plan: starter
-    dockerfilePath: laravel/docker/render/Dockerfile.meilisearch
-    dockerContext: laravel
-    disk:
-      name: meilisearch-data
-      mountPath: /meili_data
-      sizeGB: 10
-    envVars:
-      - fromGroup: auction-production
-      - key: MEILI_ENV
-        value: production
-
-  - type: keyvalue
-    name: auction-queue
-    region: frankfurt
-    plan: starter
-    maxmemoryPolicy: noeviction
-    persistenceMode: journal-snapshot
-    ipAllowList: []
-
-databases:
-  - name: auction-postgres
-    region: frankfurt
-    plan: basic-1gb
-    databaseName: auction_marketplace
-    user: auction
-    ipAllowList: []
-
-envVarGroups:
-  - name: auction-production
-    envVars:
       - key: APP_NAME
-        value: "Auction Marketplace"
+        value: "Mazad Trial"
       - key: APP_ENV
         value: production
       - key: APP_DEBUG
         value: "false"
-      - key: TRUSTED_PROXIES
-        value: "*"
       - key: APP_KEY
         sync: false
       - key: APP_URL
         sync: false
+      - key: FRONTEND_URL
+        sync: false
+      - key: TRUSTED_PROXIES
+        value: "*"
       - key: APP_LOCALE
         value: ar
       - key: APP_FALLBACK_LOCALE
         value: en
-      - key: APP_TIMEZONE
-        value: UTC
       - key: LOG_CHANNEL
         value: stderr
       - key: LOG_LEVEL
         value: warning
       - key: DB_CONNECTION
         value: pgsql
-      - key: DB_SSLMODE
-        value: require
+      - key: DB_URL
+        fromDatabase:
+          name: mazad-trial-postgres
+          property: connectionString
       - key: SESSION_DRIVER
-        value: redis
+        value: database
       - key: SESSION_ENCRYPT
         value: "true"
-      - key: SESSION_DOMAIN
+      - key: CACHE_STORE
+        value: database
+      - key: QUEUE_CONNECTION
+        value: sync
+      - key: BROADCAST_CONNECTION
+        value: log
+      - key: SCOUT_DRIVER
+        value: database
+      - key: FILESYSTEM_DISK
+        value: local
+      - key: MAIL_MAILER
+        value: log
+      - key: SANCTUM_TOKEN_EXPIRATION
+        value: "120"
+      - key: CORS_ALLOWED_ORIGINS
         sync: false
       - key: SANCTUM_STATEFUL_DOMAINS
         sync: false
-      - key: CORS_ALLOWED_ORIGINS
-        sync: false
-      - key: FRONTEND_URL
-        sync: false
-      - key: BROADCAST_CONNECTION
-        value: reverb
-      - key: FILESYSTEM_DISK
-        value: s3
-      - key: QUEUE_CONNECTION
-        value: redis
-      - key: CACHE_STORE
-        value: redis
-      - key: REDIS_CLIENT
-        value: phpredis
-      - key: SCOUT_DRIVER
-        value: meilisearch
-      - key: SCOUT_QUEUE
-        value: "true"
-      - key: HORIZON_PREFIX
-        value: "auction_horizon:"
-      - key: MEILI_MASTER_KEY
-        generateValue: true
-      - key: REVERB_APP_ID
-        generateValue: true
-      - key: REVERB_APP_KEY
-        generateValue: true
-      - key: REVERB_APP_SECRET
-        generateValue: true
-      - key: REVERB_HOST
-        sync: false
-      - key: REVERB_PORT
-        value: "443"
-      - key: REVERB_SCHEME
-        value: https
-      - key: REVERB_SERVER_HOST
-        value: 0.0.0.0
-      - key: REVERB_SERVER_PORT
-        value: "8080"
-      - key: AWS_ACCESS_KEY_ID
-        sync: false
-      - key: AWS_SECRET_ACCESS_KEY
-        sync: false
-      - key: AWS_DEFAULT_REGION
-        sync: false
-      - key: AWS_BUCKET
-        sync: false
-      - key: AWS_URL
-        sync: false
-      - key: AWS_ENDPOINT
-        sync: false
-      - key: AWS_USE_PATH_STYLE_ENDPOINT
-        value: "false"
-      - key: MAIL_MAILER
-        value: log
-      - key: MAIL_FROM_ADDRESS
-        sync: false
-      - key: MAIL_FROM_NAME
-        value: "Auction Marketplace"
+
+databases:
+  - name: mazad-trial-postgres
+    region: frankfurt
+    plan: free
+    databaseName: mazad_trial
+    user: mazad_trial
+    ipAllowList: []
