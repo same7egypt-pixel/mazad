@@ -85,6 +85,7 @@
 - [x] Add feature coverage that blocks private-media upload by a non-owner seller in the same marketplace country.
 - [x] Publish an explicit production activation checklist for the still-external Laravel API URL, payment provider credentials, webhook secrets, carrier credentials, and launch-country decisions.
 - [x] Wire AuctionDetail to Laravel auction and bid-history endpoints with the same safe fallback behavior used by discovery.
+- [x] Connect live bid placement in AuctionDetail to Laravel with token-session checks and success/failure UI coverage.
 - [x] Add a shared marketplace data-source boundary and tests proving discovery and auction detail fall back safely when the live API is unavailable.
 - [x] Add country-scoped account order retrieval and connect account wallet, order, and notification states to Laravel with labelled fallback display data.
 - [x] Add Home and AuctionDetail failure-mode tests that simulate configured Laravel API requests failing and assert labelled display-data fallback.

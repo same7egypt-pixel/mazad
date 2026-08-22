@@ -262,6 +262,16 @@ export async function getLiveBidActivity(auctionId: number, countryId: number): 
   }));
 }
 
+export async function placeLiveBid(countryId: number, auctionId: number, amount: string): Promise<{ id: number; amount: string | number }> {
+  const payload = await marketplaceRequest<{ bid: { id: number; amount: string | number } }>(`/api/auctions/${auctionId}/bids`, countryId, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ amount }),
+  });
+
+  return payload.bid;
+}
+
 type LaravelWallet = { available_balance: string | number; pending_balance: string | number; currency?: { code?: string | null; symbol?: string | null } | null };
 type LaravelOrder = { id: number; status: string; auction?: { product?: { title?: string | null } | null } | null };
 type LaravelNotification = { id: string; data?: { title?: string; message?: string; country_id?: number } | string | null; created_at: string };

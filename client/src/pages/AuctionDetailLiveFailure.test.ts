@@ -4,9 +4,13 @@ import { render, screen, waitFor } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
 const api = vi.hoisted(() => ({
+  clearLiveMarketplaceToken: vi.fn(),
   getLiveAuction: vi.fn(),
   getLiveBidActivity: vi.fn(),
+  getLiveMarketplaceToken: vi.fn(() => null),
+  getLiveMarketplaceUser: vi.fn(),
   isLiveMarketplaceEnabled: vi.fn(() => true),
+  placeLiveBid: vi.fn(),
 }));
 
 vi.mock("@/lib/marketplaceApi", () => api);
