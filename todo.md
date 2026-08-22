@@ -38,3 +38,10 @@
 - [x] Add seller-wallet credit entries tied idempotently to settled order payments.
 - [x] Add buyer-facing payment initiation and finance-scoped withdrawal request and review APIs.
 - [x] Add PostgreSQL settlement tests covering webhook replay, wallet ledger idempotency, and withdrawal authorization.
+- [x] Add country-scoped shipment creation for paid orders with provider, carrier, and self-pickup validation.
+- [x] Add guarded shipment tracking and delivery transitions that complete the order exactly once.
+- [x] Add operations-scoped shipment APIs and PostgreSQL coverage for state transitions and country isolation.
+- [x] Add PostgreSQL tests that deny shipment operations from an operator in a different country.
+- [x] Add API tests that reject mismatched X-Marketplace-Country headers on shipment endpoints.
+- [x] Add PostgreSQL coverage denying different-country operators from updating shipment status.
+- [x] Add API coverage rejecting a mismatched X-Marketplace-Country header on shipment status updates.

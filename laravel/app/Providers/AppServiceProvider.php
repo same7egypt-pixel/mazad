@@ -5,8 +5,10 @@ namespace App\Providers;
 use App\Domain\Core\Context\MarketplaceContext;
 use App\Models\Auction;
 use App\Models\Product;
+use App\Models\Shipment;
 use App\Policies\AuctionPolicy;
 use App\Policies\ProductPolicy;
+use App\Policies\ShipmentPolicy;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -20,7 +22,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        $this->app->scoped(MarketplaceContext::class, fn (): MarketplaceContext => new MarketplaceContext());
+        $this->app->scoped(MarketplaceContext::class, fn (): MarketplaceContext => new MarketplaceContext);
     }
 
     /**
@@ -30,6 +32,7 @@ class AppServiceProvider extends ServiceProvider
     {
         Gate::policy(Product::class, ProductPolicy::class);
         Gate::policy(Auction::class, AuctionPolicy::class);
+        Gate::policy(Shipment::class, ShipmentPolicy::class);
 
         RateLimiter::for('auction-bids', function (Request $request): Limit {
             return Limit::perMinute(30)->by(($request->user()?->getKey() ?? 'guest').':'.$request->ip());
