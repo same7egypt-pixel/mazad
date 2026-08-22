@@ -45,3 +45,7 @@
 - [x] Add API tests that reject mismatched X-Marketplace-Country headers on shipment endpoints.
 - [x] Add PostgreSQL coverage denying different-country operators from updating shipment status.
 - [x] Add API coverage rejecting a mismatched X-Marketplace-Country header on shipment status updates.
+- [x] Add country-scoped listing search with city, category, condition, and price filters plus Scout indexing policy.
+- [x] Add completed-order review eligibility, counterparty validation, and duplicate-review protection.
+- [x] Add authenticated notification inbox APIs with read-state transitions and country-aware access.
+- [x] Add PostgreSQL tests for search filtering, review eligibility, and notification country isolation.

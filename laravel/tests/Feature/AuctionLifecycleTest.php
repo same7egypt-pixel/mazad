@@ -188,7 +188,7 @@ class AuctionLifecycleTest extends TestCase
 
         try {
             self::assertTrue(app(StartAuction::class)->handle($auction->id));
-            Queue::assertNothingPushed();
+            Queue::assertNotPushed(BroadcastEvent::class);
             DB::commit();
         } catch (\Throwable $exception) {
             if (DB::transactionLevel() > 0) {
