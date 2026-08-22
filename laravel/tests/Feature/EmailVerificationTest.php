@@ -16,13 +16,14 @@ class EmailVerificationTest extends TestCase
 
     public function test_signed_verification_link_marks_the_account_as_verified(): void
     {
+        config(['app.frontend_url' => 'https://staging.marketplace.example']);
         $user = $this->unverifiedUser();
         $url = URL::temporarySignedRoute('verification.verify', now()->addMinutes(10), [
             'id' => $user->id,
             'hash' => sha1($user->getEmailForVerification()),
         ]);
 
-        $this->get($url)->assertRedirect();
+        $this->get($url)->assertRedirect('https://staging.marketplace.example/sell?email_verified=1');
 
         $this->assertDatabaseHas('users', [
             'id' => $user->id,
