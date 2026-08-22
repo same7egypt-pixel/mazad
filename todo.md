@@ -65,10 +65,18 @@
 - [x] Add Render blueprint, production environment template, and production container process commands for Laravel web, Horizon, Reverb, and scheduler services.
 - [x] Add Render deployment and migration runbook with service ownership, storage, Redis, PostgreSQL, Meilisearch, and WebSocket configuration guidance.
 - [x] Replace the default Laravel README with a project README covering local services, Render deployment, testing, and operational boundaries.
-- [ ] Replace the Marketplace read-only demo-data adapter with a Laravel API adapter that can be enabled safely by explicit browser-reachable configuration.
+- [x] Complete the Marketplace Laravel API adapter across discovery, auction details, bid history, and account-facing states, retaining labelled display data only as a safe fallback until a valid API URL and Sanctum session are available.
 - [ ] Build seller-facing product and auction creation flows connected to Laravel contracts, including media upload and country context.
 - [ ] Install and configure a country-scoped Filament Admin Control Tower for roles, catalog moderation, auction operations, and finance support.
 - [x] Add a country-scoped Filament operations overview for pending catalog reviews, live auctions, paid orders, and withdrawal review workload.
+- [x] Add country-scoped read-only Filament resources for orders and shipments to support fulfillment operations without bypassing domain transitions.
+- [x] Add a finance-scoped Filament withdrawal review resource that reuses the existing withdrawal approval and rejection domain service.
+- [ ] Complete a same-day technical release pass: remaining operations resources, seller workflow validation, frontend/backend full test suite, dependency audit, and deployment readiness documentation.
+- [x] Publish an explicit production activation checklist for the still-external Laravel API URL, payment provider credentials, webhook secrets, carrier credentials, and launch-country decisions.
+- [x] Wire AuctionDetail to Laravel auction and bid-history endpoints with the same safe fallback behavior used by discovery.
+- [x] Add a shared marketplace data-source boundary and tests proving discovery and auction detail fall back safely when the live API is unavailable.
+- [x] Add country-scoped account order retrieval and connect account wallet, order, and notification states to Laravel with labelled fallback display data.
+- [x] Add Home and AuctionDetail failure-mode tests that simulate configured Laravel API requests failing and assert labelled display-data fallback.
 - [ ] Add deployment-focused tests and complete remaining concurrent-bid, production payment-provider, carrier-provider, security, and launch-hardening work.
 - [ ] Continue Render preparation and seller/admin interface work while retaining temporary data until a valid Laravel API URL is supplied.
 - [x] Build a clearly labelled temporary seller listing and auction-setup flow covering product details, media placeholders, country/city, and auction timing/pricing fields.

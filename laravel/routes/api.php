@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\GovernanceController;
 use App\Http\Controllers\Api\ListingSearchController;
 use App\Http\Controllers\Api\MarketplaceCountryController;
 use App\Http\Controllers\Api\NotificationController;
+use App\Http\Controllers\Api\OrderController;
 use App\Http\Controllers\Api\PaymentController;
 use App\Http\Controllers\Api\ProductController;
 use App\Http\Controllers\Api\ProductMediaController;
@@ -41,6 +42,7 @@ Route::middleware(['marketplace.country'])->group(function (): void {
         Route::post('/auctions', [AuctionController::class, 'store']);
         Route::post('/auctions/{auction}/cancel', [AuctionController::class, 'cancel']);
         Route::post('/auctions/{auction}/bids', [BidController::class, 'store'])->middleware('throttle:auction-bids');
+        Route::get('/orders', [OrderController::class, 'index']);
         Route::post('/orders/{order}/payments', [PaymentController::class, 'initiate']);
         Route::post('/orders/{order}/reviews', [ReviewController::class, 'store']);
         Route::post('/orders/{order}/shipments', [ShipmentController::class, 'store']);
