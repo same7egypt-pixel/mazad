@@ -11,6 +11,7 @@ import {
   isLiveMarketplaceEnabled,
   loginLiveMarketplace,
   logoutLiveMarketplace,
+  registerLiveMarketplace,
   submitLiveProductForReview,
   type LiveMarketplaceUser,
   type LiveSellerProduct,
@@ -75,9 +76,16 @@ export default function SellSetup() {
   const [selectedSellerProductId, setSelectedSellerProductId] = useState("");
   const [liveSessionUser, setLiveSessionUser] = useState<LiveMarketplaceUser | null>(null);
   const [isCheckingLiveSession, setIsCheckingLiveSession] = useState(true);
+  const [accessMode, setAccessMode] = useState<"login" | "register">("login");
   const [loginEmail, setLoginEmail] = useState("");
   const [loginPassword, setLoginPassword] = useState("");
   const [isLoggingIn, setIsLoggingIn] = useState(false);
+  const [registrationName, setRegistrationName] = useState("");
+  const [registrationEmail, setRegistrationEmail] = useState("");
+  const [registrationPhone, setRegistrationPhone] = useState("");
+  const [registrationPassword, setRegistrationPassword] = useState("");
+  const [registrationConfirmation, setRegistrationConfirmation] = useState("");
+  const [isRegistering, setIsRegistering] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isScheduling, setIsScheduling] = useState(false);
   const countryId = getSavedMarketplaceCountryId();
@@ -244,6 +252,43 @@ export default function SellSetup() {
     }
   };
 
+  const registerForLiveMarketplace = async (event: FormEvent) => {
+    event.preventDefault();
+    if (!isLive || !sellerReferences) {
+      toast.info("يتطلب إنشاء الحساب الحي عنوان Laravel API صالحاً ومراجع الدولة.");
+      return;
+    }
+    const cityReference = sellerReferences.cities.find((item) => item.name === city);
+    if (!cityReference) {
+      toast.error("اختر مدينة من قائمة الدولة الحية قبل إنشاء الحساب.");
+      return;
+    }
+    if (registrationPassword !== registrationConfirmation) {
+      toast.error("تأكيد كلمة المرور غير مطابق.");
+      return;
+    }
+
+    setIsRegistering(true);
+    try {
+      const user = await registerLiveMarketplace(countryId, {
+        city_id: cityReference.id,
+        name: registrationName.trim(),
+        email: registrationEmail.trim(),
+        phone: registrationPhone.trim() || undefined,
+        password: registrationPassword,
+        password_confirmation: registrationConfirmation,
+      });
+      setLiveSessionUser(user);
+      setRegistrationPassword("");
+      setRegistrationConfirmation("");
+      toast.success("تم إنشاء حساب Laravel", { description: "يمكنك الآن إرسال المنتجات للمراجعة وجدولة المزادات المعتمدة." });
+    } catch {
+      toast.error("تعذر إنشاء حساب Laravel. تحقق من البيانات والبريد وسياق الدولة.");
+    } finally {
+      setIsRegistering(false);
+    }
+  };
+
   const logoutFromLiveMarketplace = async () => {
     try {
       await logoutLiveMarketplace(countryId);
@@ -268,7 +313,7 @@ export default function SellSetup() {
     <section className="market-container pb-20 pt-4"><div className="mx-auto max-w-5xl">
       <div className="flex flex-wrap items-start justify-between gap-4"><div><p className="text-xs font-bold tracking-[.16em] text-[#d96d46]">مسار البائع</p><h1 className="mt-2 font-serif text-4xl md:text-5xl">ابدأ من القطعة، ثم جهّز مزادك.</h1><p className="mt-4 max-w-2xl text-sm leading-7 text-[#66777b]">ينشئ الربط الحي منتجاً ووسائط خاصة ثم يرسله للمراجعة. لا تصبح جدولة المزاد متاحة إلا بعد الاعتماد.</p></div><span className="rounded-full bg-[#fff0e8] px-3 py-2 text-xs font-bold text-[#c45e39]">{dataSourceLabel}</span></div>
       {isLive && <section className="mt-6 rounded-2xl border border-[#143039]/10 bg-white p-5 shadow-[0_8px_24px_rgba(20,48,57,.05)]"><div className="flex flex-wrap items-center justify-between gap-3"><div><p className="text-xs font-bold tracking-[.12em] text-[#d96d46]">جلسة Marketplace الحية</p><h2 className="mt-1 font-serif text-2xl">{isCheckingLiveSession ? "جارٍ التحقق من جلسة Laravel…" : liveSessionUser ? `متصل باسم ${liveSessionUser.name}` : "سجّل دخول Laravel لتفعيل الإرسال الحي"}</h2><p className="mt-1 text-xs leading-5 text-[#6d7f83]">جلسة Laravel مستقلة عن تسجيل OAuth الظاهر في الواجهة؛ تستخدم رمزاً مؤقتاً في جلسة هذا المتصفح فقط.</p></div>{liveSessionUser && <button type="button" onClick={logoutFromLiveMarketplace} className="rounded-xl border border-[#143039]/15 px-4 py-2 text-sm font-bold">إنهاء جلسة Laravel</button>}</div>
-        {!isCheckingLiveSession && !liveSessionUser && <form onSubmit={loginToLiveMarketplace} className="mt-5 grid gap-3 md:grid-cols-[1fr_1fr_auto]"><label className="grid gap-1 text-xs font-bold">البريد الإلكتروني<input value={loginEmail} onChange={(event) => setLoginEmail(event.target.value)} type="email" required className="rounded-xl border border-[#143039]/15 px-3 py-2.5 text-sm font-normal outline-none focus:border-[#d96d46]" /></label><label className="grid gap-1 text-xs font-bold">كلمة المرور<input value={loginPassword} onChange={(event) => setLoginPassword(event.target.value)} type="password" required className="rounded-xl border border-[#143039]/15 px-3 py-2.5 text-sm font-normal outline-none focus:border-[#d96d46]" /></label><button type="submit" disabled={isLoggingIn} className="mt-auto rounded-xl bg-[#12313a] px-5 py-2.5 text-sm font-bold text-white disabled:opacity-60">{isLoggingIn ? "جارٍ الدخول…" : "دخول Laravel"}</button></form>}
+        {!isCheckingLiveSession && !liveSessionUser && <div className="mt-5"><div className="flex flex-wrap items-center justify-between gap-3"><div className="flex rounded-xl bg-[#edf0e8] p-1 text-xs font-bold"><button type="button" onClick={() => setAccessMode("login")} className={`rounded-lg px-3 py-2 transition ${accessMode === "login" ? "bg-white text-[#143039] shadow-sm" : "text-[#64777b]"}`}>دخول</button><button type="button" onClick={() => setAccessMode("register")} className={`rounded-lg px-3 py-2 transition ${accessMode === "register" ? "bg-white text-[#143039] shadow-sm" : "text-[#64777b]"}`}>حساب جديد</button></div>{accessMode === "register" && <span className="text-xs text-[#6d7f83]">الدولة والمدينة: {city || "اختر المدينة"}</span>}</div>{accessMode === "login" ? <form onSubmit={loginToLiveMarketplace} className="mt-4 grid gap-3 md:grid-cols-[1fr_1fr_auto]"><label className="grid gap-1 text-xs font-bold">البريد الإلكتروني<input value={loginEmail} onChange={(event) => setLoginEmail(event.target.value)} type="email" required className="rounded-xl border border-[#143039]/15 px-3 py-2.5 text-sm font-normal outline-none focus:border-[#d96d46]" /></label><label className="grid gap-1 text-xs font-bold">كلمة المرور<input value={loginPassword} onChange={(event) => setLoginPassword(event.target.value)} type="password" required className="rounded-xl border border-[#143039]/15 px-3 py-2.5 text-sm font-normal outline-none focus:border-[#d96d46]" /></label><button type="submit" disabled={isLoggingIn} className="mt-auto rounded-xl bg-[#12313a] px-5 py-2.5 text-sm font-bold text-white disabled:opacity-60">{isLoggingIn ? "جارٍ الدخول…" : "دخول Laravel"}</button></form> : <form onSubmit={registerForLiveMarketplace} className="mt-4 grid gap-3 md:grid-cols-2"><label className="grid gap-1 text-xs font-bold">الاسم الكامل<input value={registrationName} onChange={(event) => setRegistrationName(event.target.value)} required minLength={2} className="rounded-xl border border-[#143039]/15 px-3 py-2.5 text-sm font-normal outline-none focus:border-[#d96d46]" /></label><label className="grid gap-1 text-xs font-bold">البريد الإلكتروني<input value={registrationEmail} onChange={(event) => setRegistrationEmail(event.target.value)} type="email" required className="rounded-xl border border-[#143039]/15 px-3 py-2.5 text-sm font-normal outline-none focus:border-[#d96d46]" /></label><label className="grid gap-1 text-xs font-bold">رقم الهاتف <span className="font-normal text-[#6d7f83]">اختياري</span><input value={registrationPhone} onChange={(event) => setRegistrationPhone(event.target.value)} type="tel" className="rounded-xl border border-[#143039]/15 px-3 py-2.5 text-sm font-normal outline-none focus:border-[#d96d46]" /></label><label className="grid gap-1 text-xs font-bold">كلمة المرور <span className="font-normal text-[#6d7f83]">12 حرفاً على الأقل</span><input value={registrationPassword} onChange={(event) => setRegistrationPassword(event.target.value)} type="password" required minLength={12} className="rounded-xl border border-[#143039]/15 px-3 py-2.5 text-sm font-normal outline-none focus:border-[#d96d46]" /></label><label className="grid gap-1 text-xs font-bold">تأكيد كلمة المرور<input value={registrationConfirmation} onChange={(event) => setRegistrationConfirmation(event.target.value)} type="password" required minLength={12} className="rounded-xl border border-[#143039]/15 px-3 py-2.5 text-sm font-normal outline-none focus:border-[#d96d46]" /></label><button type="submit" disabled={isRegistering} className="mt-auto rounded-xl bg-[#d96d46] px-5 py-2.5 text-sm font-bold text-white disabled:opacity-60">{isRegistering ? "جارٍ إنشاء الحساب…" : "إنشاء حساب Laravel"}</button></form>}</div>}
       </section>}
       <div className="mt-9 grid gap-8 lg:grid-cols-[.72fr_1.28fr]">
         <aside className="rounded-[1.5rem] bg-[#12313a] p-6 text-white"><p className="text-xs font-bold tracking-[.14em] text-[#c7dcae]">رحلة الإدراج</p><ol className="mt-7 space-y-5">{[[1, "تفاصيل القطعة", "العنوان والوصف والفئة والموقع"], [2, "إعداد المزاد", "السعر والتوقيت والحدود"]].map(([number, label, copy]) => <li key={number} className="flex gap-3"><span className={`grid h-8 w-8 shrink-0 place-items-center rounded-full text-xs font-bold ${step === Number(number) ? "bg-[#d96d46] text-white" : step > Number(number) ? "bg-[#c7dcae] text-[#12313a]" : "bg-white/10 text-[#cfe0dc]"}`}>{step > Number(number) ? <Check size={15} /> : number}</span><div><h2 className="font-serif text-xl">{label}</h2><p className="mt-1 text-xs leading-5 text-[#cfe0dc]">{copy}</p></div></li>)}</ol><div className="mt-9 rounded-2xl bg-white/8 p-4 text-xs leading-6 text-[#cfe0dc]"><ShieldCheck className="mb-2 text-[#c7dcae]" size={18} />الحالة الحية تنتقل من مسودة إلى مراجعة واعتماد ثم مزاد حي وفق سياسات السوق والدولة.</div></aside>

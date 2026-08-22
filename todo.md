@@ -72,6 +72,9 @@
 - [x] Add a country-scoped seller product list and permit auction scheduling only for that seller's approved products, with API and UI coverage.
 - [x] Add frontend tests for loading seller products, eligible approved-product selection, and schedule success or failure states.
 - [ ] Complete and verify a real Laravel Sanctum browser-auth adapter before claiming end-to-end seller creation, review, and scheduling from React.
+- [x] Add explicit Laravel account registration to the Marketplace session adapter and seller access panel, with UI/API coverage.
+- [x] Add Laravel Feature coverage for registration success, token issuance, and marketplace country/city validation.
+- [x] Add seller-registration UI coverage for validation or API failure without claiming a successful session.
 - [x] Add a Laravel API token session adapter with explicit login, logout, and current-user checks for browser-side Marketplace calls.
 - [x] Connect the account live-data view to the Laravel session adapter instead of Manus OAuth, with UI coverage for the authenticated and fallback states.
 - [x] Verify the Laravel API token lifecycle locally: login, authenticated current-user retrieval, logout token revocation, and rejection after revocation.

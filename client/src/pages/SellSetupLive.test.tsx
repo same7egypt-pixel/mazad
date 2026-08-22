@@ -12,6 +12,7 @@ const mocks = vi.hoisted(() => ({
   getLiveSellerReferences: vi.fn(),
   loginLiveMarketplace: vi.fn(),
   logoutLiveMarketplace: vi.fn(),
+  registerLiveMarketplace: vi.fn(),
   toastError: vi.fn(),
   toastInfo: vi.fn(),
   toastSuccess: vi.fn(),
@@ -33,6 +34,7 @@ vi.mock("@/lib/marketplaceApi", () => ({
   isLiveMarketplaceEnabled: () => true,
   loginLiveMarketplace: mocks.loginLiveMarketplace,
   logoutLiveMarketplace: mocks.logoutLiveMarketplace,
+  registerLiveMarketplace: mocks.registerLiveMarketplace,
   submitLiveProductForReview: vi.fn(),
   uploadLiveProductMedia: vi.fn(),
 }));
@@ -85,6 +87,7 @@ describe("مسار البائع الحي", () => {
   });
 
   it("يعرض المنتج المعتمد غير المرتبط بمزاد كخيار جدولة وحسب", async () => {
+    mocks.createLiveAuction.mockReset();
     mocks.createLiveAuction.mockResolvedValue({ id: 501, status: "upcoming" });
     await renderReadySellerFlow();
 
@@ -104,6 +107,7 @@ describe("مسار البائع الحي", () => {
   });
 
   it("يعرض خطأً مفهوماً إن رفض Laravel جدولة المنتج المعتمد", async () => {
+    mocks.createLiveAuction.mockReset();
     mocks.createLiveAuction.mockRejectedValue(new Error("unprocessable"));
     await renderReadySellerFlow();
 
@@ -128,5 +132,50 @@ describe("مسار البائع الحي", () => {
     await waitFor(() => expect(mocks.loginLiveMarketplace).toHaveBeenCalledWith(7, user.email, "secret-password"));
     expect(await screen.findByText("متصل باسم بائع Laravel")).toBeTruthy();
     expect(mocks.toastSuccess).toHaveBeenCalled();
+  });
+
+  it("ينشئ حساب Laravel جديداً من مسار البائع ويفتح الجلسة الحية", async () => {
+    const user = { id: 45, name: "بائع جديد", email: "new-seller@example.test", country_id: 7, city_id: 11, status: "active" };
+    mocks.getLiveMarketplaceToken.mockReturnValue(null);
+    mocks.getLiveSellerReferences.mockResolvedValue(referenceData);
+    mocks.getLiveSellerProducts.mockResolvedValue([]);
+    mocks.registerLiveMarketplace.mockResolvedValue(user);
+    render(<SellSetup />);
+
+    await screen.findByText("سجّل دخول Laravel لتفعيل الإرسال الحي");
+    fireEvent.click(screen.getByRole("button", { name: "حساب جديد" }));
+    fireEvent.change(screen.getByLabelText("الاسم الكامل"), { target: { value: user.name } });
+    fireEvent.change(screen.getByLabelText("البريد الإلكتروني"), { target: { value: user.email } });
+    fireEvent.change(screen.getAllByLabelText(/كلمة المرور/)[0], { target: { value: "very-secure-password" } });
+    fireEvent.change(screen.getByLabelText("تأكيد كلمة المرور"), { target: { value: "very-secure-password" } });
+    fireEvent.click(screen.getByRole("button", { name: "إنشاء حساب Laravel" }));
+
+    await waitFor(() => expect(mocks.registerLiveMarketplace).toHaveBeenCalledWith(7, expect.objectContaining({
+      city_id: 11,
+      name: user.name,
+      email: user.email,
+      password: "very-secure-password",
+    })));
+    expect(await screen.findByText("متصل باسم بائع جديد")).toBeTruthy();
+    expect(mocks.toastSuccess).toHaveBeenCalled();
+  });
+
+  it("يعرض فشل Laravel عند رفض التسجيل ولا يدعي فتح جلسة جديدة", async () => {
+    mocks.getLiveMarketplaceToken.mockReturnValue(null);
+    mocks.getLiveSellerReferences.mockResolvedValue(referenceData);
+    mocks.getLiveSellerProducts.mockResolvedValue([]);
+    mocks.registerLiveMarketplace.mockRejectedValue(new Error("duplicate-email"));
+    render(<SellSetup />);
+
+    await screen.findByText("سجّل دخول Laravel لتفعيل الإرسال الحي");
+    fireEvent.click(screen.getByRole("button", { name: "حساب جديد" }));
+    fireEvent.change(screen.getByLabelText("الاسم الكامل"), { target: { value: "بائع مكرر" } });
+    fireEvent.change(screen.getByLabelText("البريد الإلكتروني"), { target: { value: "duplicate@example.test" } });
+    fireEvent.change(screen.getAllByLabelText(/كلمة المرور/)[0], { target: { value: "very-secure-password" } });
+    fireEvent.change(screen.getByLabelText("تأكيد كلمة المرور"), { target: { value: "very-secure-password" } });
+    fireEvent.click(screen.getByRole("button", { name: "إنشاء حساب Laravel" }));
+
+    await waitFor(() => expect(mocks.toastError).toHaveBeenCalledWith("تعذر إنشاء حساب Laravel. تحقق من البيانات والبريد وسياق الدولة."));
+    expect(screen.queryByText(/متصل باسم/)).toBeNull();
   });
 });

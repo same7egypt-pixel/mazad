@@ -37,6 +37,26 @@ describe("جلسة Laravel Marketplace", () => {
     expect(headers.get("X-Marketplace-Country")).toBe("7");
   });
 
+  it("يسجل حساب Laravel جديداً مع سياق البلد والمدينة ويحفظ رمز الجلسة", async () => {
+    vi.stubEnv("VITE_LARAVEL_API_BASE_URL", "https://api.example.test");
+    const fetchMock = vi.fn().mockResolvedValue({ ok: true, status: 201, json: async () => ({ user: liveUser, token: "new-token-abc" }) });
+    vi.stubGlobal("fetch", fetchMock);
+
+    const api = await import("./marketplaceApi");
+    await expect(api.registerLiveMarketplace(7, {
+      city_id: 11,
+      name: liveUser.name,
+      email: liveUser.email,
+      phone: "+966500000000",
+      password: "very-secure-password",
+      password_confirmation: "very-secure-password",
+    })).resolves.toEqual(liveUser);
+    expect(api.getLiveMarketplaceToken()).toBe("new-token-abc");
+
+    const [, request] = fetchMock.mock.calls[0] as [string, RequestInit];
+    expect(JSON.parse(request.body as string)).toMatchObject({ country_id: 7, city_id: 11, device_name: "Mazad Marketplace Web" });
+  });
+
   it("ينهي الجلسة الحية عند استجابة تسجيل الخروج 204 ويمسح الرمز المحلي", async () => {
     vi.stubEnv("VITE_LARAVEL_API_BASE_URL", "https://api.example.test");
     const fetchMock = vi.fn()

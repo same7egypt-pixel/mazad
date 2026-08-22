@@ -69,6 +69,15 @@ export type LiveMarketplaceUser = {
   status?: string;
 };
 
+export type LiveMarketplaceRegistrationInput = {
+  city_id: number;
+  name: string;
+  email: string;
+  phone?: string;
+  password: string;
+  password_confirmation: string;
+};
+
 export function getLiveMarketplaceToken(): string | null {
   if (typeof window === "undefined") return null;
   return window.sessionStorage.getItem(laravelApiTokenStorageKey);
@@ -148,6 +157,21 @@ export async function loginLiveMarketplace(countryId: number, email: string, pas
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ email, password, device_name: "Mazad Marketplace Web" }),
+  });
+
+  saveLiveMarketplaceToken(payload.token);
+  return payload.user;
+}
+
+export async function registerLiveMarketplace(countryId: number, input: LiveMarketplaceRegistrationInput): Promise<LiveMarketplaceUser> {
+  const payload = await marketplaceRequest<{ user: LiveMarketplaceUser; token: string }>("/api/auth/register", countryId, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      ...input,
+      country_id: countryId,
+      device_name: "Mazad Marketplace Web",
+    }),
   });
 
   saveLiveMarketplaceToken(payload.token);
