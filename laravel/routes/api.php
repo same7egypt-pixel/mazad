@@ -36,6 +36,7 @@ Route::middleware(['marketplace.country'])->group(function (): void {
         Route::get('/user', function (Request $request) {
             return $request->user();
         });
+        Route::get('/my/products', [ProductController::class, 'mine']);
         Route::post('/products', [ProductController::class, 'store']);
         Route::post('/products/{product}/submit-for-review', [ProductController::class, 'submitForReview']);
         Route::post('/products/{product}/media', [ProductMediaController::class, 'store']);

@@ -67,9 +67,13 @@
 - [x] Replace the default Laravel README with a project README covering local services, Render deployment, testing, and operational boundaries.
 - [x] Complete the Marketplace Laravel API adapter across discovery, auction details, bid history, and account-facing states, retaining labelled display data only as a safe fallback until a valid API URL and Sanctum session are available.
 - [ ] Build seller-facing product and auction creation flows connected to Laravel contracts, including media upload and country context.
+- [x] Add a country-scoped seller product list and permit auction scheduling only for that seller's approved products, with API and UI coverage.
+- [x] Add frontend tests for loading seller products, eligible approved-product selection, and schedule success or failure states.
+- [ ] Complete and verify a real Laravel Sanctum browser-auth adapter before claiming end-to-end seller creation, review, and scheduling from React.
 - [x] Require at least one private product media record before allowing a seller to submit the product for moderation, with PostgreSQL feature coverage.
 - [x] Restore Laravel policy authorization support in the shared API controller and verify the full suite after the security fix.
 - [ ] Install and configure a country-scoped Filament Admin Control Tower for roles, catalog moderation, auction operations, and finance support.
+- [x] Add country-scoped Filament resources for users and categories with least-privilege operations and tests for cross-country visibility.
 - [x] Add a country-scoped Filament operations overview for pending catalog reviews, live auctions, paid orders, and withdrawal review workload.
 - [x] Add country-scoped read-only Filament resources for orders and shipments to support fulfillment operations without bypassing domain transitions.
 - [x] Add a finance-scoped Filament withdrawal review resource that reuses the existing withdrawal approval and rejection domain service.

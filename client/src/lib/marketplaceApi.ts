@@ -123,6 +123,25 @@ export type SellerReferenceData = {
 
 export type LiveProductInput = { city_id: number; category_id: number; title: string; description: string; condition: "new" | "like_new" | "good" | "fair" | "poor" };
 
+export type LiveSellerProduct = {
+  id: number;
+  title: string;
+  status: string;
+  condition: string;
+  city?: { name?: string | null } | null;
+  category?: { name?: string | null } | null;
+  auction?: { id: number; status: string } | null;
+};
+
+export type LiveAuctionInput = {
+  product_id: number;
+  starting_price: string;
+  reserve_price?: string;
+  minimum_increment: string;
+  start_time: string;
+  end_time: string;
+};
+
 export async function getLiveSellerReferences(countryId: number): Promise<SellerReferenceData> {
   return marketplaceRequest<SellerReferenceData>(`/api/marketplaces/${countryId}/references`);
 }
@@ -149,6 +168,21 @@ export async function uploadLiveProductMedia(countryId: number, productId: numbe
     method: "POST",
     body: formData,
   });
+}
+
+export async function getLiveSellerProducts(countryId: number): Promise<LiveSellerProduct[]> {
+  const payload = await marketplaceRequest<LaravelPaginator<LiveSellerProduct>>("/api/my/products", countryId);
+  return payload.data;
+}
+
+export async function createLiveAuction(countryId: number, input: LiveAuctionInput): Promise<{ id: number; status: string }> {
+  const payload = await marketplaceRequest<{ auction: { id: number; status: string } }>("/api/auctions", countryId, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(input),
+  });
+
+  return payload.auction;
 }
 
 export async function getLiveMarketplaceCountries(): Promise<MarketplaceCountry[]> {

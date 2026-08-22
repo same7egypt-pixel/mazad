@@ -35,6 +35,24 @@ class ProductController extends Controller
         return response()->json(['product' => $product], 201);
     }
 
+    public function mine(Request $request, MarketplaceContext $context): JsonResponse
+    {
+        $user = $request->user();
+
+        if ($user->country_id !== $context->id()) {
+            abort(403);
+        }
+
+        $products = Product::query()
+            ->with(['media', 'city', 'category', 'currency', 'auction'])
+            ->where('country_id', $context->id())
+            ->where('user_id', $user->id)
+            ->latest('id')
+            ->paginate(20);
+
+        return response()->json($products);
+    }
+
     public function submitForReview(Request $request, Product $product, MarketplaceContext $context): JsonResponse
     {
         $context->assertMatches($product->country_id);

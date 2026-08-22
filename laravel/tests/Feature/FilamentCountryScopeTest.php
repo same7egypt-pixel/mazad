@@ -2,8 +2,10 @@
 
 namespace Tests\Feature;
 
+use App\Filament\Resources\Categories\CategoryResource;
 use App\Filament\Resources\Cities\CityResource;
 use App\Filament\Resources\Products\ProductResource;
+use App\Filament\Resources\Users\UserResource;
 use App\Models\Category;
 use App\Models\City;
 use App\Models\Country;
@@ -11,6 +13,7 @@ use App\Models\Currency;
 use App\Models\Product;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
@@ -104,5 +107,79 @@ class FilamentCountryScopeTest extends TestCase
         $this->actingAs($countryAdmin);
 
         $this->assertSame([$saudiProduct->id], ProductResource::getEloquentQuery()->pluck('id')->all());
+    }
+
+    public function test_country_admin_sees_and_edits_only_categories_from_their_marketplace_country(): void
+    {
+        $currency = Currency::query()->create([
+            'name' => 'Saudi Riyal',
+            'code' => 'SAR',
+            'symbol' => 'ر.س',
+        ]);
+        $saudiArabia = Country::query()->create([
+            'name' => 'Saudi Arabia',
+            'code' => 'SA',
+            'timezone' => 'Asia/Riyadh',
+            'currency_id' => $currency->id,
+        ]);
+        $egypt = Country::query()->create([
+            'name' => 'Egypt',
+            'code' => 'EG',
+            'timezone' => 'Africa/Cairo',
+            'currency_id' => $currency->id,
+        ]);
+        $saudiCategory = Category::query()->create([
+            'country_id' => $saudiArabia->id,
+            'name' => 'Watches',
+            'slug' => 'watches',
+        ]);
+        $egyptCategory = Category::query()->create([
+            'country_id' => $egypt->id,
+            'name' => 'Art',
+            'slug' => 'art',
+        ]);
+
+        $countryAdmin = User::factory()->create(['country_id' => $saudiArabia->id, 'status' => 'active']);
+        $countryAdmin->assignRole(Role::findOrCreate('COUNTRY_ADMIN', 'web'));
+        $countryAdmin->givePermissionTo(Permission::findOrCreate('categories.manage', 'web'));
+
+        $this->actingAs($countryAdmin);
+
+        $this->assertSame([$saudiCategory->id], CategoryResource::getEloquentQuery()->pluck('id')->all());
+        $this->assertTrue(CategoryResource::canEdit($saudiCategory));
+        $this->assertFalse(CategoryResource::canEdit($egyptCategory));
+    }
+
+    public function test_country_admin_sees_only_users_from_their_marketplace_country_in_read_only_support_resource(): void
+    {
+        $currency = Currency::query()->create([
+            'name' => 'Saudi Riyal',
+            'code' => 'SAR',
+            'symbol' => 'ر.س',
+        ]);
+        $saudiArabia = Country::query()->create([
+            'name' => 'Saudi Arabia',
+            'code' => 'SA',
+            'timezone' => 'Asia/Riyadh',
+            'currency_id' => $currency->id,
+        ]);
+        $egypt = Country::query()->create([
+            'name' => 'Egypt',
+            'code' => 'EG',
+            'timezone' => 'Africa/Cairo',
+            'currency_id' => $currency->id,
+        ]);
+        $saudiUser = User::factory()->create(['country_id' => $saudiArabia->id]);
+        User::factory()->create(['country_id' => $egypt->id]);
+
+        $countryAdmin = User::factory()->create(['country_id' => $saudiArabia->id, 'status' => 'active']);
+        $countryAdmin->assignRole(Role::findOrCreate('COUNTRY_ADMIN', 'web'));
+        $countryAdmin->givePermissionTo(Permission::findOrCreate('users.manage', 'web'));
+
+        $this->actingAs($countryAdmin);
+
+        $this->assertSame([$saudiUser->id, $countryAdmin->id], UserResource::getEloquentQuery()->orderBy('id')->pluck('id')->all());
+        $this->assertFalse(UserResource::canCreate());
+        $this->assertFalse(UserResource::canEdit($saudiUser));
     }
 }
