@@ -55,3 +55,4 @@
 - [x] Build a refined public Marketplace shell with navigation, country context, responsive search, auction discovery, and listing cards.
 - [x] Build initial auction-detail, bid-entry, and account interface states; integration with Laravel API contracts remains the next incremental step.
 - [x] Add visual and unit verification for the initial Marketplace user interface before further backend expansion.
+- [x] Add a public active-country discovery contract with tested safe currency metadata; connecting it to the UI requires a configured Laravel service URL for the web preview.
