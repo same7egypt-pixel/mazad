@@ -1,0 +1,24 @@
+# Project TODO
+
+- [x] Confirm the production architecture that can run Laravel/PHP, PostgreSQL, Redis, Horizon, Reverb, and Meilisearch.
+- [ ] Define the first-release scope, supported countries, country payment gateways, and shipping-provider integration priorities.
+- [ ] Model country, city, currency, category, user profile, verification, status, and audit-log data with mandatory country and currency context.
+- [ ] Implement unified authentication, verification controls, RBAC roles and permissions, policies, validation, secure uploads, and rate limiting.
+- [ ] Implement countries, cities, currencies, categories, role-scoped administration, and country-context enforcement.
+- [ ] Implement product listing creation, media handling, draft-to-approval moderation, and seller controls.
+- [ ] Implement the auction lifecycle, atomic bid placement, bid history, winner selection, scheduled start/close processing, and real-time updates.
+- [ ] Implement automatic order creation, payment-state workflows, gateway abstractions, commissions, seller wallets, earnings, and withdrawals.
+- [ ] Implement internal delivery, external carriers, self-pickup, tracking references, and shipment status transitions.
+- [ ] Implement review eligibility tied to completed orders and searchable listings with country, city, category, price, and condition filters.
+- [ ] Implement the role-scoped Admin Control Tower, reports, analytics, finance, support, moderation, settings, and operational controls.
+- [ ] Implement fraud-signal foundations, device/activity tracking, and reviewable user activity logs.
+- [ ] Build the elegant responsive marketplace and administrative interfaces with accessible interaction states.
+- [ ] Add automated tests, concurrency tests for bids, performance checks, and a security review.
+- [ ] Prepare deployment documentation, environment configuration, operational runbooks, and launch checklist.
+- [x] Create an independent Laravel application directory with a production-oriented local Docker Compose environment.
+- [x] Add PHP application, PostgreSQL, Redis, Horizon worker, Reverb server, Meilisearch, and local object-storage service definitions.
+- [x] Add Laravel environment templates, S3-compatible storage configuration, queue configuration, Horizon configuration, Reverb configuration, and Scout configuration.
+- [x] Create foundation migrations, Eloquent models, relations, and shared country/currency scoping support.
+- [x] Configure Sanctum authentication, Spatie role and permission foundations, policies, audit logging, and modular service boundaries.
+- [x] Apply all migrations and capture migration verification output against an isolated PostgreSQL 16 database; Docker runtime execution remains for the target local machine.
+- [x] Produce architecture, schema, migration-status, local-running, and next-steps reports.

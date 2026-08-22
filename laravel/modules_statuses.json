@@ -1,0 +1,21 @@
+{
+    "Core": false,
+    "Authentication": false,
+    "Users": false,
+    "Countries": false,
+    "Cities": false,
+    "Currencies": false,
+    "Categories": false,
+    "Products": false,
+    "Auctions": false,
+    "Bids": false,
+    "Orders": false,
+    "Payments": false,
+    "Wallet": false,
+    "Shipping": false,
+    "Reviews": false,
+    "Notifications": false,
+    "Support": false,
+    "Analytics": false,
+    "Admin": false
+}

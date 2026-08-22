@@ -1,0 +1,11 @@
+{
+    "name": "Bids",
+    "alias": "bids",
+    "description": "",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\Bids\\Providers\\BidsServiceProvider"
+    ],
+    "files": []
+}

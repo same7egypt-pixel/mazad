@@ -1,0 +1,11 @@
+{
+    "name": "Auctions",
+    "alias": "auctions",
+    "description": "",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\Auctions\\Providers\\AuctionsServiceProvider"
+    ],
+    "files": []
+}
