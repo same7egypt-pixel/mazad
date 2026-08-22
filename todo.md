@@ -72,7 +72,8 @@
 - [ ] Complete and verify a real Laravel Sanctum browser-auth adapter before claiming end-to-end seller creation, review, and scheduling from React.
 - [x] Require at least one private product media record before allowing a seller to submit the product for moderation, with PostgreSQL feature coverage.
 - [x] Restore Laravel policy authorization support in the shared API controller and verify the full suite after the security fix.
-- [ ] Install and configure a country-scoped Filament Admin Control Tower for roles, catalog moderation, auction operations, and finance support.
+- [x] Install and configure a country-scoped Filament Admin Control Tower for roles, catalog moderation, auction operations, and finance support.
+- [x] Add a least-privilege Filament resource for administrative roles and access assignment, with tests for global-only visibility and no cross-country escalation.
 - [x] Add country-scoped Filament resources for users and categories with least-privilege operations and tests for cross-country visibility.
 - [x] Add a country-scoped Filament operations overview for pending catalog reviews, live auctions, paid orders, and withdrawal review workload.
 - [x] Add country-scoped read-only Filament resources for orders and shipments to support fulfillment operations without bypassing domain transitions.
