@@ -40,6 +40,7 @@ COPY docker/php/php.ini /usr/local/etc/php/conf.d/99-auction-marketplace.ini
 COPY docker/render/nginx.conf.template /etc/nginx/templates/auction.conf.template
 COPY --chmod=755 docker/render/entrypoint.sh /usr/local/bin/render-entrypoint
 COPY --chmod=755 docker/render/start-web.sh /usr/local/bin/render-web
+COPY --chmod=755 docker/render/start-trial-web.sh /usr/local/bin/render-trial-web
 
 RUN composer dump-autoload --no-dev --classmap-authoritative --no-scripts \
     && php artisan package:discover --ansi \

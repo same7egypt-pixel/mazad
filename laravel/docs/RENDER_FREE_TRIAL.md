@@ -26,7 +26,7 @@
 
 ## الاستيراد في Render
 
-بعد ربط GitHub، أنشئ Blueprint من المستودع `same7egypt-pixel/mazad` والفرع `main`. سيقرأ Render ملف `render.yaml`، ثم اختر **Free** للخدمتين عند ظهور المراجعة. لا تستخدم الخطة المجانية `preDeployCommand`؛ لذلك ينفذ أمر بدء خدمة API التجريبية `php artisan migrate --force --no-interaction` قبل تشغيل nginx في كل نشر GitHub. أدخل القيم المطلوبة فقط من لوحة Render؛ لا تحفظ الأسرار في Git:
+بعد ربط GitHub، أنشئ Blueprint من المستودع `same7egypt-pixel/mazad` والفرع `main`. سيقرأ Render ملف `render.yaml`، ثم اختر **Free** للخدمتين عند ظهور المراجعة. لا تستخدم الخطة المجانية `preDeployCommand`؛ لذلك يشغّل Blueprint السكربت التنفيذي `render-trial-web` الذي ينفذ `php artisan migrate --force --no-interaction` قبل تشغيل nginx في كل نشر GitHub، مع خمس محاولات اتصال قصيرة. أدخل القيم المطلوبة فقط من لوحة Render؛ لا تحفظ الأسرار في Git:
 
 | المتغير | ما يُدخل |
 |---|---|
