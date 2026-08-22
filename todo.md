@@ -93,5 +93,6 @@
 - [x] Add country-scoped account order retrieval and connect account wallet, order, and notification states to Laravel with labelled fallback display data.
 - [x] Add Home and AuctionDetail failure-mode tests that simulate configured Laravel API requests failing and assert labelled display-data fallback.
 - [ ] Add deployment-focused tests and complete remaining concurrent-bid, production payment-provider, carrier-provider, security, and launch-hardening work.
+- [x] Add Laravel coverage for the Render health-check endpoint `/up` to catch deployment readiness regressions.
 - [ ] Continue Render preparation and seller/admin interface work while retaining temporary data until a valid Laravel API URL is supplied.
 - [x] Build a clearly labelled temporary seller listing and auction-setup flow covering product details, media placeholders, country/city, and auction timing/pricing fields.
