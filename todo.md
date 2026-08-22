@@ -4,6 +4,8 @@
 - [ ] Define the first-release scope, supported countries, country payment gateways, and shipping-provider integration priorities.
 - [ ] Model country, city, currency, category, user profile, verification, status, and audit-log data with mandatory country and currency context.
 - [ ] Implement unified authentication, verification controls, RBAC roles and permissions, policies, validation, secure uploads, and rate limiting.
+- [x] Add an explicit authentication rate limiter for Laravel registration and login, with feature coverage for HTTP 429.
+- [x] Add Feature coverage that registration also returns HTTP 429 after the configured limit.
 - [ ] Implement countries, cities, currencies, categories, role-scoped administration, and country-context enforcement.
 - [ ] Implement product listing creation, media handling, draft-to-approval moderation, and seller controls.
 - [ ] Implement the auction lifecycle, atomic bid placement, bid history, winner selection, scheduled start/close processing, and real-time updates.

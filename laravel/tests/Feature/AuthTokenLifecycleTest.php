@@ -98,4 +98,63 @@ class AuthTokenLifecycleTest extends TestCase
         ], $headers)->assertUnprocessable()
             ->assertJsonValidationErrors('city_id');
     }
+
+    public function test_login_is_rate_limited_after_six_failed_attempts(): void
+    {
+        $currency = Currency::query()->create(['name' => 'Saudi Riyal', 'code' => 'SAR', 'symbol' => 'ر.س']);
+        $country = Country::query()->create([
+            'name' => 'Saudi Arabia',
+            'code' => 'SA',
+            'timezone' => 'Asia/Riyadh',
+            'currency_id' => $currency->id,
+        ]);
+        $headers = ['X-Marketplace-Country' => (string) $country->id];
+        $payload = [
+            'email' => 'attacker@gmail.com',
+            'password' => 'incorrect-password',
+            'device_name' => 'Marketplace browser test',
+        ];
+
+        foreach (range(1, 6) as $attempt) {
+            $this->postJson('/api/auth/login', $payload, $headers)->assertUnprocessable();
+        }
+
+        $this->postJson('/api/auth/login', $payload, $headers)->assertTooManyRequests();
+    }
+
+    public function test_registration_is_rate_limited_after_six_requests(): void
+    {
+        Role::findOrCreate('USER', 'web');
+        $currency = Currency::query()->create(['name' => 'Saudi Riyal', 'code' => 'SAR', 'symbol' => 'ر.س']);
+        $country = Country::query()->create([
+            'name' => 'Saudi Arabia',
+            'code' => 'SA',
+            'timezone' => 'Asia/Riyadh',
+            'currency_id' => $currency->id,
+        ]);
+        $city = City::query()->create(['country_id' => $country->id, 'name' => 'Riyadh']);
+        $headers = ['X-Marketplace-Country' => (string) $country->id];
+
+        foreach (range(1, 6) as $attempt) {
+            $this->postJson('/api/auth/register', [
+                'country_id' => $country->id,
+                'city_id' => $city->id,
+                'name' => "Rate Limited User {$attempt}",
+                'email' => "rate-user-{$attempt}@gmail.com",
+                'password' => 'very-secure-password',
+                'password_confirmation' => 'very-secure-password',
+                'device_name' => 'Marketplace browser test',
+            ], $headers)->assertCreated();
+        }
+
+        $this->postJson('/api/auth/register', [
+            'country_id' => $country->id,
+            'city_id' => $city->id,
+            'name' => 'Rate Limited User Seven',
+            'email' => 'rate-user-seven@gmail.com',
+            'password' => 'very-secure-password',
+            'password_confirmation' => 'very-secure-password',
+            'device_name' => 'Marketplace browser test',
+        ], $headers)->assertTooManyRequests();
+    }
 }
