@@ -35,6 +35,7 @@ class RolePermissionSeeder extends Seeder
             'FINANCE_ADMIN' => ['orders.view', 'payments.view', 'payments.manage', 'wallet.view', 'analytics.view', 'audit.view'],
             'OPERATIONS_ADMIN' => ['products.approve', 'auctions.manage', 'orders.view', 'orders.fulfill', 'shipping.manage', 'support.manage'],
             'CONTENT_MODERATOR' => ['products.approve', 'reviews.moderate'],
+            'MODERATOR' => ['products.approve', 'reviews.moderate'],
             'SUPPORT_AGENT' => ['orders.view', 'support.manage'],
             'USER' => ['products.create', 'products.update', 'auctions.create', 'auctions.bid', 'orders.view', 'wallet.view', 'wallet.withdraw', 'reviews.create'],
         ];

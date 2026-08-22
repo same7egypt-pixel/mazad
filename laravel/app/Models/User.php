@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use Database\Factories\UserFactory;
+use Filament\Models\Contracts\FilamentUser;
+use Filament\Panel;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -15,7 +17,7 @@ use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Permission\Traits\HasRoles;
 
-class User extends Authenticatable implements MustVerifyEmail
+class User extends Authenticatable implements FilamentUser, MustVerifyEmail
 {
     /** @use HasFactory<UserFactory> */
     use HasApiTokens, HasFactory, HasRoles, LogsActivity, Notifiable;
@@ -44,6 +46,26 @@ class User extends Authenticatable implements MustVerifyEmail
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()->logOnly(['country_id', 'city_id', 'name', 'email', 'phone', 'verification_status', 'status'])->logOnlyDirty();
+    }
+
+    public function canAccessPanel(Panel $panel): bool
+    {
+        if ($panel->getId() !== 'admin') {
+            return false;
+        }
+
+        return $this->status === 'active'
+            && $this->email_verified_at !== null
+            && $this->hasAnyRole([
+                'GLOBAL_SUPER_ADMIN',
+                'COUNTRY_ADMIN',
+                'CITY_ADMIN',
+                'FINANCE_ADMIN',
+                'OPERATIONS_ADMIN',
+                'CONTENT_MODERATOR',
+                'MODERATOR',
+                'SUPPORT_AGENT',
+            ]);
     }
 
     public function country(): BelongsTo { return $this->belongsTo(Country::class); }

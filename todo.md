@@ -62,12 +62,13 @@
 - [x] Render and test explicit temporary watchlist and active-bid summary states in the signed-in account experience.
 - [x] Produce a current-status delivery report covering implementation, visible temporary-data UI, validation evidence, deployment link, and launch blockers.
 - [ ] Review the latest user-provided requirements file and implement its applicable Marketplace changes with verification.
-- [ ] Add Render blueprint, production environment template, and production container process commands for Laravel web, Horizon, Reverb, and scheduler services.
-- [ ] Add Render deployment and migration runbook with service ownership, storage, Redis, PostgreSQL, Meilisearch, and WebSocket configuration guidance.
-- [ ] Replace the default Laravel README with a project README covering local services, Render deployment, testing, and operational boundaries.
+- [x] Add Render blueprint, production environment template, and production container process commands for Laravel web, Horizon, Reverb, and scheduler services.
+- [x] Add Render deployment and migration runbook with service ownership, storage, Redis, PostgreSQL, Meilisearch, and WebSocket configuration guidance.
+- [x] Replace the default Laravel README with a project README covering local services, Render deployment, testing, and operational boundaries.
 - [ ] Replace the Marketplace read-only demo-data adapter with a Laravel API adapter that can be enabled safely by explicit browser-reachable configuration.
 - [ ] Build seller-facing product and auction creation flows connected to Laravel contracts, including media upload and country context.
 - [ ] Install and configure a country-scoped Filament Admin Control Tower for roles, catalog moderation, auction operations, and finance support.
+- [x] Add a country-scoped Filament operations overview for pending catalog reviews, live auctions, paid orders, and withdrawal review workload.
 - [ ] Add deployment-focused tests and complete remaining concurrent-bid, production payment-provider, carrier-provider, security, and launch-hardening work.
 - [ ] Continue Render preparation and seller/admin interface work while retaining temporary data until a valid Laravel API URL is supplied.
 - [x] Build a clearly labelled temporary seller listing and auction-setup flow covering product details, media placeholders, country/city, and auction timing/pricing fields.

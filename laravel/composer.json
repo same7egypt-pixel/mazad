@@ -8,6 +8,7 @@
     "require": {
         "php": "^8.3",
         "brick/math": "^0.18",
+        "filament/filament": "^4.0",
         "laravel/framework": "^13.17",
         "laravel/horizon": "^5.48",
         "laravel/reverb": "^1.11",
@@ -60,7 +61,8 @@
         ],
         "post-autoload-dump": [
             "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump",
-            "@php artisan package:discover --ansi"
+            "@php artisan package:discover --ansi",
+            "@php artisan filament:upgrade"
         ],
         "post-update-cmd": [
             "@php artisan vendor:publish --tag=laravel-assets --ansi --force"
