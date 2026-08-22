@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\BidController;
 use App\Http\Controllers\Api\ProductController;
+use App\Http\Controllers\Api\ProductMediaController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -18,6 +19,7 @@ Route::middleware(['marketplace.country'])->group(function (): void {
         });
         Route::post('/products', [ProductController::class, 'store']);
         Route::post('/products/{product}/submit-for-review', [ProductController::class, 'submitForReview']);
+        Route::post('/products/{product}/media', [ProductMediaController::class, 'store']);
         Route::post('/auctions/{auction}/bids', [BidController::class, 'store'])->middleware('throttle:auction-bids');
     });
 });
