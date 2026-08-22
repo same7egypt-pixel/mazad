@@ -17,4 +17,6 @@ until php artisan migrate --force --no-interaction; do
     sleep 3
 done
 
+php artisan db:seed --class=Database\\Seeders\\MarketplaceReferenceSeeder --force --no-interaction
+
 exec /usr/local/bin/render-web
