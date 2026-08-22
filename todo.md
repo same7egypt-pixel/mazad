@@ -15,6 +15,8 @@
 - [x] Prepare a resource-constrained Render trial deployment that runs only the viable free-tier services and documents disabled production components.
 - [x] Remove Reverb and WebSocket-driven real-time updates from the free Render trial configuration, retaining HTTP refresh behavior only.
 - [x] Remove the unsupported free-tier pre-deploy step and run Laravel migrations through the free-trial startup path only.
+- [ ] Fix the Render Docker build stage so Composer resolves required PHP extensions before the free-trial API deploy.
+- [ ] Confirm the Render trial build passes the prior Composer extension failure and reaches a healthy Laravel API deployment.
 - [ ] Implement countries, cities, currencies, categories, role-scoped administration, and country-context enforcement.
 - [ ] Implement product listing creation, media handling, draft-to-approval moderation, and seller controls.
 - [ ] Implement the auction lifecycle, atomic bid placement, bid history, winner selection, scheduled start/close processing, and real-time updates.
