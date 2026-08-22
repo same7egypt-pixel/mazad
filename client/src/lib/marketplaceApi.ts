@@ -134,7 +134,11 @@ async function marketplaceRequest<T>(path: string, countryId?: number, init?: Re
     headers,
   });
 
-  if (!response.ok) throw new Error(`Laravel API request failed with status ${response.status}.`);
+  if (!response.ok) {
+    if (response.status === 401) clearLiveMarketplaceToken();
+    throw new Error(`Laravel API request failed with status ${response.status}.`);
+  }
+  if (response.status === 204) return undefined as T;
 
   return response.json() as Promise<T>;
 }

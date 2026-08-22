@@ -36,4 +36,32 @@ describe("جلسة Laravel Marketplace", () => {
     expect(headers.get("Authorization")).toBe("Bearer token-abc");
     expect(headers.get("X-Marketplace-Country")).toBe("7");
   });
+
+  it("ينهي الجلسة الحية عند استجابة تسجيل الخروج 204 ويمسح الرمز المحلي", async () => {
+    vi.stubEnv("VITE_LARAVEL_API_BASE_URL", "https://api.example.test");
+    const fetchMock = vi.fn()
+      .mockResolvedValueOnce({ ok: true, status: 200, json: async () => ({ user: liveUser, token: "token-abc" }) })
+      .mockResolvedValueOnce({ ok: true, status: 204 });
+    vi.stubGlobal("fetch", fetchMock);
+
+    const api = await import("./marketplaceApi");
+    await api.loginLiveMarketplace(7, liveUser.email, "secret-password");
+    await expect(api.logoutLiveMarketplace(7)).resolves.toBeUndefined();
+
+    expect(api.getLiveMarketplaceToken()).toBeNull();
+  });
+
+  it("يمسح رمز الجلسة عند رفض Laravel للطلب المحمي برمز منتهٍ", async () => {
+    vi.stubEnv("VITE_LARAVEL_API_BASE_URL", "https://api.example.test");
+    const fetchMock = vi.fn()
+      .mockResolvedValueOnce({ ok: true, status: 200, json: async () => ({ user: liveUser, token: "token-abc" }) })
+      .mockResolvedValueOnce({ ok: false, status: 401 });
+    vi.stubGlobal("fetch", fetchMock);
+
+    const api = await import("./marketplaceApi");
+    await api.loginLiveMarketplace(7, liveUser.email, "secret-password");
+    await expect(api.getLiveMarketplaceUser(7)).rejects.toThrow("status 401");
+
+    expect(api.getLiveMarketplaceToken()).toBeNull();
+  });
 });
