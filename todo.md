@@ -52,3 +52,6 @@
 - [x] Record country-scoped bid and marketplace activity with reviewable suspicious-bid signals.
 - [x] Add role-scoped fraud and audit log APIs with cross-country isolation.
 - [x] Add PostgreSQL tests for suspicious-signal creation and fraud-review authorization.
+- [x] Build a refined public Marketplace shell with navigation, country context, responsive search, auction discovery, and listing cards.
+- [x] Build initial auction-detail, bid-entry, and account interface states; integration with Laravel API contracts remains the next incremental step.
+- [x] Add visual and unit verification for the initial Marketplace user interface before further backend expansion.

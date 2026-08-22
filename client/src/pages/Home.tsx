@@ -1,33 +1,48 @@
+import { startLogin } from "@/const";
 import { useAuth } from "@/_core/hooks/useAuth";
-import { Button } from "@/components/ui/button";
-import { Loader2 } from "lucide-react";
-import { Streamdown } from 'streamdown';
+import { ArrowLeft, Bell, Clock3, Heart, Landmark, Menu, Search, ShieldCheck, Sparkles } from "lucide-react";
+import { useState } from "react";
+import { Link, useLocation } from "wouter";
 
-/**
- * All content in this page are only for example, replace with your own feature implementation
- * When building pages, remember your instructions in Frontend Workflow, Frontend Best Practices, Design Guide and Common Pitfalls
- */
+export type AuctionPreview = { id: number; category: string; title: string; city: string; price: string; time: string; paint: string; mark: string };
+
+export const demoAuctionLots: AuctionPreview[] = [
+  { id: 1, category: "ساعات ومجوهرات", title: "ساعة كرونوغراف كلاسيكية", city: "الرياض", price: "12,800 ر.س", time: "01:42:18", paint: "from-[#10242c] via-[#466978] to-[#e5d0a1]", mark: "⌁" },
+  { id: 2, category: "فن واقتناء", title: "تكوين معاصر، إصدار محدود", city: "جدة", price: "7,250 ر.س", time: "03:15:42", paint: "from-[#ce6a4b] via-[#f1c46f] to-[#183d58]", mark: "◒" },
+  { id: 3, category: "تصوير وكاميرات", title: "كاميرا فيلمية احترافية", city: "الدمام", price: "4,600 ر.س", time: "غداً", paint: "from-[#292a2d] via-[#6e5c47] to-[#c8b69c]", mark: "◉" },
+  { id: 4, category: "تصميم وديكور", title: "مصباح إيطالي من السبعينات", city: "المدينة", price: "3,980 ر.س", time: "05:06:11", paint: "from-[#754631] via-[#bd8565] to-[#e5cfb2]", mark: "◌" },
+];
+
+const categories = ["الكل", "فن واقتناء", "ساعات ومجوهرات", "تصوير وكاميرات", "تصميم وديكور"];
+const countryLabels: Record<string, string> = { sa: "المملكة العربية السعودية", ae: "الإمارات العربية المتحدة", eg: "جمهورية مصر العربية" };
+
+function LotImage({ lot, hero = false }: { lot: AuctionPreview; hero?: boolean }) {
+  return <div className={`relative overflow-hidden bg-gradient-to-br ${lot.paint} ${hero ? "h-[25rem] md:h-[31rem]" : "h-52"}`}>
+    <div className="absolute inset-0 bg-[radial-gradient(circle_at_74%_20%,rgba(255,255,255,.35),transparent_25%),linear-gradient(140deg,rgba(255,255,255,.16),transparent_45%)]" />
+    <div className="absolute -bottom-20 -right-16 h-64 w-64 rounded-full border border-white/25 bg-white/10" />
+    <span className="absolute left-7 top-5 font-serif text-[7rem] leading-none text-white/85 drop-shadow-2xl" aria-hidden>{lot.mark}</span>
+    <span className="absolute left-5 top-5 rounded-full bg-[#0d232a]/65 px-3 py-1 text-[10px] font-bold tracking-[.12em] text-white backdrop-blur">مزاد حي</span>
+    <button className="absolute right-5 top-5 grid h-9 w-9 place-items-center rounded-full bg-white/90 text-[#12313a] transition hover:scale-105" aria-label={`حفظ ${lot.title}`}><Heart size={16} /></button>
+    <span className="absolute bottom-5 right-5 flex items-center gap-2 text-xs font-semibold text-white"><Clock3 size={14} /> ينتهي خلال {lot.time}</span>
+  </div>;
+}
+
 export default function Home() {
-  // The useAuth hook provides authentication state.
-  // To implement login/logout, call logout(), or start login from an event
-  // handler: onClick={() => startLogin()} (imported from "@/const"). Never call
-  // startLogin() during render (no href={startLogin()}) — it mints a one-time
-  // nonce cookie and must run only at the moment of navigation.
-  let { user, loading, error, isAuthenticated, logout } = useAuth();
+  const { user, isAuthenticated, loading } = useAuth();
+  const [, navigate] = useLocation();
+  const [country, setCountry] = useState("sa");
+  const [query, setQuery] = useState("");
+  const [activeCategory, setActiveCategory] = useState("الكل");
+  const filteredLots = demoAuctionLots.filter((lot) => (activeCategory === "الكل" || lot.category === activeCategory) && `${lot.title} ${lot.category} ${lot.city}`.includes(query.trim()));
 
-  // If theme is switchable in App.tsx, we can implement theme toggling like this:
-  // const { theme, toggleTheme } = useTheme();
-
-  return (
-    <div className="min-h-screen flex flex-col">
-      <main>
-        {/* Example: lucide-react for icons */}
-        <Loader2 className="animate-spin" />
-        Example Page
-        {/* Example: Streamdown for markdown rendering */}
-        <Streamdown>Any **markdown** content</Streamdown>
-        <Button variant="default">Example Button</Button>
-      </main>
-    </div>
-  );
+  return <main dir="rtl" className="min-h-screen overflow-x-hidden bg-[#f7f6f1] text-[#143039]">
+    <div className="border-b border-white/10 bg-[#12313a] text-[#dce9e3]"><div className="market-container flex h-10 items-center justify-between text-xs"><span className="flex items-center gap-2"><ShieldCheck size={14} className="text-[#c7dcae]" /> مزادات موثقة ومقيدة بسياق الدولة</span><label className="flex items-center gap-2"><Landmark size={14} /><span className="sr-only">اختر الدولة</span><select value={country} onChange={(event) => setCountry(event.target.value)} className="max-w-44 bg-transparent text-xs font-semibold outline-none"><option value="sa">السعودية</option><option value="ae">الإمارات</option><option value="eg">مصر</option></select></label></div></div>
+    <header className="market-container flex h-20 items-center justify-between gap-5"><Link href="/" className="flex items-center gap-3"><span className="grid h-10 w-10 place-items-center rounded-2xl bg-[#d96d46] text-xl font-black text-white shadow-lg">م</span><span className="font-serif text-2xl font-semibold">مِزَاد</span></Link><nav className="hidden gap-7 text-sm font-semibold text-[#5b6d72] lg:flex"><a href="#auctions" className="text-[#12313a]">المزادات</a><a href="#discover">الاكتشاف</a><a href="#how">كيف يعمل</a><a href="#sell">اعرض مقتناك</a></nav><div className="flex items-center gap-2"><button className="hidden h-10 w-10 place-items-center rounded-full border border-[#143039]/10 sm:grid" aria-label="إشعارات"><Bell size={18} /></button>{isAuthenticated ? <button onClick={() => navigate("/account")} className="rounded-full bg-[#12313a] px-5 py-2.5 text-sm font-bold text-white">{user?.name || "حسابي"}</button> : <button onClick={startLogin} disabled={loading} className="rounded-full bg-[#12313a] px-5 py-2.5 text-sm font-bold text-white disabled:opacity-50">دخول الحساب</button>}<button className="grid h-10 w-10 place-items-center rounded-full border border-[#143039]/10 lg:hidden" aria-label="القائمة"><Menu size={18} /></button></div></header>
+    <section className="market-container pb-16 pt-5 md:pb-24 md:pt-10"><div className="grid overflow-hidden rounded-[2rem] bg-[#12313a] shadow-[0_30px_90px_rgba(18,49,58,.2)] lg:grid-cols-[1.05fr_.95fr]"><div className="relative min-h-[31rem] p-8 text-[#fcfbf6] md:p-12"><div className="absolute inset-0 opacity-60 [background-image:radial-gradient(circle_at_12%_16%,rgba(199,220,174,.25),transparent_18%),radial-gradient(circle_at_78%_78%,rgba(217,109,70,.32),transparent_28%)]" /><div className="relative flex h-full flex-col items-start justify-between"><div><span className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1.5 text-xs font-bold text-[#c7dcae]"><Sparkles size={14} /> {countryLabels[country]}</span><h1 className="mt-7 font-serif text-5xl leading-[1.04] md:text-7xl">كل قطعة<br />لها قصتها.</h1><p className="mt-6 max-w-md text-base leading-8 text-[#cfe0dc]">منصة مزادات منتقاة تجمع القطع الاستثنائية مع مزايدة واضحة، ومدفوعات منظمة، وتسليم قابل للتتبع.</p></div><div className="mt-12 flex flex-wrap gap-3"><a href="#auctions" className="rounded-full bg-[#d96d46] px-6 py-3 text-sm font-bold text-white">استكشف المزادات</a><a href="#how" className="rounded-full border border-white/20 px-6 py-3 text-sm font-bold">كيف يعمل مزاد؟</a></div></div></div><div className="relative min-h-[26rem] bg-[#d9cab7] p-5 md:p-8"><LotImage lot={demoAuctionLots[0]} hero /><div className="absolute bottom-10 left-10 right-10 rounded-2xl bg-[#fcfbf6]/95 p-5 shadow-xl backdrop-blur"><p className="text-xs font-bold text-[#d96d46]">{demoAuctionLots[0].category}</p><div className="mt-2 flex items-end justify-between gap-3"><div><h2 className="font-serif text-2xl font-semibold">{demoAuctionLots[0].title}</h2><p className="mt-1 text-xs text-[#61757a]">{demoAuctionLots[0].city} · مزاد مباشر</p></div><strong className="shrink-0">{demoAuctionLots[0].price}</strong></div></div></div></div></section>
+    <section id="discover" className="border-y border-[#143039]/10 bg-[#ebe7dc] py-8"><div className="market-container grid gap-4 lg:grid-cols-[1fr_auto]"><label className="flex items-center gap-3 rounded-2xl bg-[#f8f7f2] px-4 py-3 shadow-sm"><Search className="shrink-0 text-[#d96d46]" size={20} /><input value={query} onChange={(event) => setQuery(event.target.value)} aria-label="ابحث في المزادات" placeholder="ابحث عن قطعة، فئة أو مدينة" className="w-full bg-transparent text-sm outline-none placeholder:text-[#879497]" /></label><div className="flex gap-2 overflow-x-auto pb-1 lg:max-w-[39rem]">{categories.map((name) => <button key={name} onClick={() => setActiveCategory(name)} className={`shrink-0 rounded-xl border px-4 py-3 text-sm font-semibold transition ${activeCategory === name ? "border-[#12313a] bg-[#12313a] text-white" : "border-[#143039]/10 bg-[#f8f7f2] hover:border-[#d96d46]"}`}>{name}</button>)}</div></div></section>
+    <section id="auctions" className="market-container py-16 md:py-24"><div className="mb-9 flex items-end justify-between"><div><p className="text-xs font-bold tracking-[.16em] text-[#d96d46]">مزادات حية الآن</p><h2 className="mt-2 font-serif text-4xl md:text-5xl">فرص لا تتكرر</h2></div><span className="hidden text-sm text-[#6f8084] sm:block">{filteredLots.length} مزادات مطابقة</span></div>{filteredLots.length ? <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">{filteredLots.map((lot) => <article key={lot.id} className="group overflow-hidden rounded-[1.35rem] bg-white shadow-[0_10px_35px_rgba(20,48,57,.08)] transition hover:-translate-y-1 hover:shadow-[0_18px_45px_rgba(20,48,57,.15)]"><Link href={`/auction/${lot.id}`}><LotImage lot={lot} /></Link><div className="p-5"><p className="text-xs font-bold text-[#d96d46]">{lot.category}</p><Link href={`/auction/${lot.id}`}><h3 className="mt-2 font-serif text-xl font-semibold transition group-hover:text-[#d96d46]">{lot.title}</h3></Link><p className="mt-2 text-xs text-[#718187]">{lot.city} · مزاد مباشر</p><div className="mt-5 flex items-end justify-between border-t border-[#143039]/8 pt-4"><span className="text-xs text-[#718187]">المزايدة الحالية</span><strong>{lot.price}</strong></div></div></article>)}</div> : <div className="rounded-3xl border border-dashed border-[#143039]/20 p-10 text-center text-[#6f8084]">لم نجد مزاداً مطابقاً. جرّب فئة أخرى أو كلمات بحث مختلفة.</div>}</section>
+    <section id="how" className="bg-[#e6e2d6] py-16 md:py-24"><div className="market-container grid gap-10 lg:grid-cols-[.8fr_1.2fr]"><div><p className="text-xs font-bold tracking-[.16em] text-[#d96d46]">مزاد يضع الوضوح أولاً</p><h2 className="mt-3 font-serif text-4xl leading-tight md:text-5xl">تجربة مدروسة<br />من أول مزايدة.</h2></div><div className="grid gap-px overflow-hidden rounded-3xl bg-[#143039]/10 sm:grid-cols-3">{[["01", "تحقق من القطعة", "البيانات والوسائط وسياق البائع في مكان واحد."], ["02", "زايد بثقة", "سعر حي وحد أدنى واضح وحماية ذرية."], ["03", "أكمل الاستلام", "طلب منظم وشحن قابل للمتابعة."]].map(([num, title, copy]) => <div key={num} className="bg-[#f7f6f1] p-6"><span className="font-serif text-3xl text-[#d96d46]">{num}</span><h3 className="mt-8 font-serif text-xl font-semibold">{title}</h3><p className="mt-3 text-sm leading-6 text-[#65767b]">{copy}</p></div>)}</div></div></section>
+    <section id="sell" className="market-container py-16 md:py-24"><div className="flex flex-col items-start justify-between gap-8 rounded-[2rem] bg-[#d96d46] p-8 text-white md:flex-row md:items-end md:p-12"><div><p className="text-xs font-bold tracking-[.16em] text-[#ffe3cc]">هل لديك قطعة استثنائية؟</p><h2 className="mt-3 max-w-2xl font-serif text-4xl leading-tight md:text-5xl">ابدأ مسار بيع واضحاً، من المسودة إلى المزاد.</h2></div><button onClick={isAuthenticated ? () => navigate("/account") : startLogin} className="flex items-center gap-2 rounded-full bg-white px-6 py-3 text-sm font-bold text-[#b94f31]">اعرض مقتناك <ArrowLeft size={16} /></button></div></section>
+    <footer className="border-t border-[#143039]/10 py-8"><div className="market-container flex flex-col justify-between gap-4 text-xs text-[#718187] sm:flex-row"><span>© 2026 مِزَاد · واجهة عرض مؤقتة لحين ربط بيانات Laravel الحية</span><div className="flex gap-5"><a href="#how">عن المنصة</a><a href="#auctions">المزادات</a><a href="#sell">البائعون</a></div></div></footer>
+  </main>;
 }
