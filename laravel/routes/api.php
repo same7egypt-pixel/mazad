@@ -23,8 +23,8 @@ Route::get('/marketplaces/countries', [MarketplaceCountryController::class, 'ind
 Route::get('/marketplaces/{country}/references', [MarketplaceReferenceController::class, 'show']);
 
 Route::middleware(['marketplace.country'])->group(function (): void {
-    Route::post('/auth/register', [AuthController::class, 'register'])->middleware('throttle:6,1');
-    Route::post('/auth/login', [AuthController::class, 'login'])->middleware('throttle:6,1');
+    Route::post('/auth/register', [AuthController::class, 'register'])->middleware('throttle:marketplace-auth');
+    Route::post('/auth/login', [AuthController::class, 'login'])->middleware('throttle:marketplace-auth');
     Route::get('/products', [ProductController::class, 'index']);
     Route::get('/listings/search', [ListingSearchController::class, 'index']);
     Route::get('/auctions', [AuctionController::class, 'index']);

@@ -14,6 +14,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Str;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -36,6 +37,13 @@ class AppServiceProvider extends ServiceProvider
 
         RateLimiter::for('auction-bids', function (Request $request): Limit {
             return Limit::perMinute(30)->by(($request->user()?->getKey() ?? 'guest').':'.$request->ip());
+        });
+
+        RateLimiter::for('marketplace-auth', function (Request $request): Limit {
+            $country = $request->header('X-Marketplace-Country', 'unresolved');
+            $email = Str::lower(trim($request->input('email', '')));
+
+            return Limit::perMinute(6)->by(implode(':', ['marketplace-auth', $country, $email ?: 'no-email', $request->ip()]));
         });
     }
 }

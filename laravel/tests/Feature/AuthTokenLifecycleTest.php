@@ -135,26 +135,56 @@ class AuthTokenLifecycleTest extends TestCase
         $city = City::query()->create(['country_id' => $country->id, 'name' => 'Riyadh']);
         $headers = ['X-Marketplace-Country' => (string) $country->id];
 
-        foreach (range(1, 6) as $attempt) {
-            $this->postJson('/api/auth/register', [
-                'country_id' => $country->id,
-                'city_id' => $city->id,
-                'name' => "Rate Limited User {$attempt}",
-                'email' => "rate-user-{$attempt}@gmail.com",
-                'password' => 'very-secure-password',
-                'password_confirmation' => 'very-secure-password',
-                'device_name' => 'Marketplace browser test',
-            ], $headers)->assertCreated();
-        }
-
-        $this->postJson('/api/auth/register', [
+        $payload = [
             'country_id' => $country->id,
             'city_id' => $city->id,
-            'name' => 'Rate Limited User Seven',
-            'email' => 'rate-user-seven@gmail.com',
+            'name' => 'Rate Limited User',
+            'email' => 'rate-user@gmail.com',
             'password' => 'very-secure-password',
             'password_confirmation' => 'very-secure-password',
             'device_name' => 'Marketplace browser test',
-        ], $headers)->assertTooManyRequests();
+        ];
+
+        $this->postJson('/api/auth/register', $payload, $headers)->assertCreated();
+
+        foreach (range(2, 6) as $attempt) {
+            $this->postJson('/api/auth/register', $payload, $headers)->assertUnprocessable();
+        }
+
+        $this->postJson('/api/auth/register', $payload, $headers)->assertTooManyRequests();
+    }
+
+    public function test_auth_rate_limit_isolated_by_marketplace_country_and_client_ip(): void
+    {
+        $currency = Currency::query()->create(['name' => 'Saudi Riyal', 'code' => 'SAR', 'symbol' => 'ر.س']);
+        $country = Country::query()->create([
+            'name' => 'Saudi Arabia',
+            'code' => 'SA',
+            'timezone' => 'Asia/Riyadh',
+            'currency_id' => $currency->id,
+        ]);
+        $otherCountry = Country::query()->create([
+            'name' => 'United Arab Emirates',
+            'code' => 'AE',
+            'timezone' => 'Asia/Dubai',
+            'currency_id' => $currency->id,
+        ]);
+        $payload = [
+            'email' => 'attacker@gmail.com',
+            'password' => 'incorrect-password',
+            'device_name' => 'Marketplace browser test',
+        ];
+        $countryHeader = ['X-Marketplace-Country' => (string) $country->id];
+
+        foreach (range(1, 6) as $attempt) {
+            $this->postJson('/api/auth/login', $payload, $countryHeader)->assertUnprocessable();
+        }
+
+        $this->postJson('/api/auth/login', $payload, $countryHeader)->assertTooManyRequests();
+        $this->postJson('/api/auth/login', $payload, ['X-Marketplace-Country' => (string) $otherCountry->id])
+            ->assertUnprocessable();
+        $this->withServerVariables(['REMOTE_ADDR' => '203.0.113.10'])
+            ->postJson('/api/auth/login', $payload, $countryHeader)
+            ->assertUnprocessable();
     }
 }
