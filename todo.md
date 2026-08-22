@@ -17,6 +17,9 @@
 - [x] Remove the unsupported free-tier pre-deploy step and run Laravel migrations through the free-trial startup path only.
 - [ ] Fix the Render Docker build stage so Composer resolves required PHP extensions before the free-trial API deploy.
 - [ ] Confirm the Render trial build passes the prior Composer extension failure and reaches a healthy Laravel API deployment.
+- [ ] Diagnose and correct the external API Server Error after the Render trial health endpoint succeeds.
+- [ ] Apply and verify the Laravel migration set on the Render trial Postgres database before enabling public API data contracts.
+- [ ] Run Laravel migrations explicitly in the free Render web-service startup command so GitHub-triggered deploys initialize the trial database.
 - [ ] Add the PHP zip extension to the Composer build stage after the Render retry exposed it as the next required platform dependency.
 - [ ] Prevent Composer package discovery from running before artisan exists in the Docker vendor stage, then run discovery after the Laravel source is present.
 - [ ] Implement countries, cities, currencies, categories, role-scoped administration, and country-context enforcement.
