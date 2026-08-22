@@ -8,6 +8,7 @@
 - [x] Add Feature coverage that registration also returns HTTP 429 after the configured limit.
 - [x] Replace the generic auth throttle with a named rate limiter keyed by marketplace country, normalized email, and client IP, with isolation coverage.
 - [x] Configure environment-driven Laravel CORS and Sanctum trusted origins, with automated preflight coverage for the future HTTPS staging frontend.
+- [x] Set a bounded default Sanctum token lifetime and cover rejection of an expired Marketplace API token.
 - [ ] Implement countries, cities, currencies, categories, role-scoped administration, and country-context enforcement.
 - [ ] Implement product listing creation, media handling, draft-to-approval moderation, and seller controls.
 - [ ] Implement the auction lifecycle, atomic bid placement, bid history, winner selection, scheduled start/close processing, and real-time updates.

@@ -7,6 +7,7 @@ use App\Models\Country;
 use App\Models\Currency;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Laravel\Sanctum\PersonalAccessToken;
 use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
@@ -186,5 +187,29 @@ class AuthTokenLifecycleTest extends TestCase
         $this->withServerVariables(['REMOTE_ADDR' => '203.0.113.10'])
             ->postJson('/api/auth/login', $payload, $countryHeader)
             ->assertUnprocessable();
+    }
+
+    public function test_expired_marketplace_token_is_rejected(): void
+    {
+        $currency = Currency::query()->create(['name' => 'Saudi Riyal', 'code' => 'SAR', 'symbol' => 'ر.س']);
+        $country = Country::query()->create([
+            'name' => 'Saudi Arabia',
+            'code' => 'SA',
+            'timezone' => 'Asia/Riyadh',
+            'currency_id' => $currency->id,
+        ]);
+        $city = City::query()->create(['country_id' => $country->id, 'name' => 'Riyadh']);
+        $user = User::factory()->create(['country_id' => $country->id, 'city_id' => $city->id]);
+        $plainTextToken = $user->createToken('Marketplace browser test')->plainTextToken;
+        $token = PersonalAccessToken::findToken($plainTextToken);
+
+        config(['sanctum.expiration' => 1]);
+        $token->forceFill(['created_at' => now()->subMinutes(2)])->save();
+        app('auth')->forgetGuards();
+
+        $this->getJson('/api/user', [
+            'Authorization' => "Bearer {$plainTextToken}",
+            'X-Marketplace-Country' => (string) $country->id,
+        ])->assertUnauthorized();
     }
 }
