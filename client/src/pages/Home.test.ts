@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { demoAuctionLots } from "./Home";
+import { demoAuctionLots } from "@/data/marketplaceDemo";
 
 describe("واجهة Marketplace التجريبية", () => {
   it("تعرض مزادات فريدة ومكتملة بالحد الأدنى من بيانات العرض", () => {

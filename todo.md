@@ -56,3 +56,7 @@
 - [x] Build initial auction-detail, bid-entry, and account interface states; integration with Laravel API contracts remains the next incremental step.
 - [x] Add visual and unit verification for the initial Marketplace user interface before further backend expansion.
 - [x] Add a public active-country discovery contract with tested safe currency metadata; connecting it to the UI requires a configured Laravel service URL for the web preview.
+- [x] Create a centralized temporary Marketplace fixture layer for listings, bids, seller metadata, order progress, and country display context, explicitly excluding fabricated reviews.
+- [x] Populate the auction detail and signed-in account views with clearly labelled temporary auction, bid, watchlist, order, wallet, and notification states.
+- [x] Add unit and visual verification for the temporary-data presentation layer and document the Laravel replacement boundary.
+- [x] Render and test explicit temporary watchlist and active-bid summary states in the signed-in account experience.
