@@ -9,7 +9,6 @@ services:
     dockerfilePath: laravel/Dockerfile.render
     dockerContext: laravel
     dockerCommand: /usr/local/bin/render-web
-    preDeployCommand: php artisan migrate --force
     healthCheckPath: /up
     envVars:
       - key: APP_NAME
@@ -18,6 +17,8 @@ services:
         value: production
       - key: APP_DEBUG
         value: "false"
+      - key: RUN_MIGRATIONS_ON_START
+        value: "true"
       - key: APP_KEY
         sync: false
       - key: APP_URL
