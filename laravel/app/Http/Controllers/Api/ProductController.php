@@ -43,6 +43,9 @@ class ProductController extends Controller
         if ($product->status !== 'draft') {
             return response()->json(['message' => 'Only draft products may be submitted for review.'], 422);
         }
+        if (! $product->media()->exists()) {
+            return response()->json(['message' => 'At least one product media item is required before review.'], 422);
+        }
 
         $product->update(['status' => 'pending_review']);
 

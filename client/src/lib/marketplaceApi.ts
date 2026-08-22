@@ -96,17 +96,59 @@ export function mapLaravelAuction(auction: LaravelAuction, countryCode: string):
   };
 }
 
-async function marketplaceRequest<T>(path: string, countryId?: number): Promise<T> {
+async function marketplaceRequest<T>(path: string, countryId?: number, init?: RequestInit): Promise<T> {
   if (!laravelApiBaseUrl) throw new Error("Laravel API URL is not configured.");
 
   const response = await fetch(`${laravelApiBaseUrl}${path}`, {
     credentials: "include",
-    headers: countryId ? { "X-Marketplace-Country": String(countryId), Accept: "application/json" } : { Accept: "application/json" },
+    ...init,
+    headers: {
+      Accept: "application/json",
+      ...(countryId ? { "X-Marketplace-Country": String(countryId) } : {}),
+      ...(init?.headers || {}),
+    },
   });
 
   if (!response.ok) throw new Error(`Laravel API request failed with status ${response.status}.`);
 
   return response.json() as Promise<T>;
+}
+
+export type SellerReferenceData = {
+  country: { id: number; name: string; code: string; timezone: string };
+  currency: { id: number; name: string; code: string; symbol: string; decimal_places: number } | null;
+  cities: Array<{ id: number; name: string }>;
+  categories: Array<{ id: number; name: string; slug: string; parent_id: number | null }>;
+};
+
+export type LiveProductInput = { city_id: number; category_id: number; title: string; description: string; condition: "new" | "like_new" | "good" | "fair" | "poor" };
+
+export async function getLiveSellerReferences(countryId: number): Promise<SellerReferenceData> {
+  return marketplaceRequest<SellerReferenceData>(`/api/marketplaces/${countryId}/references`);
+}
+
+export async function createLiveProduct(countryId: number, input: LiveProductInput): Promise<{ id: number; status: string }> {
+  const payload = await marketplaceRequest<{ product: { id: number; status: string } }>("/api/products", countryId, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(input),
+  });
+
+  return payload.product;
+}
+
+export async function submitLiveProductForReview(countryId: number, productId: number): Promise<{ id: number; status: string }> {
+  const payload = await marketplaceRequest<{ product: { id: number; status: string } }>(`/api/products/${productId}/submit-for-review`, countryId, { method: "POST" });
+  return payload.product;
+}
+
+export async function uploadLiveProductMedia(countryId: number, productId: number, file: File): Promise<void> {
+  const formData = new FormData();
+  formData.append("file", file);
+  await marketplaceRequest<{ media: { id: number } }>(`/api/products/${productId}/media`, countryId, {
+    method: "POST",
+    body: formData,
+  });
 }
 
 export async function getLiveMarketplaceCountries(): Promise<MarketplaceCountry[]> {

@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\BidController;
 use App\Http\Controllers\Api\GovernanceController;
 use App\Http\Controllers\Api\ListingSearchController;
 use App\Http\Controllers\Api\MarketplaceCountryController;
+use App\Http\Controllers\Api\MarketplaceReferenceController;
 use App\Http\Controllers\Api\NotificationController;
 use App\Http\Controllers\Api\OrderController;
 use App\Http\Controllers\Api\PaymentController;
@@ -19,6 +20,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/marketplaces/countries', [MarketplaceCountryController::class, 'index']);
+Route::get('/marketplaces/{country}/references', [MarketplaceReferenceController::class, 'show']);
 
 Route::middleware(['marketplace.country'])->group(function (): void {
     Route::post('/auth/register', [AuthController::class, 'register'])->middleware('throttle:6,1');
