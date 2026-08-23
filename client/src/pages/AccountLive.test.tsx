@@ -49,12 +49,12 @@ describe("الحساب الحي في Laravel", () => {
     expect(screen.getByText("طلب حي")).toBeTruthy();
   });
 
-  it("يبقي بيانات العرض موسومة ويوجه إلى دخول Laravel عند غياب جلسة Marketplace", async () => {
+  it("يبقي بيانات العرض موسومة ويوجه إلى صفحة دخول Marketplace عند غياب جلسة المستخدم", async () => {
     mocks.getLiveMarketplaceToken.mockReturnValue(null);
     render(<Account />);
 
-    expect(await screen.findByText("لعرض محفظتك وطلباتك الحية، سجّل دخول Laravel من مسار البيع.")).toBeTruthy();
+    expect(await screen.findByText("لعرض محفظتك وطلباتك الحية، سجّل الدخول أو أنشئ حساباً في Marketplace.")).toBeTruthy();
     expect(screen.getAllByText("بيانات عرض مؤقتة").length).toBeGreaterThan(0);
-    expect(screen.getByRole("link", { name: "دخول Laravel" }).getAttribute("href")).toBe("/sell");
+    expect(screen.getByRole("link", { name: "دخول أو إنشاء حساب" }).getAttribute("href")).toBe("/auth");
   });
 });

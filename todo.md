@@ -22,9 +22,9 @@
 - [x] Run Laravel migrations explicitly in the free Render web-service startup command so GitHub-triggered deploys initialize the trial database.
 - [x] Replace the incompatible inline Render shell command that exits 127 with an executable trial-start script.
 - [x] Seed idempotent Marketplace reference data for the Render trial: supported country, currency, cities, and catalogue categories only.
-- [ ] Configure the published Marketplace frontend with the Render HTTPS API URL and verify live discovery behavior.
-- [ ] Add a documented non-secret Render API fallback because the static production build did not receive VITE_LARAVEL_API_BASE_URL.
-- [ ] Show an explicit empty state when the live Laravel auction list is successfully empty instead of retaining temporary display cards.
+- [x] Configure the published Marketplace frontend with the Render HTTPS API URL and verify live discovery behavior.
+- [x] Add a documented non-secret Render API fallback because the static production build did not receive VITE_LARAVEL_API_BASE_URL.
+- [x] Show an explicit empty state when the live Laravel auction list is successfully empty instead of retaining temporary display cards.
 - [x] Provision a first Render-trial administrator from environment-provided credentials, then verify Filament admin access and ordinary-user denial.
 - [x] Seed the Render trial RBAC roles and permissions before provisioning the first administrator, and verify the startup path does not exit on a fresh database.
 - [x] Add the PHP zip extension to the Composer build stage after the Render retry exposed it as the next required platform dependency.
@@ -125,3 +125,5 @@
 - [x] Add Laravel coverage for the Render health-check endpoint `/up` to catch deployment readiness regressions.
 - [ ] Continue Render preparation and seller/admin interface work while retaining temporary data until a valid Laravel API URL is supplied.
 - [x] Build a clearly labelled temporary seller listing and auction-setup flow covering product details, media placeholders, country/city, and auction timing/pricing fields.
+- [ ] Publish the public React Marketplace on Netlify, configure the Render API origin, and verify end-user registration and login over HTTPS.
+- [ ] Enable the Netlify origin in the Render trial CORS policy and verify the public registration page loads active markets and cities.

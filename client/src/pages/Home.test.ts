@@ -4,10 +4,6 @@ import { describe, expect, it, vi } from "vitest";
 import { demoAuctionLots } from "@/data/marketplaceDemo";
 import { isLiveMarketplaceEnabled } from "@/lib/marketplaceApi";
 
-vi.mock("@/_core/hooks/useAuth", () => ({
-  useAuth: () => ({ user: null, isAuthenticated: false, loading: false }),
-}));
-
 vi.mock("wouter", () => ({
   Link: ({ children, href, ...props }: { children: React.ReactNode; href: string }) => React.createElement("a", { href, ...props }, children),
   useLocation: () => ["/", vi.fn()],
@@ -31,5 +27,6 @@ describe("واجهة Marketplace التجريبية", () => {
         : "بيانات عرض مؤقتة حتى اتصال Laravel",
     );
     if (!isLiveMarketplaceEnabled()) expect(html).toContain("ساعة كرونوغراف كلاسيكية");
+    expect(html).toContain("دخول أو إنشاء حساب");
   });
 });

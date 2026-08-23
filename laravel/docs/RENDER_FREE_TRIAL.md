@@ -36,6 +36,7 @@
 | `APP_URL` | نطاق خدمة API الذي ستنشئه Render، بصيغة `https://...onrender.com`. |
 | `FRONTEND_URL` | نطاق واجهة Marketplace الحالية أو نطاقها اللاحق. |
 | `CORS_ALLOWED_ORIGINS` | أصل الواجهة فقط، بلا مسار. |
+| `TRIAL_PUBLIC_FRONTEND_ORIGINS` | أصل واجهة Netlify التجريبية العامة؛ القيمة الحالية هي `https://mazad-marketplace.netlify.app` وتدمج مع `CORS_ALLOWED_ORIGINS` بدل استبداله. |
 | `SANCTUM_STATEFUL_DOMAINS` | مضيف الواجهة وAPI، بلا `https://`. |
 
 بعد نجاح النشر، افتح `/up` على نطاق API. لا تربط `VITE_LARAVEL_API_BASE_URL` بالواجهة المنشورة إلا بعد نجاح `/up` واختبار CORS وتسجيل مستخدم تجريبي.

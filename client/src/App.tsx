@@ -4,6 +4,7 @@ import NotFound from "@/pages/NotFound";
 import { Route, Switch } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
+import Auth from "./pages/Auth";
 import Home from "./pages/Home";
 import Account from "./pages/Account";
 import AuctionDetail from "./pages/AuctionDetail";
@@ -14,6 +15,7 @@ function Router() {
   return (
     <Switch>
       <Route path={"/"} component={Home} />
+      <Route path={"/auth"} component={Auth} />
       <Route path={"/auction/:id"} component={AuctionDetail} />
       <Route path={"/account"} component={Account} />
       <Route path={"/sell"} component={SellSetup} />
