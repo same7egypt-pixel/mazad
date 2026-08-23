@@ -152,13 +152,13 @@
 - [ ] Restore Netlify deployment availability after the external account-usage limit, then publish and browser-verify the seller scheduling fix.
 - [ ] Serve the public React Marketplace from the existing Render Laravel service, including SPA routing and the live seller scheduling fix, before retiring reliance on Netlify.
 - [x] Remove the incompatible corepack enable step from the Render Static Site build command and verify a successful public deployment.
-- [ ] Diagnose and fix the Render public-site login failure before claiming seller scheduling works on the new host.
+- [x] Diagnose and fix the Render public-site login failure before claiming seller scheduling works on the new host.
 - [ ] Diagnose and fix the Render public-site registration connectivity failure reported from the user session before continuing account-flow verification.
-- [ ] Inspect and safely align the reported existing account with its intended public marketplace country without weakening administrative RBAC.
+- [x] Inspect and safely align the reported existing account with its intended public marketplace country without weakening administrative RBAC.
 - [x] Rebrand the public product identity to Biddfy.ai while preserving the established dark teal and coral color palette after account access is verified.
-- [ ] Replace the stale Render Static Site build command still invoking corepack, redeploy the current GitHub revision, and verify the public bundle updates.
+- [x] Replace the stale Render Static Site build command still invoking corepack, redeploy the current GitHub revision, and verify the public bundle updates.
 - [ ] Diagnose and fix the newly reported inability to open or use the Render public account page after the latest deployment.
-- [ ] Diagnose and fix the post-login country-context rejection that prevents the live account dashboard and seller product submission from loading on Render.
+- [x] Diagnose and fix the post-login country-context rejection that prevents the live account dashboard and seller product submission from loading on Render.
 - [ ] Redirect the seller to the homepage after a successful product submission for review on the Render public site.
-- [ ] Diagnose and fix the blank white page reported on the live Render homepage after the Biddfy.ai deployment.
-- [ ] Replace the broken Biddfy.ai logo asset on Render with a stable brand mark that preserves the dark teal and coral identity.
+- [x] Diagnose and fix the blank white page reported on the live Render homepage after the Biddfy.ai deployment.
+- [x] Replace the broken Biddfy.ai logo asset on Render with a stable brand mark that preserves the dark teal and coral identity.
