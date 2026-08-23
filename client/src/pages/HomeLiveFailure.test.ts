@@ -22,13 +22,14 @@ vi.mock("wouter", () => ({
 import Home from "./Home";
 
 describe("فشل Laravel في صفحة الاكتشاف", () => {
-  it("يعرض بيانات العرض الموسومة عندما يفشل استدعاء الأسواق الحية", async () => {
+  it("لا يعرض بيانات عرض مؤقتة عندما يفشل استدعاء الأسواق الحية", async () => {
     api.getLiveMarketplaceCountries.mockRejectedValueOnce(new Error("offline"));
 
     render(React.createElement(Home));
 
-    await waitFor(() => expect(screen.getByText("تعذر جلب المزادات الحية؛ نعرض بيانات العرض المؤقتة إلى أن تستعيد خدمة Laravel اتصالها.")).toBeTruthy());
-    expect(screen.getAllByText("ساعة كرونوغراف كلاسيكية").length).toBeGreaterThan(0);
+    await waitFor(() => expect(screen.getByText("تعذر الاتصال بالمزادات الحية حالياً. لا نعرض أي بيانات بديلة في هذه الواجهة العامة.")).toBeTruthy());
+    expect(screen.getByText("المزادات الحية غير متاحة مؤقتاً")).toBeTruthy();
+    expect(screen.queryByText("ساعة كرونوغراف كلاسيكية")).toBeNull();
   });
 
   it("يعرض حالة فارغة صريحة عندما يعيد Laravel قائمة مزادات خالية", async () => {
