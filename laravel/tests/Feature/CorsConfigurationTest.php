@@ -6,9 +6,10 @@ use Tests\TestCase;
 
 class CorsConfigurationTest extends TestCase
 {
-    public function test_the_netlify_trial_origin_is_included_in_the_default_cors_policy(): void
+    public function test_the_public_netlify_and_render_origins_are_included_in_the_default_cors_policy(): void
     {
         $this->assertContains('https://mazad-marketplace.netlify.app', config('cors.allowed_origins'));
+        $this->assertContains('https://mazad-marketplace-web.onrender.com', config('cors.allowed_origins'));
     }
 
     public function test_configured_frontend_origin_receives_cors_preflight_headers(): void
