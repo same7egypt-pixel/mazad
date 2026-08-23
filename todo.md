@@ -137,13 +137,13 @@
 - [ ] Add role-scoped operational metrics, charts, recent activity, and country-aware navigation without enabling WebSockets on the Render free trial.
 - [ ] Expand auction, finance, user, country, and audit operations in Filament only where underlying models, permissions, and policies are implemented and testable.
 - [ ] Prepare a safe migration plan from Render Postgres to the owner's Neon Postgres project, including backup and rollback conditions.
-- [ ] Export and restore the current Render data into Neon, then verify schema, row integrity, roles, and reference marketplace data.
+- [x] Export and restore the current Render data into Neon, then verify schema, row integrity, roles, and reference marketplace data.
 - [ ] Switch Render to the Neon connection string only after the data verification succeeds, then verify `/up`, authentication, marketplace discovery, and `/admin` externally.
-- [ ] Execute the approved migration into the owner’s existing Neon project in Ohio while documenting the cross-region latency tradeoff.
-- [ ] Fix the Render Docker Vite build failure for the Filament theme and verify a successful external deployment before enabling Neon migration.
-- [ ] Correct the Render trial startup seeder class invocation and verify that the service reaches a live state before enabling Neon migration.
-- [ ] Resolve the PostgreSQL client-library mismatch in the Render migration image and verify the Neon copy completes before switching application traffic.
-- [ ] Handle Neon's pre-existing public schema during pg_restore and verify the full Render data copy completes successfully.
-- [ ] Add a reversible Render configuration switch that routes Laravel to the verified Neon database only when explicitly enabled.
+- [x] Execute the approved migration into the owner’s existing Neon project in Ohio while documenting the cross-region latency tradeoff.
+- [x] Fix the Render Docker Vite build failure for the Filament theme and verify a successful external deployment before enabling Neon migration.
+- [x] Correct the Render trial startup seeder class invocation and verify that the service reaches a live state before enabling Neon migration.
+- [x] Resolve the PostgreSQL client-library mismatch in the Render migration image and verify the Neon copy completes before switching application traffic.
+- [x] Handle Neon's pre-existing public schema during pg_restore and verify the full Render data copy completes successfully.
+- [x] Add a reversible Render configuration switch that routes Laravel to the verified Neon database only when explicitly enabled.
 - [ ] Enable Neon for the live Render service and verify health, public market discovery, authentication, and Filament admin access before decommissioning nothing.
 - [ ] Delete the Render Postgres instance only after Neon is live, verified, and the owner gives final deletion confirmation.
