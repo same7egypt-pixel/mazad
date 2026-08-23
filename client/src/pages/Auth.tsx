@@ -9,7 +9,7 @@ import {
   type MarketplaceCountry,
   type SellerReferenceData,
 } from "@/lib/marketplaceApi";
-import { ArrowRight, KeyRound, UserPlus } from "lucide-react";
+import { ArrowRight, KeyRound, RefreshCw, UserPlus } from "lucide-react";
 import React, { FormEvent, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { Link, useLocation } from "wouter";
@@ -24,6 +24,8 @@ export default function Auth() {
   const [references, setReferences] = useState<SellerReferenceData | null>(null);
   const [selectedCityId, setSelectedCityId] = useState(0);
   const [isLoadingReferences, setIsLoadingReferences] = useState(true);
+  const [marketplaceLoadAttempt, setMarketplaceLoadAttempt] = useState(0);
+  const [marketplaceLoadError, setMarketplaceLoadError] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
@@ -43,6 +45,8 @@ export default function Auth() {
     }
 
     let cancelled = false;
+    setMarketplaceLoadError(false);
+    setIsLoadingReferences(true);
     getLiveMarketplaceCountries().then((items) => {
       if (cancelled) return;
       setCountries(items);
@@ -50,12 +54,13 @@ export default function Auth() {
     }).catch(() => {
       if (!cancelled) {
         setIsLoadingReferences(false);
+        setMarketplaceLoadError(true);
         toast.error("تعذر الاتصال بخدمة الحسابات. حاول مرة أخرى بعد إيقاظ الخادم.");
       }
     });
 
     return () => { cancelled = true; };
-  }, []);
+  }, [marketplaceLoadAttempt]);
 
   useEffect(() => {
     if (!selectedCountryId || !isLiveMarketplaceEnabled()) return;
@@ -65,10 +70,14 @@ export default function Auth() {
     setReferences(null);
     getLiveSellerReferences(selectedCountryId).then((data) => {
       if (cancelled) return;
+      setMarketplaceLoadError(false);
       setReferences(data);
       setSelectedCityId(data.cities[0]?.id || 0);
     }).catch(() => {
-      if (!cancelled) toast.error("تعذر تحميل المدن المتاحة لهذا السوق.");
+      if (!cancelled) {
+        setMarketplaceLoadError(true);
+        toast.error("تعذر تحميل المدن المتاحة لهذا السوق.");
+      }
     }).finally(() => {
       if (!cancelled) setIsLoadingReferences(false);
     });
@@ -154,6 +163,13 @@ export default function Auth() {
   };
 
   const unavailable = !isLiveMarketplaceEnabled();
+  const retryMarketplaceLoading = () => {
+    setCountries([]);
+    setSelectedCountryId(0);
+    setSelectedCityId(0);
+    setReferences(null);
+    setMarketplaceLoadAttempt((attempt) => attempt + 1);
+  };
 
   return <main dir="rtl" className="min-h-screen bg-[#f7f6f1] px-4 py-8 text-[#143039] sm:py-14">
     <section className="mx-auto max-w-5xl overflow-hidden rounded-[2rem] bg-white shadow-[0_24px_70px_rgba(20,48,57,.12)] lg:grid lg:grid-cols-[.85fr_1.15fr]">
@@ -171,7 +187,8 @@ export default function Auth() {
         </div>
         <div className="mt-8"><p className="text-xs font-bold tracking-[.14em] text-[#d96d46]">{mode === "login" ? "دخول آمن" : "تسجيل مستخدم جديد"}</p><h2 className="mt-2 font-serif text-3xl">{mode === "login" ? "مرحباً بعودتك" : "أنشئ حسابك"}</h2></div>
         {unavailable ? <div className="mt-7 rounded-2xl border border-[#d96d46]/30 bg-[#fff5f0] p-4 text-sm leading-6 text-[#9d4027]">خدمة الحسابات غير مهيأة حالياً. حاول لاحقاً أو تواصل مع الإدارة.</div> : <>
-          <div className="mt-7 grid gap-4 sm:grid-cols-2"><label className="grid gap-2 text-sm font-semibold">السوق<select value={selectedCountryId} onChange={(event) => setSelectedCountryId(Number(event.target.value))} disabled={!countries.length || isLoadingReferences} className="rounded-xl border border-[#143039]/15 bg-white px-4 py-3 font-normal outline-none focus:border-[#d96d46] disabled:opacity-60">{countries.map((country) => <option key={country.id} value={country.id}>{country.name}</option>)}</select></label><div className="grid gap-2 text-sm font-semibold"><span>السوق النشط</span><div className="rounded-xl border border-[#143039]/10 bg-[#f4f3ed] px-4 py-3 font-normal text-[#64777b]">{isLoadingReferences ? "جارٍ التحميل…" : selectedCountry?.currency?.symbol || selectedCountry?.currency?.code || "غير محدد"}</div></div></div>
+          <div className="mt-7 grid gap-4 sm:grid-cols-2"><label className="grid gap-2 text-sm font-semibold">السوق<select value={selectedCountryId} onChange={(event) => setSelectedCountryId(Number(event.target.value))} disabled={!countries.length || isLoadingReferences} className="rounded-xl border border-[#143039]/15 bg-white px-4 py-3 font-normal outline-none focus:border-[#d96d46] disabled:opacity-60">{countries.map((country) => <option key={country.id} value={country.id}>{country.name}</option>)}</select></label><div className="grid gap-2 text-sm font-semibold"><span>السوق النشط</span><div className="rounded-xl border border-[#143039]/10 bg-[#f4f3ed] px-4 py-3 font-normal text-[#64777b]">{isLoadingReferences ? "يجري تجهيز السوق؛ قد يستغرق أول فتح أقل من دقيقة." : selectedCountry?.currency?.symbol || selectedCountry?.currency?.code || "غير محدد"}</div></div></div>
+          {marketplaceLoadError ? <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-[#d96d46]/25 bg-[#fff5f0] p-4 text-sm leading-6 text-[#8c3d2a]"><span>تعذر تجهيز السوق الآن. يمكنك إعادة المحاولة.</span><button type="button" onClick={retryMarketplaceLoading} className="inline-flex items-center gap-2 rounded-xl border border-[#d96d46]/30 bg-white px-3 py-2 font-bold text-[#9d4027] transition hover:bg-[#fff0e8]"><RefreshCw size={15} />إعادة تحميل السوق</button></div> : null}
           {mode === "login" ? <form onSubmit={handleLogin} className="mt-6 grid gap-4"><label className="grid gap-2 text-sm font-semibold">البريد الإلكتروني<input value={email} onChange={(event) => setEmail(event.target.value)} type="email" required autoComplete="email" className="rounded-xl border border-[#143039]/15 px-4 py-3 font-normal outline-none focus:border-[#d96d46]" /></label><label className="grid gap-2 text-sm font-semibold">كلمة المرور<input value={password} onChange={(event) => setPassword(event.target.value)} type="password" required autoComplete="current-password" className="rounded-xl border border-[#143039]/15 px-4 py-3 font-normal outline-none focus:border-[#d96d46]" /></label><button type="submit" disabled={isSubmitting || !selectedCountryId} className="mt-2 flex items-center justify-center gap-2 rounded-xl bg-[#12313a] px-5 py-3.5 text-sm font-bold text-white disabled:opacity-60"><KeyRound size={17} />{isSubmitting ? "جارٍ الدخول…" : "تسجيل الدخول"}</button></form> : <form onSubmit={handleRegistration} className="mt-6 grid gap-4"><label className="grid gap-2 text-sm font-semibold">الاسم الكامل<input value={name} onChange={(event) => setName(event.target.value)} required minLength={2} autoComplete="name" className="rounded-xl border border-[#143039]/15 px-4 py-3 font-normal outline-none focus:border-[#d96d46]" /></label><label className="grid gap-2 text-sm font-semibold">المدينة<select value={selectedCityId} onChange={(event) => setSelectedCityId(Number(event.target.value))} disabled={isLoadingReferences || !references} required className="rounded-xl border border-[#143039]/15 bg-white px-4 py-3 font-normal outline-none focus:border-[#d96d46] disabled:opacity-60">{references?.cities.map((city) => <option key={city.id} value={city.id}>{city.name}</option>)}</select></label><label className="grid gap-2 text-sm font-semibold">البريد الإلكتروني<input value={email} onChange={(event) => setEmail(event.target.value)} type="email" required autoComplete="email" className="rounded-xl border border-[#143039]/15 px-4 py-3 font-normal outline-none focus:border-[#d96d46]" /></label><label className="grid gap-2 text-sm font-semibold">رقم الهاتف <span className="font-normal text-[#6d7f83]">اختياري</span><input value={phone} onChange={(event) => setPhone(event.target.value)} type="tel" autoComplete="tel" className="rounded-xl border border-[#143039]/15 px-4 py-3 font-normal outline-none focus:border-[#d96d46]" /></label><label className="grid gap-2 text-sm font-semibold">كلمة المرور <span className="font-normal text-[#6d7f83]">12 حرفاً على الأقل</span><input value={password} onChange={(event) => setPassword(event.target.value)} type="password" required minLength={12} autoComplete="new-password" className="rounded-xl border border-[#143039]/15 px-4 py-3 font-normal outline-none focus:border-[#d96d46]" /></label><label className="grid gap-2 text-sm font-semibold">تأكيد كلمة المرور<input value={passwordConfirmation} onChange={(event) => setPasswordConfirmation(event.target.value)} type="password" required minLength={12} autoComplete="new-password" className="rounded-xl border border-[#143039]/15 px-4 py-3 font-normal outline-none focus:border-[#d96d46]" /></label><button type="submit" disabled={isSubmitting || isLoadingReferences || !selectedCityId} className="mt-2 flex items-center justify-center gap-2 rounded-xl bg-[#d96d46] px-5 py-3.5 text-sm font-bold text-white disabled:opacity-60"><UserPlus size={17} />{isSubmitting ? "جارٍ إنشاء الحساب…" : "إنشاء الحساب"}</button></form>}
         </>}
       </section>

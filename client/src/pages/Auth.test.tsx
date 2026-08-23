@@ -95,4 +95,18 @@ describe("صفحة دخول Marketplace", () => {
 
     await waitFor(() => expect(mocks.toastError).toHaveBeenCalledWith("هذا الحساب غير متاح في السوق المحدد.", expect.objectContaining({ description: "اختر السوق الذي أنشأت فيه الحساب ثم أعد المحاولة." })));
   });
+
+  it("يعرض إعادة تحميل السوق عند تعذر الاتصال ثم يعيد تحميل البيانات", async () => {
+    const country = { id: 1, code: "SA", name: "المملكة العربية السعودية", currency: { code: "SAR", symbol: "ر.س" } };
+    mocks.getLiveMarketplaceCountries.mockRejectedValueOnce(new Error("temporary connection failure")).mockResolvedValueOnce([country]);
+    mocks.getLiveSellerReferences.mockResolvedValue({ country: { id: 1, name: "المملكة العربية السعودية", code: "SA", timezone: "Asia/Riyadh" }, currency: null, cities: [{ id: 9, name: "الرياض" }], categories: [] });
+
+    render(<Auth />);
+
+    const retry = await screen.findByRole("button", { name: "إعادة تحميل السوق" });
+    fireEvent.click(retry);
+
+    expect(await screen.findByText("المملكة العربية السعودية")).toBeTruthy();
+    expect(mocks.getLiveMarketplaceCountries).toHaveBeenCalledTimes(2);
+  });
 });
