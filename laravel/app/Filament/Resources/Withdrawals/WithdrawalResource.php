@@ -10,15 +10,19 @@ use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
+use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
-use Filament\Tables\Table;
 
 class WithdrawalResource extends Resource
 {
     protected static ?string $model = Withdrawal::class;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+
+    protected static string|\UnitEnum|null $navigationGroup = 'المالية';
+
+    protected static ?int $navigationSort = 10;
 
     protected static ?string $recordTitleAttribute = 'id';
 
@@ -27,7 +31,7 @@ class WithdrawalResource extends Resource
         $query = parent::getEloquentQuery()->with(['wallet.user', 'wallet.currency', 'reviewer']);
         $user = auth()->user();
 
-        if ($user?->hasRole('GLOBAL_SUPER_ADMIN') || !$user?->country_id) {
+        if ($user?->hasRole('GLOBAL_SUPER_ADMIN') || ! $user?->country_id) {
             return $query;
         }
 

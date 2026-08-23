@@ -1,0 +1,69 @@
+@import '../../../../vendor/filament/filament/resources/css/theme.css';
+
+@source '../../../../app/Filament/**/*';
+@source '../../../../resources/views/filament/**/*';
+
+.fi-body {
+    background:
+        radial-gradient(circle at top right, rgba(45, 212, 191, 0.13), transparent 30rem),
+        radial-gradient(circle at bottom left, rgba(251, 146, 60, 0.08), transparent 32rem),
+        #07191f;
+}
+
+.fi-sidebar {
+    border-left: 1px solid rgb(255 255 255 / 0.08);
+    background: rgb(8 27 34 / 0.92);
+    backdrop-filter: blur(18px);
+}
+
+.fi-topbar {
+    border-bottom: 1px solid rgb(255 255 255 / 0.08);
+    background: rgb(7 25 31 / 0.88);
+    backdrop-filter: blur(18px);
+}
+
+.fi-wi-stats-overview-stat,
+.fi-section,
+.fi-ta-ctn {
+    box-shadow: 0 20px 50px rgb(0 0 0 / 0.15);
+}
+
+.fi-control-tower-empty {
+    border: 1px dashed rgb(255 255 255 / 0.16);
+    border-radius: .75rem;
+    padding: 1rem;
+    color: rgb(203 213 225);
+    background: rgb(15 35 43 / 0.6);
+}
+
+.fi-control-tower-activity {
+    display: grid;
+    gap: .5rem;
+}
+
+.fi-control-tower-activity__row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    border: 1px solid rgb(148 163 184 / .2);
+    border-radius: .75rem;
+    padding: .875rem 1rem;
+    background: rgb(8 27 34 / .7);
+}
+
+.fi-control-tower-activity__event,
+.fi-control-tower-activity__meta {
+    margin: 0;
+}
+
+.fi-control-tower-activity__event {
+    color: rgb(241 245 249);
+    font-weight: 700;
+}
+
+.fi-control-tower-activity__meta,
+.fi-control-tower-activity__time {
+    color: rgb(148 163 184);
+    font-size: .8125rem;
+}

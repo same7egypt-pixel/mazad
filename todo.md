@@ -132,3 +132,7 @@
 - [x] Preserve and display the authenticated Laravel session in the public homepage header after navigation from the account page.
 - [x] Display actionable Laravel registration errors in Netlify and guide an already-registered email to login instead of a generic failure.
 - [x] Remove all customer-visible Laravel, OAuth, token, and internal integration terminology from the public Netlify interface.
+- [ ] Fix seller auction scheduling validation for browser date/time input and verify the public Netlify release is the current client-safe version.
+- [ ] Redesign Filament as an Arabic RTL Marketplace Operations Control Tower powered only by real database data, with empty states where operational data is absent.
+- [ ] Add role-scoped operational metrics, charts, recent activity, and country-aware navigation without enabling WebSockets on the Render free trial.
+- [ ] Expand auction, finance, user, country, and audit operations in Filament only where underlying models, permissions, and policies are implemented and testable.

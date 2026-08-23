@@ -22,6 +22,10 @@ class AdminAccessResource extends Resource
 
     protected static ?string $navigationLabel = 'إدارة وصول المسؤولين';
 
+    protected static string|\UnitEnum|null $navigationGroup = 'النظام';
+
+    protected static ?int $navigationSort = 10;
+
     protected static ?string $recordTitleAttribute = 'name';
 
     public static function canViewAny(): bool

@@ -40,6 +40,17 @@ const conditionOptions = [
 
 type ConditionValue = (typeof conditionOptions)[number]["value"];
 
+function toDatetimeLocalValue(date: Date) {
+  const offset = date.getTimezoneOffset() * 60_000;
+  return new Date(date.getTime() - offset).toISOString().slice(0, 16);
+}
+
+function suggestedAuctionWindow() {
+  const start = new Date(Date.now() + 60 * 60_000);
+  const end = new Date(start.getTime() + 24 * 60 * 60_000);
+  return { start: toDatetimeLocalValue(start), end: toDatetimeLocalValue(end) };
+}
+
 function MediaPicker({ label, helper, accept, icon: Icon, files, onChange }: {
   label: string;
   helper: string;
@@ -158,6 +169,9 @@ export default function SellSetup() {
       toast.error("أكمل عنوان القطعة ووصفاً لا يقل عن 20 حرفاً أولاً.");
       return;
     }
+    const suggestedWindow = suggestedAuctionWindow();
+    if (!startTime) setStartTime(suggestedWindow.start);
+    if (!endTime) setEndTime(suggestedWindow.end);
     setStep(2);
   };
 
@@ -203,6 +217,10 @@ export default function SellSetup() {
       toast.info("سجّل الدخول أولاً لتتمكن من جدولة المزاد.");
       return;
     }
+    if (!approvedProducts.length) {
+      toast.info("لا يوجد منتج معتمد جاهز للجدولة بعد. أرسل منتجك للمراجعة ثم انتظر اعتماده.");
+      return;
+    }
     const product = sellerProducts.find((item) => item.id === Number(selectedSellerProductId));
     if (!product || product.status !== "approved" || product.auction) {
       toast.error("اختر منتجاً معتمداً غير مرتبط بمزاد أولاً.");
@@ -213,6 +231,13 @@ export default function SellSetup() {
       return;
     }
 
+    const startsAt = new Date(startTime);
+    const endsAt = new Date(endTime);
+    if (Number.isNaN(startsAt.getTime()) || Number.isNaN(endsAt.getTime()) || endsAt <= startsAt) {
+      toast.error("اختر وقت نهاية لاحقاً لوقت بداية المزاد.");
+      return;
+    }
+
     setIsScheduling(true);
     try {
       const auction = await createLiveAuction(countryId, {
@@ -220,8 +245,8 @@ export default function SellSetup() {
         starting_price: startingPrice,
         reserve_price: reservePrice || undefined,
         minimum_increment: increment,
-        start_time: new Date(startTime).toISOString(),
-        end_time: new Date(endTime).toISOString(),
+        start_time: startsAt.toISOString(),
+        end_time: endsAt.toISOString(),
       });
       setSellerProducts((products) => products.map((item) => item.id === product.id ? { ...item, auction } : item));
       toast.success("تمت جدولة المزاد", { description: "يظهر المزاد وفق وقت البدء وحالة النشر المعتمدة." });
@@ -330,7 +355,7 @@ export default function SellSetup() {
             <button type="button" onClick={continueToAuction} className="mt-8 flex w-full items-center justify-center gap-2 rounded-xl bg-[#12313a] px-5 py-3.5 text-sm font-bold text-white">تابع إلى إعداد المزاد <ChevronLeft size={17} /></button>
           </> : <>
             <div className="flex items-center justify-between"><div><p className="text-xs font-bold text-[#d96d46]">الخطوة 2 من 2</p><h2 className="mt-1 font-serif text-3xl">إعدادات المزاد</h2></div><CalendarClock className="text-[#d96d46]" /></div>
-            <div className="mt-7 grid gap-5 sm:grid-cols-2"><label className="grid gap-2 text-sm font-semibold">سعر البداية<input value={startingPrice} onChange={(event) => setStartingPrice(event.target.value)} inputMode="decimal" placeholder="مثال: 500" className="rounded-xl border border-[#143039]/15 px-4 py-3 font-normal outline-none focus:border-[#d96d46]" /></label><label className="grid gap-2 text-sm font-semibold">سعر الاحتياط <span className="text-xs font-normal text-[#758488]">اختياري</span><input value={reservePrice} onChange={(event) => setReservePrice(event.target.value)} inputMode="decimal" placeholder="مثال: 1000" className="rounded-xl border border-[#143039]/15 px-4 py-3 font-normal outline-none focus:border-[#d96d46]" /></label><label className="grid gap-2 text-sm font-semibold">أقل زيادة<input value={increment} onChange={(event) => setIncrement(event.target.value)} inputMode="decimal" className="rounded-xl border border-[#143039]/15 px-4 py-3 font-normal outline-none focus:border-[#d96d46]" /></label><div className="rounded-xl border border-[#143039]/10 bg-[#f4f3ed] p-4 text-sm leading-6 text-[#6b7d81]">تُستخدم هذه الإعدادات لإنشاء المزاد فقط بعد اعتماد المنتج. لا تُنشئ الواجهة مزاداً لمنتج غير معتمد.</div><label className="grid gap-2 text-sm font-semibold sm:col-span-2">وقت البداية<input value={startTime} onChange={(event) => setStartTime(event.target.value)} type="datetime-local" className="rounded-xl border border-[#143039]/15 px-4 py-3 font-normal outline-none focus:border-[#d96d46]" /></label><label className="grid gap-2 text-sm font-semibold sm:col-span-2">وقت النهاية<input value={endTime} onChange={(event) => setEndTime(event.target.value)} type="datetime-local" className="rounded-xl border border-[#143039]/15 px-4 py-3 font-normal outline-none focus:border-[#d96d46]" /></label></div>
+            <div className="mt-7 grid gap-5 sm:grid-cols-2"><label className="grid gap-2 text-sm font-semibold">سعر البداية<input value={startingPrice} onChange={(event) => setStartingPrice(event.target.value)} inputMode="decimal" placeholder="مثال: 500" className="rounded-xl border border-[#143039]/15 px-4 py-3 font-normal outline-none focus:border-[#d96d46]" /></label><label className="grid gap-2 text-sm font-semibold">سعر الاحتياط <span className="text-xs font-normal text-[#758488]">اختياري</span><input value={reservePrice} onChange={(event) => setReservePrice(event.target.value)} inputMode="decimal" placeholder="مثال: 1000" className="rounded-xl border border-[#143039]/15 px-4 py-3 font-normal outline-none focus:border-[#d96d46]" /></label><label className="grid gap-2 text-sm font-semibold">أقل زيادة<input value={increment} onChange={(event) => setIncrement(event.target.value)} inputMode="decimal" className="rounded-xl border border-[#143039]/15 px-4 py-3 font-normal outline-none focus:border-[#d96d46]" /></label><div className="rounded-xl border border-[#143039]/10 bg-[#f4f3ed] p-4 text-sm leading-6 text-[#6b7d81]">اقترحنا أوقاتاً أولية للمزاد. يمكنك تعديلها، ويجب أن يكون وقت النهاية بعد وقت البداية. لا تتاح الجدولة إلا بعد اعتماد المنتج.</div><label className="grid gap-2 text-sm font-semibold sm:col-span-2">وقت البداية<input value={startTime} onChange={(event) => setStartTime(event.target.value)} type="datetime-local" className="rounded-xl border border-[#143039]/15 px-4 py-3 font-normal outline-none focus:border-[#d96d46]" /></label><label className="grid gap-2 text-sm font-semibold sm:col-span-2">وقت النهاية<input value={endTime} onChange={(event) => setEndTime(event.target.value)} type="datetime-local" className="rounded-xl border border-[#143039]/15 px-4 py-3 font-normal outline-none focus:border-[#d96d46]" /></label></div>
             <div className="mt-7 rounded-2xl bg-[#edf0e8] p-4 text-sm leading-6 text-[#59706d]"><strong className="text-[#143039]">ملخص العرض:</strong> {title || "قطعة بلا عنوان"} · {category} · {city} · حالة {selectedCondition}. سيخضع المنتج الفعلي للمراجعة قبل جدولة المزاد.</div>
             <div className="mt-8 flex flex-col gap-3 sm:flex-row"><button type="button" onClick={() => setStep(1)} className="rounded-xl border border-[#143039]/15 px-5 py-3 text-sm font-bold">العودة للتفاصيل</button><button type="submit" disabled={isSubmitting} className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-[#d96d46] px-5 py-3 text-sm font-bold text-white disabled:cursor-wait disabled:opacity-60"><Gavel size={17} />{isSubmitting ? "جارٍ الإرسال…" : isLive ? "إرسال المنتج للمراجعة" : "حفظ مسودة العرض"}</button></div>
           </>}

@@ -12,15 +12,19 @@ use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
+use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
-use Filament\Tables\Table;
 
 class CategoryResource extends Resource
 {
     protected static ?string $model = Category::class;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+
+    protected static string|\UnitEnum|null $navigationGroup = 'السوق';
+
+    protected static ?int $navigationSort = 30;
 
     protected static ?string $recordTitleAttribute = 'name';
 
@@ -29,7 +33,7 @@ class CategoryResource extends Resource
         $query = parent::getEloquentQuery();
         $user = auth()->user();
 
-        if ($user?->hasRole('GLOBAL_SUPER_ADMIN') || !$user?->country_id) {
+        if ($user?->hasRole('GLOBAL_SUPER_ADMIN') || ! $user?->country_id) {
             return $query;
         }
 

@@ -2,6 +2,13 @@
 
 namespace App\Providers\Filament;
 
+use App\Filament\Widgets\ActiveAuctionsTable;
+use App\Filament\Widgets\AuctionStatusChart;
+use App\Filament\Widgets\AuditActivityFeed;
+use App\Filament\Widgets\MarketplaceOperationsOverview;
+use App\Filament\Widgets\OperationsSignals;
+use App\Filament\Widgets\RecentOrdersTable;
+use App\Filament\Widgets\RevenueAndCommissionChart;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
@@ -11,7 +18,6 @@ use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
 use Filament\Widgets\AccountWidget;
-use Filament\Widgets\FilamentInfoWidget;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
@@ -29,6 +35,7 @@ class AdminPanelProvider extends PanelProvider
             ->path('admin')
             ->brandName('مِزَاد · Control Tower')
             ->login()
+            ->viteTheme('resources/css/filament/admin/theme.css')
             ->colors([
                 'primary' => Color::Teal,
             ])
@@ -39,8 +46,14 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\Filament\Widgets')
             ->widgets([
+                MarketplaceOperationsOverview::class,
+                RevenueAndCommissionChart::class,
+                AuctionStatusChart::class,
+                OperationsSignals::class,
+                AuditActivityFeed::class,
+                RecentOrdersTable::class,
+                ActiveAuctionsTable::class,
                 AccountWidget::class,
-                FilamentInfoWidget::class,
             ])
             ->middleware([
                 EncryptCookies::class,

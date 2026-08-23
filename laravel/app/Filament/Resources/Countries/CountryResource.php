@@ -12,14 +12,18 @@ use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
-use Illuminate\Database\Eloquent\Model;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Model;
 
 class CountryResource extends Resource
 {
     protected static ?string $model = Country::class;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+
+    protected static string|\UnitEnum|null $navigationGroup = 'الأسواق';
+
+    protected static ?int $navigationSort = 10;
 
     protected static ?string $recordTitleAttribute = 'name';
 
