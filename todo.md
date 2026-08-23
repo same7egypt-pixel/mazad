@@ -165,3 +165,4 @@
 - [x] Show a polished animated success confirmation after submitting a product for review, then redirect automatically to the homepage.
 - [x] Add advanced homepage filters and sorting for live auctions and products while preserving country scope and empty states.
 - [ ] Add an administrator-managed percentage platform commission setting, scoped safely by marketplace, and apply it transparently to completed sale calculations.
+- [x] Fix the Filament country edit form so authorized administrators can open the commission setting without a server error.

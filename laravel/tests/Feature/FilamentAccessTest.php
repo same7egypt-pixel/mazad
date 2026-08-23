@@ -3,6 +3,8 @@
 namespace Tests\Feature;
 
 use App\Filament\Resources\AdminAccess\AdminAccessResource;
+use App\Models\Country;
+use App\Models\Currency;
 use App\Models\User;
 use Filament\Panel;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -56,5 +58,28 @@ class FilamentAccessTest extends TestCase
 
         $this->assertFalse(AdminAccessResource::canViewAny());
         $this->assertFalse(AdminAccessResource::canEdit($targetUser));
+    }
+
+    public function test_authorized_admin_can_open_the_country_edit_form_with_the_commission_setting(): void
+    {
+        $currency = Currency::query()->create([
+            'name' => 'Saudi Riyal',
+            'code' => 'SAR',
+            'symbol' => 'ر.س',
+        ]);
+        $country = Country::query()->create([
+            'name' => 'Saudi Arabia',
+            'code' => 'SA',
+            'timezone' => 'Asia/Riyadh',
+            'currency_id' => $currency->id,
+        ]);
+        $admin = User::factory()->create(['status' => 'active']);
+        $admin->assignRole(Role::findOrCreate('GLOBAL_SUPER_ADMIN', 'web'));
+        $admin->givePermissionTo(Permission::findOrCreate('countries.manage', 'web'));
+
+        $this->actingAs($admin)
+            ->get(route('filament.admin.resources.countries.edit', ['record' => $country]))
+            ->assertOk()
+            ->assertSee('نسبة عمولة المنصة');
     }
 }

@@ -18,7 +18,6 @@ class CountryForm
                     ->maxLength(120),
                 TextInput::make('code')
                     ->required()
-                    ->uppercase()
                     ->length(2)
                     ->unique(ignoreRecord: true),
                 TextInput::make('timezone')
