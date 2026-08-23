@@ -124,10 +124,10 @@ describe("مسار البائع الحي", () => {
     mocks.getLiveSellerProducts.mockResolvedValue([]);
     render(<SellSetup />);
 
-    await screen.findByText("سجّل دخول Laravel لتفعيل الإرسال الحي");
+    await screen.findByText("سجّل الدخول لتفعيل الإرسال");
     fireEvent.change(screen.getByLabelText("البريد الإلكتروني"), { target: { value: user.email } });
     fireEvent.change(screen.getByLabelText("كلمة المرور"), { target: { value: "secret-password" } });
-    fireEvent.click(screen.getByRole("button", { name: "دخول Laravel" }));
+    fireEvent.click(screen.getByRole("button", { name: "تسجيل الدخول" }));
 
     await waitFor(() => expect(mocks.loginLiveMarketplace).toHaveBeenCalledWith(7, user.email, "secret-password"));
     expect(await screen.findByText("متصل باسم بائع Laravel")).toBeTruthy();
@@ -142,13 +142,13 @@ describe("مسار البائع الحي", () => {
     mocks.registerLiveMarketplace.mockResolvedValue(user);
     render(<SellSetup />);
 
-    await screen.findByText("سجّل دخول Laravel لتفعيل الإرسال الحي");
+    await screen.findByText("سجّل الدخول لتفعيل الإرسال");
     fireEvent.click(screen.getByRole("button", { name: "حساب جديد" }));
     fireEvent.change(screen.getByLabelText("الاسم الكامل"), { target: { value: user.name } });
     fireEvent.change(screen.getByLabelText("البريد الإلكتروني"), { target: { value: user.email } });
     fireEvent.change(screen.getAllByLabelText(/كلمة المرور/)[0], { target: { value: "very-secure-password" } });
     fireEvent.change(screen.getByLabelText("تأكيد كلمة المرور"), { target: { value: "very-secure-password" } });
-    fireEvent.click(screen.getByRole("button", { name: "إنشاء حساب Laravel" }));
+    fireEvent.click(screen.getByRole("button", { name: "إنشاء حساب" }));
 
     await waitFor(() => expect(mocks.registerLiveMarketplace).toHaveBeenCalledWith(7, expect.objectContaining({
       city_id: 11,
@@ -167,15 +167,15 @@ describe("مسار البائع الحي", () => {
     mocks.registerLiveMarketplace.mockRejectedValue(new Error("duplicate-email"));
     render(<SellSetup />);
 
-    await screen.findByText("سجّل دخول Laravel لتفعيل الإرسال الحي");
+    await screen.findByText("سجّل الدخول لتفعيل الإرسال");
     fireEvent.click(screen.getByRole("button", { name: "حساب جديد" }));
     fireEvent.change(screen.getByLabelText("الاسم الكامل"), { target: { value: "بائع مكرر" } });
     fireEvent.change(screen.getByLabelText("البريد الإلكتروني"), { target: { value: "duplicate@example.test" } });
     fireEvent.change(screen.getAllByLabelText(/كلمة المرور/)[0], { target: { value: "very-secure-password" } });
     fireEvent.change(screen.getByLabelText("تأكيد كلمة المرور"), { target: { value: "very-secure-password" } });
-    fireEvent.click(screen.getByRole("button", { name: "إنشاء حساب Laravel" }));
+    fireEvent.click(screen.getByRole("button", { name: "إنشاء حساب" }));
 
-    await waitFor(() => expect(mocks.toastError).toHaveBeenCalledWith("تعذر إنشاء حساب Laravel. تحقق من البيانات والبريد وسياق الدولة."));
+    await waitFor(() => expect(mocks.toastError).toHaveBeenCalledWith("تعذر إنشاء الحساب. تحقق من البيانات والبريد والسوق المختار."));
     expect(screen.queryByText(/متصل باسم/)).toBeNull();
   });
 });

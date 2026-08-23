@@ -64,7 +64,7 @@ describe("المزايدة الحية في Marketplace", () => {
 
     render(<AuctionDetail />);
 
-    await screen.findByText("ستُرسل المزايدة إلى Laravel باسم مزايد Laravel وتُحدّث من الخادم عند قبولها.");
+    await screen.findByText("ستُرسل المزايدة باسم مزايد Laravel وتُحدّث عند قبولها.");
     fireEvent.change(screen.getByLabelText("قيمة المزايدة"), { target: { value: "13000" } });
     fireEvent.click(screen.getByRole("button", { name: "زايد الآن" }));
 
@@ -80,7 +80,7 @@ describe("المزايدة الحية في Marketplace", () => {
 
     render(<AuctionDetail />);
 
-    await screen.findByText("ستُرسل المزايدة إلى Laravel باسم مزايد Laravel وتُحدّث من الخادم عند قبولها.");
+    await screen.findByText("ستُرسل المزايدة باسم مزايد Laravel وتُحدّث عند قبولها.");
     fireEvent.change(screen.getByLabelText("قيمة المزايدة"), { target: { value: "13000" } });
     fireEvent.click(screen.getByRole("button", { name: "زايد الآن" }));
 

@@ -85,7 +85,7 @@ export default function AuctionDetail() {
       return;
     }
     if (!canPlaceLiveBid) {
-      toast.info("تحتاج المزايدة الحية إلى جلسة Laravel صالحة. سجّل الدخول من مسار البيع أولاً.");
+      toast.info("سجّل الدخول أولاً لتتمكن من إتمام مزايدتك.");
       return;
     }
 
@@ -99,7 +99,7 @@ export default function AuctionDetail() {
       setAuction(updatedAuction);
       setBidActivity(updatedBids);
       setAmount("");
-      toast.success("تم تسجيل المزايدة", { description: "تم تحديث السعر وسجل الحركة من Laravel." });
+      toast.success("تم تسجيل المزايدة", { description: "تم تحديث السعر وسجل الحركة." });
     } catch {
       toast.error("تعذر تسجيل المزايدة. تحقق من الجلسة، حالة المزاد، والحد الأدنى للمزايدة.");
     } finally {
@@ -135,7 +135,7 @@ export default function AuctionDetail() {
         <aside className="rounded-[2rem] bg-white p-7 shadow-[0_15px_50px_rgba(20,48,57,.08)] md:p-9">
           <div className="flex items-center justify-between gap-3">
             <p className="text-xs font-bold text-[#d96d46]">{auction.category} · مزاد حي</p>
-            <span className="rounded-full bg-[#fff0e8] px-2.5 py-1 text-[10px] font-bold text-[#c45e39]">{isLive && !liveError ? "بيانات Laravel حية" : "بيانات عرض"}</span>
+            <span className="rounded-full bg-[#fff0e8] px-2.5 py-1 text-[10px] font-bold text-[#c45e39]">{isLive && !liveError ? "بيانات محدثة" : "بيانات عرض"}</span>
           </div>
           <h1 className="mt-3 font-serif text-4xl leading-tight">{auction.title}</h1>
           <p className="mt-4 flex items-center gap-2 text-sm text-[#6d7e82]"><MapPin size={16} />{auction.city} · المملكة العربية السعودية</p>
@@ -151,12 +151,12 @@ export default function AuctionDetail() {
             <ShieldCheck className="mt-0.5 shrink-0 text-[#5e7e69]" size={18} />
             <span>
               {canPlaceLiveBid
-                ? `ستُرسل المزايدة إلى Laravel باسم ${liveSessionUser.name} وتُحدّث من الخادم عند قبولها.`
+                ? `ستُرسل المزايدة باسم ${liveSessionUser.name} وتُحدّث عند قبولها.`
                 : isCheckingLiveSession
-                  ? "جارٍ التحقق من جلسة Laravel قبل إتاحة المزايدة."
+                  ? "جارٍ التحقق من حسابك قبل إتاحة المزايدة."
                   : isLive
-                    ? <>تحتاج المزايدة الحية إلى جلسة Laravel صالحة. <Link href="/sell" className="font-bold text-[#bf5a36]">دخول Laravel</Link></>
-                    : "هذا الزر لا يرسل مزايدة لأن Laravel API غير مهيأ."}
+                    ? <>سجّل الدخول لإتمام مزايدتك. <Link href="/auth" className="font-bold text-[#bf5a36]">تسجيل الدخول</Link></>
+                    : "لا يمكن إتمام المزايدة حالياً. حاول مرة أخرى بعد قليل."}
             </span>
           </div>
         </aside>
@@ -177,7 +177,7 @@ export default function AuctionDetail() {
         <article className="rounded-[1.5rem] bg-[#12313a] p-7 text-white shadow-[0_10px_35px_rgba(20,48,57,.12)]">
           <div className="flex items-center justify-between"><div><p className="text-xs font-bold tracking-[.14em] text-[#c7dcae]">{isLive && !liveError ? "سجل مزايدات حي" : "سجل مزايدات تجريبي"}</p><h2 className="mt-2 font-serif text-2xl">الحركة الأخيرة</h2></div><Gavel className="text-[#d96d46]" /></div>
           <div className="mt-6 divide-y divide-white/10">{bidActivity.map((bid) => <div key={`${bid.amount}-${bid.time}`} className="flex items-center justify-between py-4"><div><strong className="text-sm">{bid.amount}</strong><p className="mt-1 text-xs text-[#bdcfca]">{bid.label}</p></div><span className="text-xs text-[#bdcfca]">{bid.time}</span></div>)}</div>
-          <p className="mt-4 rounded-xl bg-white/8 p-3 text-xs leading-5 text-[#cfe0dc]">لا تُعرض هوية مزايدين حقيقيين هنا، ويستبدل هذا القسم بسجل Laravel المصرح به عند الربط.</p>
+          <p className="mt-4 rounded-xl bg-white/8 p-3 text-xs leading-5 text-[#cfe0dc]">تعرض المنصة نشاط المزايدات المتاح لك مع الحفاظ على خصوصية المشاركين.</p>
         </article>
       </section>
     </main>

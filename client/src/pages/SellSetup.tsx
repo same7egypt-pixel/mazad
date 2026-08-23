@@ -141,7 +141,7 @@ export default function SellSetup() {
     getLiveSellerProducts(countryId).then((products) => {
       if (!cancelled) setSellerProducts(products);
     }).catch(() => {
-      if (!cancelled) toast.error("تعذر تحميل منتجات البائع الحية. تحقق من جلسة Sanctum وسياق الدولة.");
+      if (!cancelled) toast.error("تعذر تحميل منتجاتك الآن. تحقق من تسجيل الدخول والسوق المختار.");
     });
 
     return () => { cancelled = true; };
@@ -168,7 +168,7 @@ export default function SellSetup() {
       return;
     }
     if (!isLive || !sellerReferences || !liveSessionUser) {
-      toast.success("تم حفظ مسودة العرض فقط", { description: "لن يُنشأ منتج أو مزاد حقيقي قبل تفعيل عنوان Laravel API وتسجيل الدخول إلى حساب Laravel." });
+      toast.success("تم حفظ مسودة العرض فقط", { description: "سجّل الدخول واتصل بالمنصة لإرسال المنتج للمراجعة وجدولة مزاد." });
       return;
     }
     const cityReference = sellerReferences.cities.find((item) => item.name === city);
@@ -191,7 +191,7 @@ export default function SellSetup() {
       await submitLiveProductForReview(countryId, product.id);
       toast.success("أُرسل المنتج للمراجعة", { description: "تُحفظ الوسائط بشكل خاص. لا يمكن جدولة المزاد إلا بعد اعتماد المنتج من المشرف." });
     } catch {
-      toast.error("تعذر إرسال المنتج إلى Laravel. تحقق من جلسة Sanctum وسياق الدولة والملفات المسموح بها.");
+      toast.error("تعذر إرسال المنتج. تحقق من تسجيل الدخول والسوق والملفات المسموح بها.");
     } finally {
       setIsSubmitting(false);
     }
@@ -200,7 +200,7 @@ export default function SellSetup() {
   const scheduleApprovedProduct = async (event: FormEvent) => {
     event.preventDefault();
     if (!isLive || !liveSessionUser) {
-      toast.info("تحتاج جدولة المزاد إلى عنوان Laravel API وتسجيل دخول Laravel صالح.");
+      toast.info("سجّل الدخول أولاً لتتمكن من جدولة المزاد.");
       return;
     }
     const product = sellerProducts.find((item) => item.id === Number(selectedSellerProductId));
@@ -224,7 +224,7 @@ export default function SellSetup() {
         end_time: new Date(endTime).toISOString(),
       });
       setSellerProducts((products) => products.map((item) => item.id === product.id ? { ...item, auction } : item));
-      toast.success("تمت جدولة المزاد", { description: "يظهر المزاد وفق وقت البدء وحالة النشر المعتمدة في Laravel." });
+      toast.success("تمت جدولة المزاد", { description: "يظهر المزاد وفق وقت البدء وحالة النشر المعتمدة." });
     } catch {
       toast.error("تعذر جدولة المزاد. تحقق من اعتماد المنتج، صلاحية إنشاء المزادات، والتوقيتات المدخلة.");
     } finally {
@@ -235,7 +235,7 @@ export default function SellSetup() {
   const loginToLiveMarketplace = async (event: FormEvent) => {
     event.preventDefault();
     if (!isLive) {
-      toast.info("يتطلب الدخول الحي عنوان Laravel API صالحاً.");
+      toast.info("تعذر فتح الحساب الآن. حاول مرة أخرى بعد قليل.");
       return;
     }
 
@@ -244,9 +244,9 @@ export default function SellSetup() {
       const user = await loginLiveMarketplace(countryId, loginEmail.trim(), loginPassword);
       setLiveSessionUser(user);
       setLoginPassword("");
-      toast.success("تم تسجيل الدخول إلى حساب Laravel", { description: "يمكنك الآن إرسال المنتجات للمراجعة وجدولة المزادات المعتمدة." });
+      toast.success("تم تسجيل الدخول", { description: "يمكنك الآن إرسال المنتجات للمراجعة وجدولة المزادات المعتمدة." });
     } catch {
-      toast.error("تعذر تسجيل الدخول إلى Laravel. تحقق من البريد وكلمة المرور وسياق الدولة.");
+      toast.error("تعذر تسجيل الدخول. تحقق من البريد وكلمة المرور والسوق المختار.");
     } finally {
       setIsLoggingIn(false);
     }
@@ -255,7 +255,7 @@ export default function SellSetup() {
   const registerForLiveMarketplace = async (event: FormEvent) => {
     event.preventDefault();
     if (!isLive || !sellerReferences) {
-      toast.info("يتطلب إنشاء الحساب الحي عنوان Laravel API صالحاً ومراجع الدولة.");
+      toast.info("تعذر فتح التسجيل الآن. حاول مرة أخرى بعد قليل.");
       return;
     }
     const cityReference = sellerReferences.cities.find((item) => item.name === city);
@@ -281,9 +281,9 @@ export default function SellSetup() {
       setLiveSessionUser(user);
       setRegistrationPassword("");
       setRegistrationConfirmation("");
-      toast.success("تم إنشاء حساب Laravel", { description: "يمكنك الآن إرسال المنتجات للمراجعة وجدولة المزادات المعتمدة." });
+      toast.success("تم إنشاء الحساب", { description: "يمكنك الآن إرسال المنتجات للمراجعة وجدولة المزادات المعتمدة." });
     } catch {
-      toast.error("تعذر إنشاء حساب Laravel. تحقق من البيانات والبريد وسياق الدولة.");
+      toast.error("تعذر إنشاء الحساب. تحقق من البيانات والبريد والسوق المختار.");
     } finally {
       setIsRegistering(false);
     }
@@ -298,10 +298,10 @@ export default function SellSetup() {
     setLiveSessionUser(null);
     setSellerProducts([]);
     setSelectedSellerProductId("");
-    toast.info("تم إنهاء جلسة Laravel لهذا المتصفح.");
+    toast.info("تم تسجيل الخروج من هذا المتصفح.");
   };
 
-  const dataSourceLabel = isLive && sellerReferences && liveSessionUser ? "ربط Laravel حي" : "عرض مؤقت غير منشور";
+  const dataSourceLabel = isLive && sellerReferences && liveSessionUser ? "حسابك متصل" : "عرض تجريبي غير منشور";
   const selectedCondition = conditionOptions.find((item) => item.value === condition)?.label || condition;
   const approvedProducts = sellerProducts.filter((product) => product.status === "approved" && !product.auction);
 
@@ -312,8 +312,8 @@ export default function SellSetup() {
     </header>
     <section className="market-container pb-20 pt-4"><div className="mx-auto max-w-5xl">
       <div className="flex flex-wrap items-start justify-between gap-4"><div><p className="text-xs font-bold tracking-[.16em] text-[#d96d46]">مسار البائع</p><h1 className="mt-2 font-serif text-4xl md:text-5xl">ابدأ من القطعة، ثم جهّز مزادك.</h1><p className="mt-4 max-w-2xl text-sm leading-7 text-[#66777b]">ينشئ الربط الحي منتجاً ووسائط خاصة ثم يرسله للمراجعة. لا تصبح جدولة المزاد متاحة إلا بعد الاعتماد.</p></div><span className="rounded-full bg-[#fff0e8] px-3 py-2 text-xs font-bold text-[#c45e39]">{dataSourceLabel}</span></div>
-      {isLive && <section className="mt-6 rounded-2xl border border-[#143039]/10 bg-white p-5 shadow-[0_8px_24px_rgba(20,48,57,.05)]"><div className="flex flex-wrap items-center justify-between gap-3"><div><p className="text-xs font-bold tracking-[.12em] text-[#d96d46]">جلسة Marketplace الحية</p><h2 className="mt-1 font-serif text-2xl">{isCheckingLiveSession ? "جارٍ التحقق من جلسة Laravel…" : liveSessionUser ? `متصل باسم ${liveSessionUser.name}` : "سجّل دخول Laravel لتفعيل الإرسال الحي"}</h2><p className="mt-1 text-xs leading-5 text-[#6d7f83]">جلسة Laravel مستقلة عن تسجيل OAuth الظاهر في الواجهة؛ تستخدم رمزاً مؤقتاً في جلسة هذا المتصفح فقط.</p></div>{liveSessionUser && <button type="button" onClick={logoutFromLiveMarketplace} className="rounded-xl border border-[#143039]/15 px-4 py-2 text-sm font-bold">إنهاء جلسة Laravel</button>}</div>
-        {!isCheckingLiveSession && !liveSessionUser && <div className="mt-5"><div className="flex flex-wrap items-center justify-between gap-3"><div className="flex rounded-xl bg-[#edf0e8] p-1 text-xs font-bold"><button type="button" onClick={() => setAccessMode("login")} className={`rounded-lg px-3 py-2 transition ${accessMode === "login" ? "bg-white text-[#143039] shadow-sm" : "text-[#64777b]"}`}>دخول</button><button type="button" onClick={() => setAccessMode("register")} className={`rounded-lg px-3 py-2 transition ${accessMode === "register" ? "bg-white text-[#143039] shadow-sm" : "text-[#64777b]"}`}>حساب جديد</button></div>{accessMode === "register" && <span className="text-xs text-[#6d7f83]">الدولة والمدينة: {city || "اختر المدينة"}</span>}</div>{accessMode === "login" ? <form onSubmit={loginToLiveMarketplace} className="mt-4 grid gap-3 md:grid-cols-[1fr_1fr_auto]"><label className="grid gap-1 text-xs font-bold">البريد الإلكتروني<input value={loginEmail} onChange={(event) => setLoginEmail(event.target.value)} type="email" required className="rounded-xl border border-[#143039]/15 px-3 py-2.5 text-sm font-normal outline-none focus:border-[#d96d46]" /></label><label className="grid gap-1 text-xs font-bold">كلمة المرور<input value={loginPassword} onChange={(event) => setLoginPassword(event.target.value)} type="password" required className="rounded-xl border border-[#143039]/15 px-3 py-2.5 text-sm font-normal outline-none focus:border-[#d96d46]" /></label><button type="submit" disabled={isLoggingIn} className="mt-auto rounded-xl bg-[#12313a] px-5 py-2.5 text-sm font-bold text-white disabled:opacity-60">{isLoggingIn ? "جارٍ الدخول…" : "دخول Laravel"}</button></form> : <form onSubmit={registerForLiveMarketplace} className="mt-4 grid gap-3 md:grid-cols-2"><label className="grid gap-1 text-xs font-bold">الاسم الكامل<input value={registrationName} onChange={(event) => setRegistrationName(event.target.value)} required minLength={2} className="rounded-xl border border-[#143039]/15 px-3 py-2.5 text-sm font-normal outline-none focus:border-[#d96d46]" /></label><label className="grid gap-1 text-xs font-bold">البريد الإلكتروني<input value={registrationEmail} onChange={(event) => setRegistrationEmail(event.target.value)} type="email" required className="rounded-xl border border-[#143039]/15 px-3 py-2.5 text-sm font-normal outline-none focus:border-[#d96d46]" /></label><label className="grid gap-1 text-xs font-bold">رقم الهاتف <span className="font-normal text-[#6d7f83]">اختياري</span><input value={registrationPhone} onChange={(event) => setRegistrationPhone(event.target.value)} type="tel" className="rounded-xl border border-[#143039]/15 px-3 py-2.5 text-sm font-normal outline-none focus:border-[#d96d46]" /></label><label className="grid gap-1 text-xs font-bold">كلمة المرور <span className="font-normal text-[#6d7f83]">12 حرفاً على الأقل</span><input value={registrationPassword} onChange={(event) => setRegistrationPassword(event.target.value)} type="password" required minLength={12} className="rounded-xl border border-[#143039]/15 px-3 py-2.5 text-sm font-normal outline-none focus:border-[#d96d46]" /></label><label className="grid gap-1 text-xs font-bold">تأكيد كلمة المرور<input value={registrationConfirmation} onChange={(event) => setRegistrationConfirmation(event.target.value)} type="password" required minLength={12} className="rounded-xl border border-[#143039]/15 px-3 py-2.5 text-sm font-normal outline-none focus:border-[#d96d46]" /></label><button type="submit" disabled={isRegistering} className="mt-auto rounded-xl bg-[#d96d46] px-5 py-2.5 text-sm font-bold text-white disabled:opacity-60">{isRegistering ? "جارٍ إنشاء الحساب…" : "إنشاء حساب Laravel"}</button></form>}</div>}
+      {isLive && <section className="mt-6 rounded-2xl border border-[#143039]/10 bg-white p-5 shadow-[0_8px_24px_rgba(20,48,57,.05)]"><div className="flex flex-wrap items-center justify-between gap-3"><div><p className="text-xs font-bold tracking-[.12em] text-[#d96d46]">حساب البائع</p><h2 className="mt-1 font-serif text-2xl">{isCheckingLiveSession ? "جارٍ التحقق من حسابك…" : liveSessionUser ? `متصل باسم ${liveSessionUser.name}` : "سجّل الدخول لتفعيل الإرسال"}</h2><p className="mt-1 text-xs leading-5 text-[#6d7f83]">نحافظ على تسجيل دخولك بأمان في هذا المتصفح.</p></div>{liveSessionUser && <button type="button" onClick={logoutFromLiveMarketplace} className="rounded-xl border border-[#143039]/15 px-4 py-2 text-sm font-bold">تسجيل الخروج</button>}</div>
+        {!isCheckingLiveSession && !liveSessionUser && <div className="mt-5"><div className="flex flex-wrap items-center justify-between gap-3"><div className="flex rounded-xl bg-[#edf0e8] p-1 text-xs font-bold"><button type="button" onClick={() => setAccessMode("login")} className={`rounded-lg px-3 py-2 transition ${accessMode === "login" ? "bg-white text-[#143039] shadow-sm" : "text-[#64777b]"}`}>دخول</button><button type="button" onClick={() => setAccessMode("register")} className={`rounded-lg px-3 py-2 transition ${accessMode === "register" ? "bg-white text-[#143039] shadow-sm" : "text-[#64777b]"}`}>حساب جديد</button></div>{accessMode === "register" && <span className="text-xs text-[#6d7f83]">الدولة والمدينة: {city || "اختر المدينة"}</span>}</div>{accessMode === "login" ? <form onSubmit={loginToLiveMarketplace} className="mt-4 grid gap-3 md:grid-cols-[1fr_1fr_auto]"><label className="grid gap-1 text-xs font-bold">البريد الإلكتروني<input value={loginEmail} onChange={(event) => setLoginEmail(event.target.value)} type="email" required className="rounded-xl border border-[#143039]/15 px-3 py-2.5 text-sm font-normal outline-none focus:border-[#d96d46]" /></label><label className="grid gap-1 text-xs font-bold">كلمة المرور<input value={loginPassword} onChange={(event) => setLoginPassword(event.target.value)} type="password" required className="rounded-xl border border-[#143039]/15 px-3 py-2.5 text-sm font-normal outline-none focus:border-[#d96d46]" /></label><button type="submit" disabled={isLoggingIn} className="mt-auto rounded-xl bg-[#12313a] px-5 py-2.5 text-sm font-bold text-white disabled:opacity-60">{isLoggingIn ? "جارٍ الدخول…" : "تسجيل الدخول"}</button></form> : <form onSubmit={registerForLiveMarketplace} className="mt-4 grid gap-3 md:grid-cols-2"><label className="grid gap-1 text-xs font-bold">الاسم الكامل<input value={registrationName} onChange={(event) => setRegistrationName(event.target.value)} required minLength={2} className="rounded-xl border border-[#143039]/15 px-3 py-2.5 text-sm font-normal outline-none focus:border-[#d96d46]" /></label><label className="grid gap-1 text-xs font-bold">البريد الإلكتروني<input value={registrationEmail} onChange={(event) => setRegistrationEmail(event.target.value)} type="email" required className="rounded-xl border border-[#143039]/15 px-3 py-2.5 text-sm font-normal outline-none focus:border-[#d96d46]" /></label><label className="grid gap-1 text-xs font-bold">رقم الهاتف <span className="font-normal text-[#6d7f83]">اختياري</span><input value={registrationPhone} onChange={(event) => setRegistrationPhone(event.target.value)} type="tel" className="rounded-xl border border-[#143039]/15 px-3 py-2.5 text-sm font-normal outline-none focus:border-[#d96d46]" /></label><label className="grid gap-1 text-xs font-bold">كلمة المرور <span className="font-normal text-[#6d7f83]">12 حرفاً على الأقل</span><input value={registrationPassword} onChange={(event) => setRegistrationPassword(event.target.value)} type="password" required minLength={12} className="rounded-xl border border-[#143039]/15 px-3 py-2.5 text-sm font-normal outline-none focus:border-[#d96d46]" /></label><label className="grid gap-1 text-xs font-bold">تأكيد كلمة المرور<input value={registrationConfirmation} onChange={(event) => setRegistrationConfirmation(event.target.value)} type="password" required minLength={12} className="rounded-xl border border-[#143039]/15 px-3 py-2.5 text-sm font-normal outline-none focus:border-[#d96d46]" /></label><button type="submit" disabled={isRegistering} className="mt-auto rounded-xl bg-[#d96d46] px-5 py-2.5 text-sm font-bold text-white disabled:opacity-60">{isRegistering ? "جارٍ إنشاء الحساب…" : "إنشاء حساب"}</button></form>}</div>}
       </section>}
       <div className="mt-9 grid gap-8 lg:grid-cols-[.72fr_1.28fr]">
         <aside className="rounded-[1.5rem] bg-[#12313a] p-6 text-white"><p className="text-xs font-bold tracking-[.14em] text-[#c7dcae]">رحلة الإدراج</p><ol className="mt-7 space-y-5">{[[1, "تفاصيل القطعة", "العنوان والوصف والفئة والموقع"], [2, "إعداد المزاد", "السعر والتوقيت والحدود"]].map(([number, label, copy]) => <li key={number} className="flex gap-3"><span className={`grid h-8 w-8 shrink-0 place-items-center rounded-full text-xs font-bold ${step === Number(number) ? "bg-[#d96d46] text-white" : step > Number(number) ? "bg-[#c7dcae] text-[#12313a]" : "bg-white/10 text-[#cfe0dc]"}`}>{step > Number(number) ? <Check size={15} /> : number}</span><div><h2 className="font-serif text-xl">{label}</h2><p className="mt-1 text-xs leading-5 text-[#cfe0dc]">{copy}</p></div></li>)}</ol><div className="mt-9 rounded-2xl bg-white/8 p-4 text-xs leading-6 text-[#cfe0dc]"><ShieldCheck className="mb-2 text-[#c7dcae]" size={18} />الحالة الحية تنتقل من مسودة إلى مراجعة واعتماد ثم مزاد حي وفق سياسات السوق والدولة.</div></aside>

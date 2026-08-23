@@ -149,7 +149,7 @@ export default function Auth() {
         <p className="mt-16 text-xs font-bold tracking-[.16em] text-[#c7dcae]">حساب مِزَاد</p>
         <h1 className="mt-4 font-serif text-4xl leading-tight md:text-5xl">ادخل للمزايدة، أو ابدأ البيع بثقة.</h1>
         <p className="mt-6 max-w-md text-sm leading-7 text-[#cfe0dc]">أنشئ حساباً واحداً لمتابعة المزادات والطلبات والمحفظة، ثم أضف مقتنياتك للمراجعة عند جاهزيتها.</p>
-        <div className="mt-12 rounded-2xl border border-white/10 bg-white/8 p-5 text-sm leading-6 text-[#cfe0dc]">تستخدم المنصة جلسة Laravel مستقلة لهذا المتصفح. لا تدخل كلمات المرور في أي قناة دعم أو رسالة.</div>
+        <div className="mt-12 rounded-2xl border border-white/10 bg-white/8 p-5 text-sm leading-6 text-[#cfe0dc]">نحافظ على تسجيل دخولك بأمان في هذا المتصفح. لا تشارك كلمة المرور في أي رسالة أو قناة دعم.</div>
       </aside>
       <section className="p-7 md:p-12">
         <div className="flex rounded-xl bg-[#edf0e8] p-1 text-sm font-bold">

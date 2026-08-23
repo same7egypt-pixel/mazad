@@ -45,7 +45,7 @@ describe("الحساب الحي في Laravel", () => {
 
     render(<Account />);
 
-    expect((await screen.findAllByText("حساب Laravel حي")).length).toBeGreaterThan(0);
+    expect((await screen.findAllByText("حسابك نشط")).length).toBeGreaterThan(0);
     expect(screen.getByText("مرحباً، بائع Laravel")).toBeTruthy();
     expect(await screen.findByText("ORD-100")).toBeTruthy();
     expect(screen.getByText("1,250 ر.س")).toBeTruthy();
