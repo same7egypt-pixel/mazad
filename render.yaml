@@ -61,6 +61,14 @@ services:
         sync: false
       - key: SANCTUM_STATEFUL_DOMAINS
         sync: false
+      - key: FIRST_ADMIN_ENABLED
+        sync: false
+      - key: FIRST_ADMIN_NAME
+        sync: false
+      - key: FIRST_ADMIN_EMAIL
+        sync: false
+      - key: FIRST_ADMIN_PASSWORD
+        sync: false
 
 databases:
   - name: mazad-trial-postgres

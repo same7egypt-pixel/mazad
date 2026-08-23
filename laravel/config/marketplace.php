@@ -25,4 +25,10 @@ return [
         'GLOBAL_SUPER_ADMIN', 'COUNTRY_ADMIN', 'CITY_ADMIN', 'FINANCE_ADMIN',
         'OPERATIONS_ADMIN', 'CONTENT_MODERATOR', 'SUPPORT_AGENT', 'USER',
     ],
+    'first_admin' => [
+        'enabled' => env('FIRST_ADMIN_ENABLED', false),
+        'name' => env('FIRST_ADMIN_NAME'),
+        'email' => env('FIRST_ADMIN_EMAIL'),
+        'password' => env('FIRST_ADMIN_PASSWORD'),
+    ],
 ];

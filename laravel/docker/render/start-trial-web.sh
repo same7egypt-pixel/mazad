@@ -18,5 +18,6 @@ until php artisan migrate --force --no-interaction; do
 done
 
 php artisan db:seed --class=Database\\Seeders\\MarketplaceReferenceSeeder --force --no-interaction
+php artisan marketplace:provision-first-admin --no-interaction
 
 exec /usr/local/bin/render-web
