@@ -19,6 +19,7 @@ const mocks = vi.hoisted(() => ({
   toastInfo: vi.fn(),
   toastSuccess: vi.fn(),
   uploadLiveProductMedia: vi.fn(),
+  navigate: vi.fn(),
 }));
 
 vi.mock("@/_core/hooks/useAuth", () => ({
@@ -48,6 +49,7 @@ vi.mock("sonner", () => ({
 
 vi.mock("wouter", () => ({
   Link: ({ children, href, ...props }: { children: React.ReactNode; href: string }) => React.createElement("a", { href, ...props }, children),
+  useLocation: () => ["/sell", mocks.navigate],
 }));
 
 import SellSetup from "./SellSetup";
@@ -136,6 +138,7 @@ describe("مسار البائع الحي", () => {
       condition: "good",
     })));
     expect(mocks.toastError).not.toHaveBeenCalledWith("أكمل سعر البداية والزيادة وتوقيت البداية والنهاية.");
+    await waitFor(() => expect(mocks.navigate).toHaveBeenCalledWith("/"));
   });
 
   it("يعرض خطأً مفهوماً إن رفض Laravel جدولة المنتج المعتمد", async () => {

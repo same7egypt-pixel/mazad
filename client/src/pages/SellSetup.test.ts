@@ -12,6 +12,7 @@ vi.mock("@/_core/hooks/useAuth", () => ({
 
 vi.mock("wouter", () => ({
   Link: ({ children, href, ...props }: { children: React.ReactNode; href: string }) => React.createElement("a", { href, ...props }, children),
+  useLocation: () => ["/sell", vi.fn()],
 }));
 
 import SellSetup from "./SellSetup";

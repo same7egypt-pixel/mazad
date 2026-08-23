@@ -159,3 +159,4 @@
 - [ ] Replace the stale Render Static Site build command still invoking corepack, redeploy the current GitHub revision, and verify the public bundle updates.
 - [ ] Diagnose and fix the newly reported inability to open or use the Render public account page after the latest deployment.
 - [ ] Diagnose and fix the post-login country-context rejection that prevents the live account dashboard and seller product submission from loading on Render.
+- [ ] Redirect the seller to the homepage after a successful product submission for review on the Render public site.

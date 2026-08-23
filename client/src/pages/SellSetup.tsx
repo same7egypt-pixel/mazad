@@ -21,7 +21,7 @@ import {
 import { ArrowRight, CalendarClock, Check, ChevronLeft, FileImage, Gavel, ImagePlus, MapPin, ShieldCheck, Video } from "lucide-react";
 import React, { FormEvent, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 
 const fallbackCities: Record<string, string[]> = {
   sa: ["الرياض", "جدة", "الدمام", "المدينة"],
@@ -68,6 +68,7 @@ function MediaPicker({ label, helper, accept, icon: Icon, files, onChange }: {
 }
 
 export default function SellSetup() {
+  const [, navigate] = useLocation();
   const [step, setStep] = useState<1 | 2>(1);
   const [country, setCountry] = useState("sa");
   const [city, setCity] = useState("الرياض");
@@ -198,6 +199,7 @@ export default function SellSetup() {
       await Promise.all(allMediaFiles.map((file) => uploadLiveProductMedia(countryId, product.id, file)));
       await submitLiveProductForReview(countryId, product.id);
       toast.success("أُرسل المنتج للمراجعة", { description: "تُحفظ الوسائط بشكل خاص. لا يمكن جدولة المزاد إلا بعد اعتماد المنتج من المشرف." });
+      navigate("/");
     } catch {
       toast.error("تعذر إرسال المنتج. تحقق من تسجيل الدخول والسوق والملفات المسموح بها.");
     } finally {
