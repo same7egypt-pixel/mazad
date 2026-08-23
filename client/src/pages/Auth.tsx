@@ -120,7 +120,7 @@ export default function Auth() {
     } catch (error) {
       if (error instanceof LaravelApiRequestError) {
         const emailErrors = error.validationErrors.email || [];
-        const existingEmail = error.status === 422 && emailErrors.length > 0;
+        const existingEmail = error.status === 422 && /already|taken|exists|موجود|مسجل/i.test(emailErrors.join(" "));
         if (existingEmail) {
           setMode("login");
           setPassword("");
