@@ -33,4 +33,14 @@ class RenderTrialStartupScriptTest extends TestCase
         $this->assertStringContainsString('pg_dump', $script);
         $this->assertStringContainsString('pg_restore', $script);
     }
+
+    public function test_render_image_uses_the_matching_postgres_client_library_for_neon_migration(): void
+    {
+        $dockerfile = file_get_contents(base_path('Dockerfile.render'));
+
+        $this->assertIsString($dockerfile);
+        $this->assertStringContainsString('libpq.so.5.18', $dockerfile);
+        $this->assertStringContainsString('postgres18-client.conf', $dockerfile);
+        $this->assertStringContainsString('ldconfig', $dockerfile);
+    }
 }
