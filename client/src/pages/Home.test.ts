@@ -28,5 +28,6 @@ describe("واجهة Marketplace التجريبية", () => {
     );
     if (!isLiveMarketplaceEnabled()) expect(html).toContain("ساعة كرونوغراف كلاسيكية");
     expect(html).toContain("دخول أو إنشاء حساب");
+    expect(html).toContain("Biddfy.ai");
   });
 });

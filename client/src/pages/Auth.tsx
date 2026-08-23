@@ -10,6 +10,7 @@ import {
   type SellerReferenceData,
 } from "@/lib/marketplaceApi";
 import { ArrowRight, KeyRound, RefreshCw, UserPlus } from "lucide-react";
+import { BrandLogo } from "@/components/BrandLogo";
 import React, { FormEvent, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { Link, useLocation } from "wouter";
@@ -175,7 +176,8 @@ export default function Auth() {
     <section className="mx-auto max-w-5xl overflow-hidden rounded-[2rem] bg-white shadow-[0_24px_70px_rgba(20,48,57,.12)] lg:grid lg:grid-cols-[.85fr_1.15fr]">
       <aside className="bg-[#12313a] p-8 text-white md:p-12">
         <Link href="/" className="inline-flex items-center gap-2 text-sm font-bold text-[#c7dcae]"><ArrowRight size={17} /> العودة للمزادات</Link>
-        <p className="mt-16 text-xs font-bold tracking-[.16em] text-[#c7dcae]">حساب مِزَاد</p>
+        <div className="mt-16 w-fit rounded-xl bg-white px-4 py-2.5"><BrandLogo className="h-8 max-w-36" /></div>
+        <p className="mt-5 text-xs font-bold tracking-[.16em] text-[#c7dcae]">حساب Biddfy.ai</p>
         <h1 className="mt-4 font-serif text-4xl leading-tight md:text-5xl">ادخل للمزايدة، أو ابدأ البيع بثقة.</h1>
         <p className="mt-6 max-w-md text-sm leading-7 text-[#cfe0dc]">أنشئ حساباً واحداً لمتابعة المزادات والطلبات والمحفظة، ثم أضف مقتنياتك للمراجعة عند جاهزيتها.</p>
         <div className="mt-12 rounded-2xl border border-white/10 bg-white/8 p-5 text-sm leading-6 text-[#cfe0dc]">نحافظ على تسجيل دخولك بأمان في هذا المتصفح. لا تشارك كلمة المرور في أي رسالة أو قناة دعم.</div>

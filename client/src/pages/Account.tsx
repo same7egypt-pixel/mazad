@@ -1,5 +1,6 @@
 import { clearLiveMarketplaceToken, getLiveAccountSnapshot, getLiveMarketplaceToken, getLiveMarketplaceUser, getSavedMarketplaceCountryId, isLiveMarketplaceEnabled, logoutLiveMarketplace, type LiveAccountSnapshot, type LiveMarketplaceUser } from "@/lib/marketplaceApi";
 import { ArrowLeft, Bell, Gavel, Heart, LogOut, PackageCheck, PlusCircle, RefreshCcw, WalletCards } from "lucide-react";
+import { BrandLogo } from "@/components/BrandLogo";
 import React, { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Link, useLocation } from "wouter";
@@ -85,7 +86,7 @@ export default function Account() {
   const accountIsReady = Boolean(liveSessionUser && !liveError);
 
   return <main dir="rtl" className="min-h-screen bg-[#f7f6f1] text-[#143039]">
-    <header className="market-container flex h-20 items-center justify-between gap-4"><Link href="/" className="font-serif text-2xl font-semibold">مِزَاد</Link><div className="flex items-center gap-3"><span className="text-sm text-[#63767a]">{liveSessionUser ? `مرحباً، ${liveSessionUser.name}` : "حساب مِزَاد"}</span>{liveSessionUser && <button type="button" onClick={logout} className="inline-flex items-center gap-2 rounded-xl border border-[#143039]/15 px-3 py-2 text-xs font-bold"><LogOut size={15} />تسجيل الخروج</button>}</div></header>
+    <header className="market-container flex h-20 items-center justify-between gap-4"><Link href="/" className="rounded-xl px-1 py-2" aria-label="Biddfy.ai"><BrandLogo /></Link><div className="flex items-center gap-3"><span className="text-sm text-[#63767a]">{liveSessionUser ? `مرحباً، ${liveSessionUser.name}` : "حساب Biddfy.ai"}</span>{liveSessionUser && <button type="button" onClick={logout} className="inline-flex items-center gap-2 rounded-xl border border-[#143039]/15 px-3 py-2 text-xs font-bold"><LogOut size={15} />تسجيل الخروج</button>}</div></header>
     <section className="market-container py-8">
       <div className="flex flex-wrap items-start justify-between gap-4"><div><p className="text-xs font-bold tracking-[.14em] text-[#d96d46]">مساحة الحساب</p><h1 className="mt-2 font-serif text-4xl">كل نشاطك في مكان واحد</h1></div><span className={`rounded-full px-3 py-2 text-xs font-bold ${accountIsReady ? "bg-[#edf0e8] text-[#4e6967]" : "bg-[#fff0e8] text-[#c45e39]"}`}>{accountIsReady ? "حسابك نشط" : "تسجيل الدخول مطلوب"}</span></div>
 

@@ -10,6 +10,7 @@ import {
   type LiveMarketplaceUser,
 } from "@/lib/marketplaceApi";
 import { ArrowRight, Clock3, Gavel, Heart, MapPin, PackageCheck, ShieldCheck, Truck } from "lucide-react";
+import { BrandLogo } from "@/components/BrandLogo";
 import React, { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Link, useRoute } from "wouter";
@@ -110,7 +111,7 @@ export default function AuctionDetail() {
   return (
     <main dir="rtl" className="min-h-screen bg-[#f7f6f1] text-[#143039]">
       <header className="market-container flex h-20 items-center justify-between">
-        <Link href="/" className="font-serif text-2xl font-semibold">مِزَاد</Link>
+        <Link href="/" className="rounded-xl px-1 py-2" aria-label="Biddfy.ai"><BrandLogo /></Link>
         <Link href="/" className="flex items-center gap-2 text-sm font-bold"><ArrowRight size={17} /> الرجوع للمزادات</Link>
       </header>
 

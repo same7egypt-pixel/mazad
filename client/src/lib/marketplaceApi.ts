@@ -201,7 +201,7 @@ export async function loginLiveMarketplace(countryId: number, email: string, pas
   const payload = await marketplaceRequest<{ user: LiveMarketplaceUser; token: string }>("/api/auth/login", countryId, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ email, password, device_name: "Mazad Marketplace Web" }),
+    body: JSON.stringify({ email, password, device_name: "Biddfy.ai Web" }),
   });
 
   saveLiveMarketplaceToken(payload.token);
@@ -215,7 +215,7 @@ export async function registerLiveMarketplace(countryId: number, input: LiveMark
     body: JSON.stringify({
       ...input,
       country_id: countryId,
-      device_name: "Mazad Marketplace Web",
+      device_name: "Biddfy.ai Web",
     }),
   });
 

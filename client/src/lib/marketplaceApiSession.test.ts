@@ -55,7 +55,7 @@ describe("جلسة Laravel Marketplace", () => {
     expect(api.getLiveMarketplaceToken()).toBe("new-token-abc");
 
     const [, request] = fetchMock.mock.calls[0] as [string, RequestInit];
-    expect(JSON.parse(request.body as string)).toMatchObject({ country_id: 7, city_id: 11, device_name: "Mazad Marketplace Web" });
+    expect(JSON.parse(request.body as string)).toMatchObject({ country_id: 7, city_id: 11, device_name: "Biddfy.ai Web" });
   });
 
   it("يكمل الدخول داخل الصفحة عندما يمنع وضع الخصوصية تخزين الجلسة", async () => {
