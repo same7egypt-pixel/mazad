@@ -146,3 +146,4 @@
 - [ ] Handle Neon's pre-existing public schema during pg_restore and verify the full Render data copy completes successfully.
 - [ ] Add a reversible Render configuration switch that routes Laravel to the verified Neon database only when explicitly enabled.
 - [ ] Enable Neon for the live Render service and verify health, public market discovery, authentication, and Filament admin access before decommissioning nothing.
+- [ ] Delete the Render Postgres instance only after Neon is live, verified, and the owner gives final deletion confirmation.

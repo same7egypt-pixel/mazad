@@ -13,4 +13,12 @@ class NeonDatabaseSwitchConfigurationTest extends TestCase
         $this->assertIsString($configuration);
         $this->assertStringContainsString("env('USE_NEON_DATABASE', false) ? env('NEON_DATABASE_URL') : env('DB_URL')", $configuration);
     }
+
+    public function test_render_blueprint_explicitly_enables_the_reversible_neon_switch(): void
+    {
+        $blueprint = file_get_contents(dirname(base_path()).'/render.yaml');
+
+        $this->assertIsString($blueprint);
+        $this->assertStringContainsString("key: USE_NEON_DATABASE\n        value: \"true\"", $blueprint);
+    }
 }

@@ -39,6 +39,8 @@ services:
         fromDatabase:
           name: mazad-trial-postgres
           property: connectionString
+      - key: USE_NEON_DATABASE
+        value: "true"
       - key: SESSION_DRIVER
         value: database
       - key: SESSION_ENCRYPT
