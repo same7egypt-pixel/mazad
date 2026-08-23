@@ -32,9 +32,10 @@ fi
 
 source_table_count="$(psql --dbname="${DB_URL}" --tuples-only --no-align --command "SELECT count(*) FROM information_schema.tables WHERE table_schema = 'public' AND table_type = 'BASE TABLE';")"
 dump_file="$(mktemp /tmp/mazad-render-to-neon.XXXXXX.dump)"
+restore_list_file="$(mktemp /tmp/mazad-render-to-neon.XXXXXX.list)"
 
 cleanup() {
-    rm -f "${dump_file}"
+    rm -f "${dump_file}" "${restore_list_file}"
 }
 
 trap cleanup EXIT INT TERM
@@ -42,8 +43,11 @@ trap cleanup EXIT INT TERM
 echo "Exporting the Render public schema to a temporary archive."
 pg_dump --dbname="${DB_URL}" --format=custom --verbose --schema=public --no-owner --no-privileges --file="${dump_file}"
 
+echo "Preparing the archive for Neon's existing public schema."
+pg_restore --list "${dump_file}" | sed '/ SCHEMA - public /d; / COMMENT - SCHEMA public /d; / ACL - SCHEMA public /d' > "${restore_list_file}"
+
 echo "Restoring the archive into the empty Neon target."
-pg_restore --dbname="${NEON_DATABASE_URL}" --verbose --no-owner --no-acl --single-transaction --exit-on-error "${dump_file}"
+pg_restore --dbname="${NEON_DATABASE_URL}" --use-list="${restore_list_file}" --verbose --no-owner --no-acl --single-transaction --exit-on-error "${dump_file}"
 
 restored_table_count="$(psql --dbname="${NEON_DATABASE_URL}" --tuples-only --no-align --command "SELECT count(*) FROM information_schema.tables WHERE table_schema = 'public' AND table_type = 'BASE TABLE';")"
 

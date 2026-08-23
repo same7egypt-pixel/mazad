@@ -143,3 +143,4 @@
 - [ ] Fix the Render Docker Vite build failure for the Filament theme and verify a successful external deployment before enabling Neon migration.
 - [ ] Correct the Render trial startup seeder class invocation and verify that the service reaches a live state before enabling Neon migration.
 - [ ] Resolve the PostgreSQL client-library mismatch in the Render migration image and verify the Neon copy completes before switching application traffic.
+- [ ] Handle Neon's pre-existing public schema during pg_restore and verify the full Render data copy completes successfully.

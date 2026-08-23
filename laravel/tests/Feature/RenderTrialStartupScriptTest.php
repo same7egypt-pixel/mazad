@@ -32,6 +32,8 @@ class RenderTrialStartupScriptTest extends TestCase
         $this->assertStringContainsString('target must be an empty public schema', $script);
         $this->assertStringContainsString('pg_dump', $script);
         $this->assertStringContainsString('pg_restore', $script);
+        $this->assertStringContainsString("sed '/ SCHEMA - public /d", $script);
+        $this->assertStringContainsString('--use-list="${restore_list_file}"', $script);
     }
 
     public function test_render_image_uses_the_matching_postgres_client_library_for_neon_migration(): void
