@@ -149,3 +149,4 @@
 - [ ] Delete the Render Postgres instance only after Neon is live, verified, and the owner gives final deletion confirmation.
 - [ ] Diagnose and resolve the live Filament dashboard load error observed after administrator login on Neon before deleting the Render database.
 - [ ] Fix the RTL date/time field state mismatch in Netlify seller auction scheduling that reports required fields despite visible values.
+- [ ] Restore Netlify deployment availability after the external account-usage limit, then publish and browser-verify the seller scheduling fix.
