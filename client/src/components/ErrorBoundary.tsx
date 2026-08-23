@@ -1,6 +1,6 @@
 import { cn } from "@/lib/utils";
 import { AlertTriangle, RotateCcw } from "lucide-react";
-import { Component, ReactNode } from "react";
+import React, { Component, ReactNode } from "react";
 
 interface Props {
   children: ReactNode;
@@ -24,34 +24,26 @@ class ErrorBoundary extends Component<Props, State> {
   render() {
     if (this.state.hasError) {
       return (
-        <div className="flex items-center justify-center min-h-screen p-8 bg-background">
-          <div className="flex flex-col items-center w-full max-w-2xl p-8">
+        <main dir="rtl" className="flex min-h-screen items-center justify-center bg-[#f7f6f1] p-8 text-[#143039]">
+          <section className="flex w-full max-w-xl flex-col items-center rounded-[2rem] bg-white p-8 text-center shadow-[0_20px_60px_rgba(20,48,57,.12)]">
             <AlertTriangle
               size={48}
-              className="text-destructive mb-6 flex-shrink-0"
+              className="mb-6 shrink-0 text-[#d96d46]"
             />
 
-            <h2 className="text-xl mb-4">An unexpected error occurred.</h2>
-
-            <div className="p-4 w-full rounded bg-muted overflow-auto mb-6">
-              <pre className="text-sm text-muted-foreground whitespace-break-spaces">
-                {this.state.error?.stack}
-              </pre>
-            </div>
+            <p className="text-xs font-bold tracking-[.14em] text-[#d96d46]">Biddfy.ai</p>
+            <h2 className="mt-3 font-serif text-3xl">تعذر فتح الصفحة الآن</h2>
+            <p className="mt-3 max-w-md text-sm leading-7 text-[#687a7e]">حدّث الصفحة لإعادة تحميل النسخة الأحدث. إذا استمرت المشكلة، حاول مرة أخرى بعد لحظات.</p>
 
             <button
               onClick={() => window.location.reload()}
-              className={cn(
-                "flex items-center gap-2 px-4 py-2 rounded-lg",
-                "bg-primary text-primary-foreground",
-                "hover:opacity-90 cursor-pointer"
-              )}
+              className="mt-7 flex items-center gap-2 rounded-xl bg-[#12313a] px-5 py-3 text-sm font-bold text-white transition hover:brightness-110"
             >
               <RotateCcw size={16} />
-              Reload Page
+              إعادة تحميل الصفحة
             </button>
-          </div>
-        </div>
+          </section>
+        </main>
       );
     }
 

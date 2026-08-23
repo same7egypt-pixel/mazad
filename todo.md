@@ -160,3 +160,5 @@
 - [ ] Diagnose and fix the newly reported inability to open or use the Render public account page after the latest deployment.
 - [ ] Diagnose and fix the post-login country-context rejection that prevents the live account dashboard and seller product submission from loading on Render.
 - [ ] Redirect the seller to the homepage after a successful product submission for review on the Render public site.
+- [ ] Diagnose and fix the blank white page reported on the live Render homepage after the Biddfy.ai deployment.
+- [ ] Replace the broken Biddfy.ai logo asset on Render with a stable brand mark that preserves the dark teal and coral identity.
