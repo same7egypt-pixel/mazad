@@ -159,9 +159,9 @@
 - [x] Replace the stale Render Static Site build command still invoking corepack, redeploy the current GitHub revision, and verify the public bundle updates.
 - [ ] Diagnose and fix the newly reported inability to open or use the Render public account page after the latest deployment.
 - [x] Diagnose and fix the post-login country-context rejection that prevents the live account dashboard and seller product submission from loading on Render.
-- [ ] Redirect the seller to the homepage after a successful product submission for review on the Render public site.
+- [x] Redirect the seller to the homepage after a successful product submission for review on the Render public site.
 - [x] Diagnose and fix the blank white page reported on the live Render homepage after the Biddfy.ai deployment.
 - [x] Replace the broken Biddfy.ai logo asset on Render with a stable brand mark that preserves the dark teal and coral identity.
-- [ ] Show a polished animated success confirmation after submitting a product for review, then redirect automatically to the homepage.
-- [ ] Add advanced homepage filters and sorting for live auctions and products while preserving country scope and empty states.
+- [x] Show a polished animated success confirmation after submitting a product for review, then redirect automatically to the homepage.
+- [x] Add advanced homepage filters and sorting for live auctions and products while preserving country scope and empty states.
 - [ ] Add an administrator-managed percentage platform commission setting, scoped safely by marketplace, and apply it transparently to completed sale calculations.
