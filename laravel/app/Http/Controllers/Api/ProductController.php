@@ -39,7 +39,7 @@ class ProductController extends Controller
     {
         $user = $request->user();
 
-        if ($user->country_id !== $context->id()) {
+        if (! $user->canUseMarketplaceCountry($context->id())) {
             abort(403);
         }
 

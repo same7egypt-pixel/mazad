@@ -71,7 +71,6 @@ class AuthController extends Controller
 
     private function canUseMarketplaceCountry(User $user, int $countryId): bool
     {
-        return $user->country_id === $countryId
-            || ($user->country_id === null && $user->hasRole('GLOBAL_SUPER_ADMIN'));
+        return $user->canUseMarketplaceCountry($countryId);
     }
 }

@@ -16,7 +16,7 @@ class WalletController extends Controller
 {
     public function index(Request $request, MarketplaceContext $context): JsonResponse
     {
-        if ($request->user()->country_id !== $context->id()) {
+        if (! $request->user()->canUseMarketplaceCountry($context->id())) {
             abort(403);
         }
 

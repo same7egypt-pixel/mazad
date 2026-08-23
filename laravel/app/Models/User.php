@@ -6,13 +6,12 @@ use Database\Factories\UserFactory;
 use Filament\Models\Contracts\FilamentUser;
 use Filament\Panel;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
-use Spatie\Activitylog\Contracts\Activity;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Permission\Traits\HasRoles;
@@ -68,11 +67,44 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail
             ]);
     }
 
-    public function country(): BelongsTo { return $this->belongsTo(Country::class); }
-    public function city(): BelongsTo { return $this->belongsTo(City::class); }
-    public function products(): HasMany { return $this->hasMany(Product::class); }
-    public function bids(): HasMany { return $this->hasMany(Bid::class); }
-    public function wallets(): HasMany { return $this->hasMany(Wallet::class); }
-    public function sales(): HasMany { return $this->hasMany(Order::class, 'seller_id'); }
-    public function purchases(): HasMany { return $this->hasMany(Order::class, 'buyer_id'); }
+    public function canUseMarketplaceCountry(int $countryId): bool
+    {
+        return $this->country_id === $countryId
+            || ($this->country_id === null && $this->hasRole('GLOBAL_SUPER_ADMIN'));
+    }
+
+    public function country(): BelongsTo
+    {
+        return $this->belongsTo(Country::class);
+    }
+
+    public function city(): BelongsTo
+    {
+        return $this->belongsTo(City::class);
+    }
+
+    public function products(): HasMany
+    {
+        return $this->hasMany(Product::class);
+    }
+
+    public function bids(): HasMany
+    {
+        return $this->hasMany(Bid::class);
+    }
+
+    public function wallets(): HasMany
+    {
+        return $this->hasMany(Wallet::class);
+    }
+
+    public function sales(): HasMany
+    {
+        return $this->hasMany(Order::class, 'seller_id');
+    }
+
+    public function purchases(): HasMany
+    {
+        return $this->hasMany(Order::class, 'buyer_id');
+    }
 }

@@ -9,7 +9,7 @@ class ProductPolicy
 {
     public function update(User $user, Product $product): bool
     {
-        return $user->can('products.update') && $user->id === $product->user_id && $user->country_id === $product->country_id;
+        return $user->can('products.update') && $user->id === $product->user_id && $user->canUseMarketplaceCountry($product->country_id);
     }
 
     public function approve(User $user, Product $product): bool
