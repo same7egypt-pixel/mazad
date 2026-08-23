@@ -141,3 +141,4 @@
 - [ ] Switch Render to the Neon connection string only after the data verification succeeds, then verify `/up`, authentication, marketplace discovery, and `/admin` externally.
 - [ ] Execute the approved migration into the owner’s existing Neon project in Ohio while documenting the cross-region latency tradeoff.
 - [ ] Fix the Render Docker Vite build failure for the Filament theme and verify a successful external deployment before enabling Neon migration.
+- [ ] Correct the Render trial startup seeder class invocation and verify that the service reaches a live state before enabling Neon migration.

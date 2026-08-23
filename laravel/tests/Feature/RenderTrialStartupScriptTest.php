@@ -18,6 +18,7 @@ class RenderTrialStartupScriptTest extends TestCase
         $this->assertNotFalse($rolesSeedOffset);
         $this->assertNotFalse($adminProvisionOffset);
         $this->assertLessThan($adminProvisionOffset, $rolesSeedOffset);
+        $this->assertStringContainsString("--class='Database\\Seeders\\MarketplaceReferenceSeeder'", $script);
     }
 
     public function test_neon_migration_is_explicitly_gated_and_requires_an_empty_direct_target(): void
