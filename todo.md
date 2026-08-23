@@ -154,3 +154,6 @@
 - [x] Remove the incompatible corepack enable step from the Render Static Site build command and verify a successful public deployment.
 - [ ] Diagnose and fix the Render public-site login failure before claiming seller scheduling works on the new host.
 - [ ] Diagnose and fix the Render public-site registration connectivity failure reported from the user session before continuing account-flow verification.
+- [ ] Inspect and safely align the reported existing account with its intended public marketplace country without weakening administrative RBAC.
+- [ ] Rebrand the public product identity to Biddfy.ai while preserving the established dark teal and coral color palette after account access is verified.
+- [ ] Replace the stale Render Static Site build command still invoking corepack, redeploy the current GitHub revision, and verify the public bundle updates.

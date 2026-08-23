@@ -39,7 +39,7 @@ class AuthController extends Controller
             throw ValidationException::withMessages(['email' => 'The provided credentials are incorrect.']);
         }
 
-        if ($user->status !== 'active' || $user->country_id !== $context->id()) {
+        if ($user->status !== 'active' || ! $this->canUseMarketplaceCountry($user, $context->id())) {
             throw ValidationException::withMessages(['email' => 'This account is unavailable in the selected marketplace.']);
         }
 
@@ -62,10 +62,16 @@ class AuthController extends Controller
     {
         $user = $request->user();
 
-        if ($user->country_id !== $context->id()) {
+        if (! $this->canUseMarketplaceCountry($user, $context->id())) {
             abort(403);
         }
 
         return response()->json($user);
+    }
+
+    private function canUseMarketplaceCountry(User $user, int $countryId): bool
+    {
+        return $user->country_id === $countryId
+            || ($user->country_id === null && $user->hasRole('GLOBAL_SUPER_ADMIN'));
     }
 }

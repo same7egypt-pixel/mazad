@@ -52,6 +52,35 @@ class AuthTokenLifecycleTest extends TestCase
         $this->getJson('/api/user', $authenticatedHeaders)->assertUnauthorized();
     }
 
+    public function test_global_super_admin_without_a_country_can_use_the_selected_marketplace_without_changing_its_admin_scope(): void
+    {
+        $currency = Currency::query()->create(['name' => 'Saudi Riyal', 'code' => 'SAR', 'symbol' => 'ر.س']);
+        $country = Country::query()->create([
+            'name' => 'Saudi Arabia',
+            'code' => 'SA',
+            'timezone' => 'Asia/Riyadh',
+            'currency_id' => $currency->id,
+        ]);
+        $administrator = User::factory()->create([
+            'country_id' => null,
+            'email' => 'global-admin@gmail.com',
+            'status' => 'active',
+        ]);
+        $administrator->assignRole(Role::findOrCreate('GLOBAL_SUPER_ADMIN', 'web'));
+        $headers = ['X-Marketplace-Country' => (string) $country->id];
+
+        $login = $this->postJson('/api/auth/login', [
+            'email' => $administrator->email,
+            'password' => 'password',
+            'device_name' => 'Marketplace browser test',
+        ], $headers)->assertOk()->assertJsonPath('user.id', $administrator->id);
+
+        $this->assertNull($administrator->fresh()->country_id);
+        $this->getJson('/api/user', $headers + ['Authorization' => 'Bearer '.$login->json('token')])
+            ->assertOk()
+            ->assertJsonPath('id', $administrator->id);
+    }
+
     public function test_marketplace_registration_issues_a_token_and_rejects_a_city_from_another_country(): void
     {
         Role::findOrCreate('USER', 'web');
