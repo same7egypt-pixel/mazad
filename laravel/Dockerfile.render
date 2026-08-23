@@ -19,6 +19,8 @@ COPY package.json package-lock.json ./
 RUN npm ci --no-audit --no-fund
 
 COPY vite.config.js ./
+COPY --from=vendor /var/www/vendor ./vendor
+COPY app/Filament ./app/Filament
 COPY resources ./resources
 COPY public ./public
 RUN npm run build
