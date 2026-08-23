@@ -16,6 +16,7 @@ const mocks = vi.hoisted(() => {
     loginLiveMarketplace: vi.fn(),
     registerLiveMarketplace: vi.fn(),
     LaravelApiRequestError,
+    toastError: vi.fn(),
   };
 });
 
@@ -31,6 +32,14 @@ vi.mock("@/lib/marketplaceApi", () => ({
 vi.mock("wouter", () => ({
   Link: ({ children, href, ...props }: { children: React.ReactNode; href: string }) => React.createElement("a", { href, ...props }, children),
   useLocation: () => ["/auth", vi.fn()],
+}));
+
+vi.mock("sonner", () => ({
+  toast: {
+    error: mocks.toastError,
+    message: vi.fn(),
+    success: vi.fn(),
+  },
 }));
 
 import Auth from "./Auth";
@@ -71,5 +80,19 @@ describe("صفحة دخول Marketplace", () => {
 
     await waitFor(() => expect(screen.getByText("مرحباً بعودتك")).toBeTruthy());
     expect(screen.getByDisplayValue("sameh@example.test")).toBeTruthy();
+  });
+
+  it("يوضح أن الحساب يتبع سوقاً مختلفاً بدلاً من إخفاء سبب الرفض", async () => {
+    mocks.getLiveMarketplaceCountries.mockResolvedValue([{ id: 1, code: "SA", name: "المملكة العربية السعودية", currency: { code: "SAR", symbol: "ر.س" } }]);
+    mocks.getLiveSellerReferences.mockResolvedValue({ country: { id: 1, name: "المملكة العربية السعودية", code: "SA", timezone: "Asia/Riyadh" }, currency: null, cities: [{ id: 9, name: "الرياض" }], categories: [] });
+    mocks.loginLiveMarketplace.mockRejectedValue(new mocks.LaravelApiRequestError("The given data was invalid.", 422, { email: ["This account is unavailable in the selected marketplace."] }));
+
+    render(<Auth />);
+    await screen.findByText("المملكة العربية السعودية");
+    fireEvent.change(screen.getByLabelText("البريد الإلكتروني"), { target: { value: "sameh@example.test" } });
+    fireEvent.change(screen.getByLabelText("كلمة المرور"), { target: { value: "valid-password-123" } });
+    fireEvent.submit(screen.getAllByRole("button", { name: "تسجيل الدخول" }).at(-1)!.closest("form")!);
+
+    await waitFor(() => expect(mocks.toastError).toHaveBeenCalledWith("هذا الحساب غير متاح في السوق المحدد.", expect.objectContaining({ description: "اختر السوق الذي أنشأت فيه الحساب ثم أعد المحاولة." })));
   });
 });

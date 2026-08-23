@@ -86,8 +86,21 @@ export default function Auth() {
       saveMarketplaceCountryId(selectedCountryId);
       toast.success(`مرحباً ${user.name}`, { description: "تم تسجيل الدخول إلى حسابك بنجاح." });
       navigate("/account");
-    } catch {
-      toast.error("تعذر تسجيل الدخول. تحقق من البريد وكلمة المرور والسوق المحدد.");
+    } catch (error) {
+      if (error instanceof LaravelApiRequestError) {
+        const emailErrors = error.validationErrors.email || [];
+        const rejection = emailErrors.join(" ").toLowerCase();
+
+        if (error.status === 429) {
+          toast.error("تكررت محاولات الدخول بسرعة. انتظر قليلاً ثم أعد المحاولة.");
+        } else if (/unavailable|marketplace|غير متاح|السوق/.test(rejection)) {
+          toast.error("هذا الحساب غير متاح في السوق المحدد.", { description: "اختر السوق الذي أنشأت فيه الحساب ثم أعد المحاولة." });
+        } else {
+          toast.error("بيانات الدخول غير صحيحة.", { description: "تحقق من البريد الإلكتروني وكلمة المرور ثم أعد المحاولة." });
+        }
+      } else {
+        toast.error("تعذر الاتصال بخدمة الحسابات. حاول مرة أخرى بعد إيقاظ الخادم.");
+      }
     } finally {
       setIsSubmitting(false);
     }
