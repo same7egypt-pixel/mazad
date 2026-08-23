@@ -19,4 +19,17 @@ class RenderTrialStartupScriptTest extends TestCase
         $this->assertNotFalse($adminProvisionOffset);
         $this->assertLessThan($adminProvisionOffset, $rolesSeedOffset);
     }
+
+    public function test_neon_migration_is_explicitly_gated_and_requires_an_empty_direct_target(): void
+    {
+        $script = file_get_contents(base_path('docker/render/migrate-to-neon.sh'));
+
+        $this->assertIsString($script);
+        $this->assertStringContainsString('NEON_MIGRATION_ENABLED:-false', $script);
+        $this->assertStringContainsString('NEON_DATABASE_URL', $script);
+        $this->assertStringContainsString('*-pooler*', $script);
+        $this->assertStringContainsString('target must be an empty public schema', $script);
+        $this->assertStringContainsString('pg_dump', $script);
+        $this->assertStringContainsString('pg_restore', $script);
+    }
 }

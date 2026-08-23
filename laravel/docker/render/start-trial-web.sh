@@ -18,7 +18,9 @@ until php artisan migrate --force --no-interaction; do
 done
 
 php artisan db:seed --class=Database\\Seeders\\RolePermissionSeeder --force --no-interaction
-php artisan db:seed --class=Database\\Seeders\\MarketplaceReferenceSeeder --force --no-interaction
+php artisan db:seed --class=Database\Seeders\MarketplaceReferenceSeeder --force --no-interaction
 php artisan marketplace:provision-first-admin --no-interaction
+
+/usr/local/bin/migrate-to-neon
 
 exec /usr/local/bin/render-web

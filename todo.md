@@ -136,3 +136,7 @@
 - [ ] Redesign Filament as an Arabic RTL Marketplace Operations Control Tower powered only by real database data, with empty states where operational data is absent.
 - [ ] Add role-scoped operational metrics, charts, recent activity, and country-aware navigation without enabling WebSockets on the Render free trial.
 - [ ] Expand auction, finance, user, country, and audit operations in Filament only where underlying models, permissions, and policies are implemented and testable.
+- [ ] Prepare a safe migration plan from Render Postgres to the owner's Neon Postgres project, including backup and rollback conditions.
+- [ ] Export and restore the current Render data into Neon, then verify schema, row integrity, roles, and reference marketplace data.
+- [ ] Switch Render to the Neon connection string only after the data verification succeeds, then verify `/up`, authentication, marketplace discovery, and `/admin` externally.
+- [ ] Execute the approved migration into the owner’s existing Neon project in Ohio while documenting the cross-region latency tradeoff.

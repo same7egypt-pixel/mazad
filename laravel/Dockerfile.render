@@ -23,6 +23,8 @@ COPY resources ./resources
 COPY public ./public
 RUN npm run build
 
+FROM postgres:18-bookworm AS postgres-client
+
 FROM php:8.3-fpm-bookworm
 
 RUN apt-get update \
@@ -46,6 +48,9 @@ RUN apt-get update \
 
 WORKDIR /var/www
 COPY --from=vendor /usr/bin/composer /usr/bin/composer
+COPY --from=postgres-client /usr/lib/postgresql/18/bin/pg_dump /usr/local/bin/pg_dump
+COPY --from=postgres-client /usr/lib/postgresql/18/bin/pg_restore /usr/local/bin/pg_restore
+COPY --from=postgres-client /usr/lib/postgresql/18/bin/psql /usr/local/bin/psql
 COPY . .
 COPY --from=vendor /var/www/vendor ./vendor
 COPY --from=frontend /build/public/build ./public/build
@@ -54,6 +59,7 @@ COPY docker/render/nginx.conf.template /etc/nginx/templates/auction.conf.templat
 COPY --chmod=755 docker/render/entrypoint.sh /usr/local/bin/render-entrypoint
 COPY --chmod=755 docker/render/start-web.sh /usr/local/bin/render-web
 COPY --chmod=755 docker/render/start-trial-web.sh /usr/local/bin/render-trial-web
+COPY --chmod=755 docker/render/migrate-to-neon.sh /usr/local/bin/migrate-to-neon
 
 RUN composer dump-autoload --no-dev --classmap-authoritative --no-scripts \
     && php artisan package:discover --ansi \
