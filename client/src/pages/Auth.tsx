@@ -2,6 +2,7 @@ import {
   getLiveMarketplaceCountries,
   getLiveSellerReferences,
   isLiveMarketplaceEnabled,
+  LaravelApiRequestError,
   loginLiveMarketplace,
   registerLiveMarketplace,
   saveMarketplaceCountryId,
@@ -116,8 +117,24 @@ export default function Auth() {
       saveMarketplaceCountryId(selectedCountryId);
       toast.success(`أهلاً ${user.name}`, { description: "تم إنشاء الحساب وتسجيل دخولك." });
       navigate("/account");
-    } catch {
-      toast.error("تعذر إنشاء الحساب. تحقق من الحقول والبريد وسياق السوق.");
+    } catch (error) {
+      if (error instanceof LaravelApiRequestError) {
+        const emailErrors = error.validationErrors.email || [];
+        const existingEmail = error.status === 422 && emailErrors.length > 0;
+        if (existingEmail) {
+          setMode("login");
+          setPassword("");
+          setPasswordConfirmation("");
+          toast.message("هذا البريد مسجل بالفعل.", { description: "انتقلنا بك إلى تسجيل الدخول؛ أدخل كلمة المرور فقط." });
+        } else if (error.status === 429) {
+          toast.error("تكررت المحاولات بسرعة. انتظر قليلاً ثم أعد المحاولة.");
+        } else {
+          const firstValidationError = Object.values(error.validationErrors).flat()[0];
+          toast.error(firstValidationError || error.message || "تعذر إنشاء الحساب. تحقق من الحقول ثم أعد المحاولة.");
+        }
+      } else {
+        toast.error("تعذر إنشاء الحساب بسبب مشكلة اتصال. أعد المحاولة بعد لحظات.");
+      }
     } finally {
       setIsSubmitting(false);
     }

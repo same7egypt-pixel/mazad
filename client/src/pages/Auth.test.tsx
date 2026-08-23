@@ -1,19 +1,29 @@
 // @vitest-environment jsdom
 import React from "react";
-import { cleanup, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-const mocks = vi.hoisted(() => ({
-  getLiveMarketplaceCountries: vi.fn(),
-  getLiveSellerReferences: vi.fn(),
-  loginLiveMarketplace: vi.fn(),
-  registerLiveMarketplace: vi.fn(),
-}));
+const mocks = vi.hoisted(() => {
+  class LaravelApiRequestError extends Error {
+    constructor(message: string, public status: number, public validationErrors: Record<string, string[]> = {}) {
+      super(message);
+    }
+  }
+
+  return {
+    getLiveMarketplaceCountries: vi.fn(),
+    getLiveSellerReferences: vi.fn(),
+    loginLiveMarketplace: vi.fn(),
+    registerLiveMarketplace: vi.fn(),
+    LaravelApiRequestError,
+  };
+});
 
 vi.mock("@/lib/marketplaceApi", () => ({
   getLiveMarketplaceCountries: mocks.getLiveMarketplaceCountries,
   getLiveSellerReferences: mocks.getLiveSellerReferences,
   isLiveMarketplaceEnabled: () => true,
+  LaravelApiRequestError: mocks.LaravelApiRequestError,
   loginLiveMarketplace: mocks.loginLiveMarketplace,
   registerLiveMarketplace: mocks.registerLiveMarketplace,
 }));
@@ -42,5 +52,24 @@ describe("صفحة دخول Marketplace", () => {
     screen.getByRole("button", { name: "حساب جديد" }).click();
     expect(await screen.findByRole("button", { name: "إنشاء الحساب" })).toBeTruthy();
     expect(screen.getByLabelText("المدينة")).toBeTruthy();
+  });
+
+  it("ينقل البريد المسجل مسبقاً إلى تسجيل الدخول بدلاً من رسالة فشل عامة", async () => {
+    mocks.getLiveMarketplaceCountries.mockResolvedValue([{ id: 1, code: "SA", name: "المملكة العربية السعودية", currency: { code: "SAR", symbol: "ر.س" } }]);
+    mocks.getLiveSellerReferences.mockResolvedValue({ country: { id: 1, name: "المملكة العربية السعودية", code: "SA", timezone: "Asia/Riyadh" }, currency: null, cities: [{ id: 9, name: "الرياض" }], categories: [] });
+    mocks.registerLiveMarketplace.mockRejectedValue(new mocks.LaravelApiRequestError("The given data was invalid.", 422, { email: ["The email has already been taken."] }));
+
+    render(<Auth />);
+    await screen.findByText("المملكة العربية السعودية");
+    fireEvent.click(screen.getByRole("button", { name: "حساب جديد" }));
+    fireEvent.change(screen.getByLabelText("الاسم الكامل"), { target: { value: "Sameh" } });
+    fireEvent.change(screen.getByLabelText("البريد الإلكتروني"), { target: { value: "sameh@example.test" } });
+    const passwordInputs = screen.getAllByLabelText(/كلمة المرور/);
+    fireEvent.change(passwordInputs[0], { target: { value: "valid-password-123" } });
+    fireEvent.change(passwordInputs[1], { target: { value: "valid-password-123" } });
+    fireEvent.submit(screen.getByRole("button", { name: "إنشاء الحساب" }).closest("form")!);
+
+    await waitFor(() => expect(screen.getByText("مرحباً بعودتك")).toBeTruthy());
+    expect(screen.getByDisplayValue("sameh@example.test")).toBeTruthy();
   });
 });

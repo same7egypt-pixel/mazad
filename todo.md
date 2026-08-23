@@ -130,3 +130,4 @@
 - [x] Prevent the Netlify production storefront from showing temporary auction cards when the live Laravel API is unavailable.
 - [x] Replace non-interactive account display cards with real Marketplace actions and hide all temporary account values for authenticated Netlify users.
 - [x] Preserve and display the authenticated Laravel session in the public homepage header after navigation from the account page.
+- [x] Display actionable Laravel registration errors in Netlify and guide an already-registered email to login instead of a generic failure.

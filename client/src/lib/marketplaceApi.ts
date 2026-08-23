@@ -9,6 +9,17 @@ const visualThemes = [
 
 type LaravelPaginator<T> = { data: T[] };
 
+export class LaravelApiRequestError extends Error {
+  constructor(
+    message: string,
+    public readonly status: number,
+    public readonly validationErrors: Record<string, string[]> = {},
+  ) {
+    super(message);
+    this.name = "LaravelApiRequestError";
+  }
+}
+
 type LaravelProduct = {
   id: number;
   title: string;
@@ -152,7 +163,17 @@ async function marketplaceRequest<T>(path: string, countryId?: number, init?: Re
 
   if (!response.ok) {
     if (response.status === 401) clearLiveMarketplaceToken();
-    throw new Error(`Laravel API request failed with status ${response.status}.`);
+    const payload = typeof response.json === "function"
+      ? await response.json().catch(() => null) as { message?: unknown; errors?: unknown } | null
+      : null;
+    const validationErrors: Record<string, string[]> = {};
+    if (payload?.errors && typeof payload.errors === "object" && !Array.isArray(payload.errors)) {
+      Object.entries(payload.errors as Record<string, unknown>).forEach(([field, messages]) => {
+        if (Array.isArray(messages)) validationErrors[field] = messages.filter((message): message is string => typeof message === "string");
+      });
+    }
+    const message = typeof payload?.message === "string" ? payload.message : `Laravel API request failed with status ${response.status}.`;
+    throw new LaravelApiRequestError(message, response.status, validationErrors);
   }
   if (response.status === 204) return undefined as T;
 

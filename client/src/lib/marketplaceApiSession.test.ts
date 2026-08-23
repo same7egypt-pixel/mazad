@@ -57,6 +57,24 @@ describe("جلسة Laravel Marketplace", () => {
     expect(JSON.parse(request.body as string)).toMatchObject({ country_id: 7, city_id: 11, device_name: "Mazad Marketplace Web" });
   });
 
+  it("يحفظ سبب التحقق من Laravel عندما يكون البريد مسجلاً بالفعل", async () => {
+    vi.stubEnv("VITE_LARAVEL_API_BASE_URL", "https://api.example.test");
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue({
+      ok: false,
+      status: 422,
+      json: async () => ({ message: "The given data was invalid.", errors: { email: ["The email has already been taken."] } }),
+    }));
+
+    const api = await import("./marketplaceApi");
+    await expect(api.registerLiveMarketplace(7, {
+      city_id: 11,
+      name: liveUser.name,
+      email: liveUser.email,
+      password: "very-secure-password",
+      password_confirmation: "very-secure-password",
+    })).rejects.toMatchObject({ status: 422, validationErrors: { email: ["The email has already been taken."] } });
+  });
+
   it("ينهي الجلسة الحية عند استجابة تسجيل الخروج 204 ويمسح الرمز المحلي", async () => {
     vi.stubEnv("VITE_LARAVEL_API_BASE_URL", "https://api.example.test");
     const fetchMock = vi.fn()
