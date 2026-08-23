@@ -15,15 +15,16 @@
 - [x] Prepare a resource-constrained Render trial deployment that runs only the viable free-tier services and documents disabled production components.
 - [x] Remove Reverb and WebSocket-driven real-time updates from the free Render trial configuration, retaining HTTP refresh behavior only.
 - [x] Remove the unsupported free-tier pre-deploy step and run Laravel migrations through the free-trial startup path only.
-- [ ] Fix the Render Docker build stage so Composer resolves required PHP extensions before the free-trial API deploy.
-- [ ] Confirm the Render trial build passes the prior Composer extension failure and reaches a healthy Laravel API deployment.
-- [ ] Diagnose and correct the external API Server Error after the Render trial health endpoint succeeds.
-- [ ] Apply and verify the Laravel migration set on the Render trial Postgres database before enabling public API data contracts.
-- [ ] Run Laravel migrations explicitly in the free Render web-service startup command so GitHub-triggered deploys initialize the trial database.
-- [ ] Replace the incompatible inline Render shell command that exits 127 with an executable trial-start script.
-- [ ] Seed idempotent Marketplace reference data for the Render trial: supported country, currency, cities, and catalogue categories only.
-- [ ] Add the PHP zip extension to the Composer build stage after the Render retry exposed it as the next required platform dependency.
-- [ ] Prevent Composer package discovery from running before artisan exists in the Docker vendor stage, then run discovery after the Laravel source is present.
+- [x] Fix the Render Docker build stage so Composer resolves required PHP extensions before the free-trial API deploy.
+- [x] Confirm the Render trial build passes the prior Composer extension failure and reaches a healthy Laravel API deployment.
+- [x] Diagnose and correct the external API Server Error after the Render trial health endpoint succeeds.
+- [x] Apply and verify the Laravel migration set on the Render trial Postgres database before enabling public API data contracts.
+- [x] Run Laravel migrations explicitly in the free Render web-service startup command so GitHub-triggered deploys initialize the trial database.
+- [x] Replace the incompatible inline Render shell command that exits 127 with an executable trial-start script.
+- [x] Seed idempotent Marketplace reference data for the Render trial: supported country, currency, cities, and catalogue categories only.
+- [ ] Configure the published Marketplace frontend with the Render HTTPS API URL and verify live discovery behavior.
+- [x] Add the PHP zip extension to the Composer build stage after the Render retry exposed it as the next required platform dependency.
+- [x] Prevent Composer package discovery from running before artisan exists in the Docker vendor stage, then run discovery after the Laravel source is present.
 - [ ] Implement countries, cities, currencies, categories, role-scoped administration, and country-context enforcement.
 - [ ] Implement product listing creation, media handling, draft-to-approval moderation, and seller controls.
 - [ ] Implement the auction lifecycle, atomic bid placement, bid history, winner selection, scheduled start/close processing, and real-time updates.

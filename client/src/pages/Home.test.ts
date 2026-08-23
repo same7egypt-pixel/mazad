@@ -2,6 +2,7 @@ import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
 import { demoAuctionLots } from "@/data/marketplaceDemo";
+import { isLiveMarketplaceEnabled } from "@/lib/marketplaceApi";
 
 vi.mock("@/_core/hooks/useAuth", () => ({
   useAuth: () => ({ user: null, isAuthenticated: false, loading: false }),
@@ -21,10 +22,14 @@ describe("واجهة Marketplace التجريبية", () => {
     expect(demoAuctionLots.every((lot) => lot.title && lot.price && lot.city)).toBe(true);
   });
 
-  it("توسم بيانات العرض الاحتياطية عندما لا يكون Laravel الحي مهيأ", () => {
+  it("توضح مصدر العرض وفق حالة تهيئة Laravel", () => {
     const html = renderToStaticMarkup(React.createElement(Home));
 
-    expect(html).toContain("بيانات عرض مؤقتة حتى اتصال Laravel");
+    expect(html).toContain(
+      isLiveMarketplaceEnabled()
+        ? "مزادات حية مقيدة بسياق الدولة"
+        : "بيانات عرض مؤقتة حتى اتصال Laravel",
+    );
     expect(html).toContain("ساعة كرونوغراف كلاسيكية");
   });
 });

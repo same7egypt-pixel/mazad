@@ -23,7 +23,9 @@ describe("محول Laravel Marketplace", () => {
     expect(listing.price).toContain("ر.س");
   });
 
-  it("يبقي وضع البيانات الحية معطلاً عند غياب عنوان API صالح", () => {
-    expect(isLiveMarketplaceEnabled()).toBe(false);
+  it("يعكس تهيئة عنوان API من البيئة", () => {
+    expect(isLiveMarketplaceEnabled()).toBe(
+      Boolean(process.env.VITE_LARAVEL_API_BASE_URL),
+    );
   });
 });

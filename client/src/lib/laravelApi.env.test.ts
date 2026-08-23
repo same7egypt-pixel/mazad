@@ -17,4 +17,17 @@ describe("إعداد Laravel API الحي", () => {
 
     expect(response.ok).toBe(true);
   });
+
+  integrationTest("يكتشف السوق المرجعي عبر العنوان المهيأ", async () => {
+    const response = await fetch(`${baseUrl}/api/marketplaces/countries`);
+
+    expect(response.ok).toBe(true);
+    await expect(response.json()).resolves.toEqual(
+      expect.objectContaining({
+        countries: expect.arrayContaining([
+          expect.objectContaining({ code: "SA" }),
+        ]),
+      }),
+    );
+  });
 });
