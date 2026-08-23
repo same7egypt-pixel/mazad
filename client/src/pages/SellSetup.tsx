@@ -80,8 +80,9 @@ export default function SellSetup() {
   const [startingPrice, setStartingPrice] = useState("");
   const [reservePrice, setReservePrice] = useState("");
   const [increment, setIncrement] = useState("100");
-  const [startTime, setStartTime] = useState("");
-  const [endTime, setEndTime] = useState("");
+  const [initialAuctionWindow] = useState(suggestedAuctionWindow);
+  const [startTime, setStartTime] = useState(initialAuctionWindow.start);
+  const [endTime, setEndTime] = useState(initialAuctionWindow.end);
   const [sellerReferences, setSellerReferences] = useState<SellerReferenceData | null>(null);
   const [sellerProducts, setSellerProducts] = useState<LiveSellerProduct[]>([]);
   const [selectedSellerProductId, setSelectedSellerProductId] = useState("");
@@ -169,18 +170,11 @@ export default function SellSetup() {
       toast.error("أكمل عنوان القطعة ووصفاً لا يقل عن 20 حرفاً أولاً.");
       return;
     }
-    const suggestedWindow = suggestedAuctionWindow();
-    if (!startTime) setStartTime(suggestedWindow.start);
-    if (!endTime) setEndTime(suggestedWindow.end);
     setStep(2);
   };
 
   const submitListing = async (event: FormEvent) => {
     event.preventDefault();
-    if (!startingPrice || !increment || !startTime || !endTime) {
-      toast.error("أكمل سعر البداية والزيادة وتوقيت البداية والنهاية.");
-      return;
-    }
     if (!isLive || !sellerReferences || !liveSessionUser) {
       toast.success("تم حفظ مسودة العرض فقط", { description: "سجّل الدخول واتصل بالمنصة لإرسال المنتج للمراجعة وجدولة مزاد." });
       return;
@@ -355,7 +349,7 @@ export default function SellSetup() {
             <button type="button" onClick={continueToAuction} className="mt-8 flex w-full items-center justify-center gap-2 rounded-xl bg-[#12313a] px-5 py-3.5 text-sm font-bold text-white">تابع إلى إعداد المزاد <ChevronLeft size={17} /></button>
           </> : <>
             <div className="flex items-center justify-between"><div><p className="text-xs font-bold text-[#d96d46]">الخطوة 2 من 2</p><h2 className="mt-1 font-serif text-3xl">إعدادات المزاد</h2></div><CalendarClock className="text-[#d96d46]" /></div>
-            <div className="mt-7 grid gap-5 sm:grid-cols-2"><label className="grid gap-2 text-sm font-semibold">سعر البداية<input value={startingPrice} onChange={(event) => setStartingPrice(event.target.value)} inputMode="decimal" placeholder="مثال: 500" className="rounded-xl border border-[#143039]/15 px-4 py-3 font-normal outline-none focus:border-[#d96d46]" /></label><label className="grid gap-2 text-sm font-semibold">سعر الاحتياط <span className="text-xs font-normal text-[#758488]">اختياري</span><input value={reservePrice} onChange={(event) => setReservePrice(event.target.value)} inputMode="decimal" placeholder="مثال: 1000" className="rounded-xl border border-[#143039]/15 px-4 py-3 font-normal outline-none focus:border-[#d96d46]" /></label><label className="grid gap-2 text-sm font-semibold">أقل زيادة<input value={increment} onChange={(event) => setIncrement(event.target.value)} inputMode="decimal" className="rounded-xl border border-[#143039]/15 px-4 py-3 font-normal outline-none focus:border-[#d96d46]" /></label><div className="rounded-xl border border-[#143039]/10 bg-[#f4f3ed] p-4 text-sm leading-6 text-[#6b7d81]">اقترحنا أوقاتاً أولية للمزاد. يمكنك تعديلها، ويجب أن يكون وقت النهاية بعد وقت البداية. لا تتاح الجدولة إلا بعد اعتماد المنتج.</div><label className="grid gap-2 text-sm font-semibold sm:col-span-2">وقت البداية<input value={startTime} onChange={(event) => setStartTime(event.target.value)} type="datetime-local" className="rounded-xl border border-[#143039]/15 px-4 py-3 font-normal outline-none focus:border-[#d96d46]" /></label><label className="grid gap-2 text-sm font-semibold sm:col-span-2">وقت النهاية<input value={endTime} onChange={(event) => setEndTime(event.target.value)} type="datetime-local" className="rounded-xl border border-[#143039]/15 px-4 py-3 font-normal outline-none focus:border-[#d96d46]" /></label></div>
+            <div className="mt-7 grid gap-5 sm:grid-cols-2"><label className="grid gap-2 text-sm font-semibold">سعر البداية<input value={startingPrice} onChange={(event) => setStartingPrice(event.target.value)} inputMode="decimal" placeholder="مثال: 500" className="rounded-xl border border-[#143039]/15 px-4 py-3 font-normal outline-none focus:border-[#d96d46]" /></label><label className="grid gap-2 text-sm font-semibold">سعر الاحتياط <span className="text-xs font-normal text-[#758488]">اختياري</span><input value={reservePrice} onChange={(event) => setReservePrice(event.target.value)} inputMode="decimal" placeholder="مثال: 1000" className="rounded-xl border border-[#143039]/15 px-4 py-3 font-normal outline-none focus:border-[#d96d46]" /></label><label className="grid gap-2 text-sm font-semibold">أقل زيادة<input value={increment} onChange={(event) => setIncrement(event.target.value)} inputMode="decimal" className="rounded-xl border border-[#143039]/15 px-4 py-3 font-normal outline-none focus:border-[#d96d46]" /></label><div className="rounded-xl border border-[#143039]/10 bg-[#f4f3ed] p-4 text-sm leading-6 text-[#6b7d81]">التوقيتات مقترحة وتُحفظ في حالة النموذج. أرسل المنتج للمراجعة أولاً، ثم بعد اعتماده اختره وجدول المزاد. يجب أن يكون وقت النهاية بعد وقت البداية.</div><label className="grid gap-2 text-sm font-semibold sm:col-span-2">وقت البداية<input value={startTime} onChange={(event) => setStartTime(event.target.value)} type="datetime-local" lang="en-GB" dir="ltr" className="rounded-xl border border-[#143039]/15 px-4 py-3 text-left font-normal outline-none focus:border-[#d96d46]" /></label><label className="grid gap-2 text-sm font-semibold sm:col-span-2">وقت النهاية<input value={endTime} onChange={(event) => setEndTime(event.target.value)} type="datetime-local" lang="en-GB" dir="ltr" className="rounded-xl border border-[#143039]/15 px-4 py-3 text-left font-normal outline-none focus:border-[#d96d46]" /></label></div>
             <div className="mt-7 rounded-2xl bg-[#edf0e8] p-4 text-sm leading-6 text-[#59706d]"><strong className="text-[#143039]">ملخص العرض:</strong> {title || "قطعة بلا عنوان"} · {category} · {city} · حالة {selectedCondition}. سيخضع المنتج الفعلي للمراجعة قبل جدولة المزاد.</div>
             <div className="mt-8 flex flex-col gap-3 sm:flex-row"><button type="button" onClick={() => setStep(1)} className="rounded-xl border border-[#143039]/15 px-5 py-3 text-sm font-bold">العودة للتفاصيل</button><button type="submit" disabled={isSubmitting} className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-[#d96d46] px-5 py-3 text-sm font-bold text-white disabled:cursor-wait disabled:opacity-60"><Gavel size={17} />{isSubmitting ? "جارٍ الإرسال…" : isLive ? "إرسال المنتج للمراجعة" : "حفظ مسودة العرض"}</button></div>
           </>}

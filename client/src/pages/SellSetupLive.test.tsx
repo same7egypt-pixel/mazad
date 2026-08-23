@@ -6,6 +6,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 const mocks = vi.hoisted(() => ({
   clearLiveMarketplaceToken: vi.fn(),
   createLiveAuction: vi.fn(),
+  createLiveProduct: vi.fn(),
   getLiveMarketplaceToken: vi.fn(),
   getLiveMarketplaceUser: vi.fn(),
   getLiveSellerProducts: vi.fn(),
@@ -13,9 +14,11 @@ const mocks = vi.hoisted(() => ({
   loginLiveMarketplace: vi.fn(),
   logoutLiveMarketplace: vi.fn(),
   registerLiveMarketplace: vi.fn(),
+  submitLiveProductForReview: vi.fn(),
   toastError: vi.fn(),
   toastInfo: vi.fn(),
   toastSuccess: vi.fn(),
+  uploadLiveProductMedia: vi.fn(),
 }));
 
 vi.mock("@/_core/hooks/useAuth", () => ({
@@ -25,7 +28,7 @@ vi.mock("@/_core/hooks/useAuth", () => ({
 vi.mock("@/lib/marketplaceApi", () => ({
   clearLiveMarketplaceToken: mocks.clearLiveMarketplaceToken,
   createLiveAuction: mocks.createLiveAuction,
-  createLiveProduct: vi.fn(),
+  createLiveProduct: mocks.createLiveProduct,
   getLiveMarketplaceToken: mocks.getLiveMarketplaceToken,
   getLiveMarketplaceUser: mocks.getLiveMarketplaceUser,
   getLiveSellerReferences: mocks.getLiveSellerReferences,
@@ -35,8 +38,8 @@ vi.mock("@/lib/marketplaceApi", () => ({
   loginLiveMarketplace: mocks.loginLiveMarketplace,
   logoutLiveMarketplace: mocks.logoutLiveMarketplace,
   registerLiveMarketplace: mocks.registerLiveMarketplace,
-  submitLiveProductForReview: vi.fn(),
-  uploadLiveProductMedia: vi.fn(),
+  submitLiveProductForReview: mocks.submitLiveProductForReview,
+  uploadLiveProductMedia: mocks.uploadLiveProductMedia,
 }));
 
 vi.mock("sonner", () => ({
@@ -70,6 +73,7 @@ async function renderReadySellerFlow() {
   render(<SellSetup />);
 
   await screen.findByText("منتجاتك الحية");
+  await waitFor(() => expect(screen.getByText("3 منتج")).toBeTruthy());
   fireEvent.change(screen.getByLabelText("عنوان القطعة"), { target: { value: "ساعة معروضة" } });
   fireEvent.change(screen.getByLabelText("الوصف"), { target: { value: "هذا وصف حي كافٍ لتفعيل الانتقال إلى إعدادات المزاد." } });
   fireEvent.click(screen.getByRole("button", { name: "تابع إلى إعداد المزاد" }));
@@ -104,6 +108,34 @@ describe("مسار البائع الحي", () => {
     })));
     await waitFor(() => expect(screen.getAllByText("مرتبط بمزاد upcoming")).toHaveLength(2));
     expect(mocks.toastSuccess).toHaveBeenCalled();
+  });
+
+  it("يثبت التوقيتات المقترحة في حالة النموذج ويعرضها باتجاه واضح", async () => {
+    await renderReadySellerFlow();
+
+    const start = screen.getByLabelText("وقت البداية") as HTMLInputElement;
+    const end = screen.getByLabelText("وقت النهاية") as HTMLInputElement;
+
+    expect(start.value).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/);
+    expect(end.value).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/);
+    expect(start.getAttribute("dir")).toBe("ltr");
+    expect(end.getAttribute("lang")).toBe("en-GB");
+  });
+
+  it("يرسل المنتج للمراجعة دون اشتراط جدولة المزاد قبل اعتماده", async () => {
+    mocks.createLiveProduct.mockResolvedValue({ id: 901 });
+    mocks.submitLiveProductForReview.mockResolvedValue(undefined);
+    await renderReadySellerFlow();
+    fireEvent.change(screen.getByLabelText("وقت البداية"), { target: { value: "" } });
+    fireEvent.change(screen.getByLabelText("وقت النهاية"), { target: { value: "" } });
+
+    fireEvent.click(screen.getByRole("button", { name: "إرسال المنتج للمراجعة" }));
+
+    await waitFor(() => expect(mocks.createLiveProduct).toHaveBeenCalledWith(7, expect.objectContaining({
+      title: "ساعة معروضة",
+      condition: "good",
+    })));
+    expect(mocks.toastError).not.toHaveBeenCalledWith("أكمل سعر البداية والزيادة وتوقيت البداية والنهاية.");
   });
 
   it("يعرض خطأً مفهوماً إن رفض Laravel جدولة المنتج المعتمد", async () => {

@@ -147,3 +147,5 @@
 - [x] Add a reversible Render configuration switch that routes Laravel to the verified Neon database only when explicitly enabled.
 - [ ] Enable Neon for the live Render service and verify health, public market discovery, authentication, and Filament admin access before decommissioning nothing.
 - [ ] Delete the Render Postgres instance only after Neon is live, verified, and the owner gives final deletion confirmation.
+- [ ] Diagnose and resolve the live Filament dashboard load error observed after administrator login on Neon before deleting the Render database.
+- [ ] Fix the RTL date/time field state mismatch in Netlify seller auction scheduling that reports required fields despite visible values.
