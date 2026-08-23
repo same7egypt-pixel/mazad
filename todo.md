@@ -166,8 +166,12 @@
 - [x] Add advanced homepage filters and sorting for live auctions and products while preserving country scope and empty states.
 - [x] Add an administrator-managed percentage platform commission setting, scoped safely by marketplace, and apply it transparently to completed sale calculations.
 - [x] Fix the Filament country edit form so authorized administrators can open the commission setting without a server error.
-- [ ] Audit the live post-win order flow from auction closure through buyer payment, shipment selection, delivery, and completion.
-- [ ] Build buyer-facing post-win order actions for payment deadline, delivery or pickup choice, order status, and receipt confirmation using real order data.
-- [ ] Connect the post-payment seller payout, shipment progress, and buyer receipt confirmation to the existing order lifecycle with tested country and role isolation.
-- [ ] Define and implement cash-on-delivery eligibility, winner confirmation deadline, delivery or pickup selection, collection outcomes, and post-delivery seller settlement.
-- [ ] Add customer, seller, and operations interfaces for cash-on-delivery orders, including shipment tracking, failed collection handling, and release of seller funds after confirmed delivery.
+- [x] Audit the live post-win order flow from auction closure through buyer payment, shipment selection, delivery, and completion.
+- [x] Build buyer-facing post-win order actions for payment deadline, delivery or pickup choice, order status, and receipt confirmation using real order data.
+- [x] Connect the post-payment seller payout, shipment progress, and buyer receipt confirmation to the existing order lifecycle with tested country and role isolation.
+- [x] Define and implement cash-on-delivery eligibility, winner confirmation deadline, delivery or pickup selection, collection outcomes, and post-delivery seller settlement.
+- [x] Add customer, seller, and operations interfaces for cash-on-delivery orders, including shipment tracking, failed collection handling, and release of seller funds after confirmed delivery.
+- [x] Add non-destructive COD order, collection, confirmation, and settlement fields with country-scoped configuration defaults.
+- [x] Create idempotent COD winner-confirmation, collection-recording, receipt-confirmation, and seller-settlement domain services with audited transitions.
+- [x] Build account-level COD order detail actions and role-scoped Filament operations for collection, fulfillment, failed collection, and settlement release.
+- [ ] Verify COD lifecycle, country isolation, finance safeguards, account UI, and Render deployment before enabling the workflow for live orders.

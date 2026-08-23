@@ -12,19 +12,42 @@ class Country extends Model
 {
     use LogsActivity;
 
-    protected $fillable = ['name', 'code', 'timezone', 'currency_id', 'platform_commission_rate', 'is_active'];
-    protected function casts(): array { return ['platform_commission_rate' => 'decimal:2', 'is_active' => 'boolean']; }
+    protected $fillable = ['name', 'code', 'timezone', 'currency_id', 'platform_commission_rate', 'cash_on_delivery_enabled', 'cod_confirmation_hours', 'cod_dispute_hours', 'is_active'];
+
+    protected function casts(): array
+    {
+        return ['platform_commission_rate' => 'decimal:2', 'cash_on_delivery_enabled' => 'boolean', 'is_active' => 'boolean'];
+    }
 
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()
-            ->logOnly(['name', 'code', 'platform_commission_rate', 'is_active'])
+            ->logOnly(['name', 'code', 'platform_commission_rate', 'cash_on_delivery_enabled', 'cod_confirmation_hours', 'cod_dispute_hours', 'is_active'])
             ->logOnlyDirty();
     }
 
-    public function currency(): BelongsTo { return $this->belongsTo(Currency::class); }
-    public function cities(): HasMany { return $this->hasMany(City::class); }
-    public function users(): HasMany { return $this->hasMany(User::class); }
-    public function products(): HasMany { return $this->hasMany(Product::class); }
-    public function auctions(): HasMany { return $this->hasMany(Auction::class); }
+    public function currency(): BelongsTo
+    {
+        return $this->belongsTo(Currency::class);
+    }
+
+    public function cities(): HasMany
+    {
+        return $this->hasMany(City::class);
+    }
+
+    public function users(): HasMany
+    {
+        return $this->hasMany(User::class);
+    }
+
+    public function products(): HasMany
+    {
+        return $this->hasMany(Product::class);
+    }
+
+    public function auctions(): HasMany
+    {
+        return $this->hasMany(Auction::class);
+    }
 }

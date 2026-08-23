@@ -48,7 +48,9 @@ class UpdateShipmentStatus
             }
             if ($status === 'delivered') {
                 $updates['delivered_at'] = now();
-                if ($order->status !== 'completed') {
+                if ($order->payment_method === 'cash_on_delivery') {
+                    $order->update(['status' => $order->collection_status === 'collected' ? 'awaiting_receipt_confirmation' : 'awaiting_collection']);
+                } elseif ($order->status !== 'completed') {
                     $order->update(['status' => 'completed', 'completed_at' => now()]);
                 }
             }

@@ -13,7 +13,7 @@ class CreditSellerWallet
 {
     public function handle(Order $order): WalletTransaction
     {
-        if ($order->status !== 'paid') {
+        if ($order->status !== 'paid' && ! ($order->payment_method === 'cash_on_delivery' && $order->collection_status === 'collected')) {
             throw ValidationException::withMessages(['order' => 'Seller earnings can only be credited after payment succeeds.']);
         }
 
@@ -39,7 +39,7 @@ class CreditSellerWallet
             'reference_type' => $referenceType,
             'reference_id' => $order->id,
             'status' => 'pending',
-            'metadata' => ['order_id' => $order->id, 'policy_event' => 'payment_succeeded'],
+            'metadata' => ['order_id' => $order->id, 'policy_event' => $order->payment_method === 'cash_on_delivery' ? 'cash_collected' : 'payment_succeeded'],
         ]);
 
         $wallet->update(['pending_balance' => Decimal::add((string) $wallet->pending_balance, $amount)]);

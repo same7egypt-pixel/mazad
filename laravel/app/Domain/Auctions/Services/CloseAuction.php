@@ -36,11 +36,16 @@ class CloseAuction
 
             $commissionRate = (string) ($auction->country?->platform_commission_rate ?? config('marketplace.default_commission_rate'));
             $commission = Decimal::percentage((string) $auction->current_price, $commissionRate);
+            $cashOnDelivery = $auction->country?->cash_on_delivery_enabled ?? false;
             $order = Order::query()->firstOrCreate(['auction_id' => $auction->id], [
                 'seller_id' => $auction->product->user_id, 'buyer_id' => $auction->winner_id,
                 'country_id' => $auction->country_id, 'currency_id' => $auction->currency_id,
                 'amount' => $auction->current_price, 'commission_rate' => $commissionRate, 'commission_amount' => $commission,
-                'seller_amount' => Decimal::subtract((string) $auction->current_price, $commission), 'status' => 'waiting_payment',
+                'seller_amount' => Decimal::subtract((string) $auction->current_price, $commission),
+                'payment_method' => $cashOnDelivery ? 'cash_on_delivery' : 'online',
+                'status' => $cashOnDelivery ? 'awaiting_cod_confirmation' : 'waiting_payment',
+                'winner_confirmation_expires_at' => $cashOnDelivery ? now()->addHours($auction->country?->cod_confirmation_hours ?? 12) : null,
+                'collection_status' => $cashOnDelivery ? 'awaiting_confirmation' : 'not_applicable',
             ]);
             $auction->update(['status' => 'sold']);
             $auction->product->update(['status' => 'sold']);

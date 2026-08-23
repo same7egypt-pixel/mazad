@@ -342,20 +342,84 @@ export async function placeLiveBid(countryId: number, auctionId: number, amount:
 }
 
 type LaravelWallet = { available_balance: string | number; pending_balance: string | number; currency?: { code?: string | null; symbol?: string | null } | null };
-type LaravelOrder = { id: number; status: string; auction?: { product?: { title?: string | null } | null } | null };
+type LaravelOrder = {
+  id: number;
+  buyer_id?: number;
+  seller_id?: number;
+  status: string;
+  payment_method?: string;
+  fulfilment_preference?: string | null;
+  collection_status?: string;
+  settlement_status?: string;
+  winner_confirmation_expires_at?: string | null;
+  shipment?: { status?: string | null; tracking_number?: string | null } | null;
+  auction?: { product?: { title?: string | null } | null } | null;
+};
 type LaravelNotification = { id: string; data?: { title?: string; message?: string; country_id?: number } | string | null; created_at: string };
+
+export type LiveCashOnDeliveryInput = {
+  fulfilment_preference: "external" | "self_pickup";
+  shipping_address?: { address_line?: string; city?: string; phone?: string; notes?: string };
+};
 
 export type LiveAccountSnapshot = {
   wallet: { available: string; pending: string; label: string } | null;
-  orders: Array<{ reference: string; title: string; status: string; progress: string; tone: "amber" | "teal" }>;
+  orders: Array<{
+    id: number;
+    reference: string;
+    title: string;
+    status: string;
+    progress: string;
+    tone: "amber" | "teal";
+    paymentMethod?: string;
+    fulfilmentPreference?: string | null;
+    collectionStatus?: string;
+    settlementStatus?: string;
+    winnerConfirmationExpiresAt?: string | null;
+    shipmentStatus?: string | null;
+    trackingNumber?: string | null;
+    isSeller: boolean;
+    needsCodConfirmation: boolean;
+    needsReceiptConfirmation: boolean;
+  }>;
   notifications: Array<{ title: string; detail: string; time: string }>;
 };
 
 function statusTone(status: string): "amber" | "teal" {
-  return ["paid", "shipped", "ready_for_pickup", "completed"].includes(status) ? "teal" : "amber";
+  return ["paid", "shipped", "ready_for_pickup", "awaiting_receipt_confirmation", "completed"].includes(status) ? "teal" : "amber";
 }
 
-export async function getLiveAccountSnapshot(countryId: number): Promise<LiveAccountSnapshot> {
+function orderStatusCopy(order: LaravelOrder): { status: string; progress: string } {
+  const map: Record<string, { status: string; progress: string }> = {
+    awaiting_cod_confirmation: { status: "بانتظار تأكيدك", progress: "أكد طريقة الاستلام قبل انتهاء المهلة حتى يبدأ تجهيز القطعة." },
+    cod_confirmed: { status: "تم تأكيد الطلب", progress: "يجري تجهيز القطعة للاستلام أو التوصيل والدفع عند الاستلام." },
+    fulfillment_pending: { status: "قيد التجهيز", progress: "فريق التشغيل يجهز القطعة لمسار الاستلام الذي اخترته." },
+    shipped: { status: "تم الشحن", progress: order.shipment?.tracking_number ? `رقم التتبع: ${order.shipment.tracking_number}` : "القطعة في طريقها إليك." },
+    ready_for_pickup: { status: "جاهز للاستلام", progress: "يمكنك استلام القطعة ودفع القيمة في نقطة الاستلام." },
+    awaiting_collection: { status: "بانتظار التحصيل", progress: "تم تسجيل التسليم وبانتظار تأكيد تحصيل القيمة عند الاستلام." },
+    awaiting_receipt_confirmation: { status: "أكد الاستلام", progress: "تم تحصيل القيمة. أكد استلامك للقطعة لإكمال الطلب." },
+    collection_failed: { status: "تعذر التحصيل", progress: "يراجع فريق التشغيل الطلب قبل اتخاذ الإجراء التالي." },
+    completed: { status: "مكتمل", progress: "اكتملت عملية الاستلام والتسوية." },
+    waiting_payment: { status: "بانتظار الدفع", progress: "ينتظر الطلب بدء الدفع الإلكتروني." },
+    paid: { status: "مدفوع", progress: "تم تأكيد الدفع ويجري تجهيز القطعة." },
+  };
+
+  return map[order.status] || { status: order.status, progress: "بيانات الطلب الحية" };
+}
+
+export async function confirmLiveCashOnDeliveryOrder(countryId: number, orderId: number, input: LiveCashOnDeliveryInput): Promise<void> {
+  await marketplaceRequest<{ order: LaravelOrder }>(`/api/orders/${orderId}/cash-on-delivery/confirm`, countryId, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(input),
+  });
+}
+
+export async function confirmLiveCashOnDeliveryReceipt(countryId: number, orderId: number): Promise<void> {
+  await marketplaceRequest<{ order: LaravelOrder }>(`/api/orders/${orderId}/cash-on-delivery/receipt-confirmation`, countryId, { method: "POST" });
+}
+
+export async function getLiveAccountSnapshot(countryId: number, viewerId?: number): Promise<LiveAccountSnapshot> {
   const [walletPayload, ordersPayload, notificationsPayload] = await Promise.all([
     marketplaceRequest<{ wallets: LaravelWallet[] }>("/api/wallets", countryId),
     marketplaceRequest<LaravelPaginator<LaravelOrder>>("/api/orders", countryId),
@@ -370,11 +434,21 @@ export async function getLiveAccountSnapshot(countryId: number): Promise<LiveAcc
       label: "محفظتك الحية",
     } : null,
     orders: ordersPayload.data.map((order) => ({
+      id: order.id,
       reference: `ORD-${order.id}`,
       title: order.auction?.product?.title || `طلب #${order.id}`,
-      status: order.status,
-      progress: "بيانات الطلب الحية",
+      ...orderStatusCopy(order),
       tone: statusTone(order.status),
+      paymentMethod: order.payment_method,
+      fulfilmentPreference: order.fulfilment_preference,
+      collectionStatus: order.collection_status,
+      settlementStatus: order.settlement_status,
+      winnerConfirmationExpiresAt: order.winner_confirmation_expires_at,
+      shipmentStatus: order.shipment?.status || null,
+      trackingNumber: order.shipment?.tracking_number || null,
+      isSeller: viewerId === order.seller_id,
+      needsCodConfirmation: viewerId === order.buyer_id && order.payment_method === "cash_on_delivery" && order.status === "awaiting_cod_confirmation",
+      needsReceiptConfirmation: viewerId === order.buyer_id && order.payment_method === "cash_on_delivery" && order.status === "awaiting_receipt_confirmation",
     })),
     notifications: notificationsPayload.data.map((notice) => {
       const data = typeof notice.data === "string" ? JSON.parse(notice.data) as LaravelNotification["data"] : notice.data;

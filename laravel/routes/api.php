@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\AuctionController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\BidController;
+use App\Http\Controllers\Api\CashOnDeliveryController;
 use App\Http\Controllers\Api\GovernanceController;
 use App\Http\Controllers\Api\ListingSearchController;
 use App\Http\Controllers\Api\MarketplaceCountryController;
@@ -16,7 +17,6 @@ use App\Http\Controllers\Api\ProductModerationController;
 use App\Http\Controllers\Api\ReviewController;
 use App\Http\Controllers\Api\ShipmentController;
 use App\Http\Controllers\Api\WalletController;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/marketplaces/countries', [MarketplaceCountryController::class, 'index']);
@@ -45,6 +45,10 @@ Route::middleware(['marketplace.country'])->group(function (): void {
         Route::post('/auctions/{auction}/bids', [BidController::class, 'store'])->middleware('throttle:auction-bids');
         Route::get('/orders', [OrderController::class, 'index']);
         Route::post('/orders/{order}/payments', [PaymentController::class, 'initiate']);
+        Route::post('/orders/{order}/cash-on-delivery/confirm', [CashOnDeliveryController::class, 'confirm']);
+        Route::post('/orders/{order}/cash-on-delivery/collection', [CashOnDeliveryController::class, 'recordCollection']);
+        Route::post('/orders/{order}/cash-on-delivery/collection-failed', [CashOnDeliveryController::class, 'markCollectionFailed']);
+        Route::post('/orders/{order}/cash-on-delivery/receipt-confirmation', [CashOnDeliveryController::class, 'confirmReceipt']);
         Route::post('/orders/{order}/reviews', [ReviewController::class, 'store']);
         Route::post('/orders/{order}/shipments', [ShipmentController::class, 'store']);
         Route::post('/shipments/{shipment}/status', [ShipmentController::class, 'updateStatus']);

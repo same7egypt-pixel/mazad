@@ -1,10 +1,12 @@
 // @vitest-environment jsdom
 import React from "react";
-import { cleanup, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({
   clearLiveMarketplaceToken: vi.fn(),
+  confirmLiveCashOnDeliveryOrder: vi.fn(),
+  confirmLiveCashOnDeliveryReceipt: vi.fn(),
   getLiveAccountSnapshot: vi.fn(),
   getLiveMarketplaceToken: vi.fn(),
   getLiveMarketplaceUser: vi.fn(),
@@ -13,6 +15,8 @@ const mocks = vi.hoisted(() => ({
 
 vi.mock("@/lib/marketplaceApi", () => ({
   clearLiveMarketplaceToken: mocks.clearLiveMarketplaceToken,
+  confirmLiveCashOnDeliveryOrder: mocks.confirmLiveCashOnDeliveryOrder,
+  confirmLiveCashOnDeliveryReceipt: mocks.confirmLiveCashOnDeliveryReceipt,
   getLiveAccountSnapshot: mocks.getLiveAccountSnapshot,
   getLiveMarketplaceToken: mocks.getLiveMarketplaceToken,
   getLiveMarketplaceUser: mocks.getLiveMarketplaceUser,
@@ -59,5 +63,22 @@ describe("الحساب الحي في Laravel", () => {
     expect(await screen.findByText("سجّل الدخول للوصول إلى طلباتك ومحفظتك وإشعاراتك الحية.")).toBeTruthy();
     expect(screen.queryByText("بيانات عرض مؤقتة")).toBeNull();
     expect(screen.getByRole("link", { name: "دخول أو إنشاء حساب" }).getAttribute("href")).toBe("/auth");
+  });
+
+  it("يتيح للفائز تأكيد طلب الدفع عند الاستلام واختيار الاستلام الذاتي", async () => {
+    mocks.getLiveMarketplaceToken.mockReturnValue("token-abc");
+    mocks.getLiveMarketplaceUser.mockResolvedValue({ id: 44, name: "فائز", email: "winner@example.test", country_id: 7, city_id: 11 });
+    mocks.getLiveAccountSnapshot.mockResolvedValue({
+      wallet: null,
+      orders: [{ id: 101, reference: "ORD-101", title: "قطعة فائزة", status: "بانتظار تأكيدك", progress: "أكد طريقة الاستلام", tone: "amber", needsCodConfirmation: true, needsReceiptConfirmation: false, winnerConfirmationExpiresAt: "2026-08-24T12:00:00Z" }],
+      notifications: [],
+    });
+    mocks.confirmLiveCashOnDeliveryOrder.mockResolvedValue(undefined);
+
+    render(<Account />);
+
+    fireEvent.click(await screen.findByRole("button", { name: "تأكيد الطلب" }));
+
+    await waitFor(() => expect(mocks.confirmLiveCashOnDeliveryOrder).toHaveBeenCalledWith(7, 101, { fulfilment_preference: "self_pickup" }));
   });
 });

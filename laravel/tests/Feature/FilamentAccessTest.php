@@ -72,6 +72,7 @@ class FilamentAccessTest extends TestCase
             'code' => 'SA',
             'timezone' => 'Asia/Riyadh',
             'currency_id' => $currency->id,
+            'cash_on_delivery_enabled' => true,
         ]);
         $admin = User::factory()->create(['status' => 'active']);
         $admin->assignRole(Role::findOrCreate('GLOBAL_SUPER_ADMIN', 'web'));
@@ -80,6 +81,8 @@ class FilamentAccessTest extends TestCase
         $this->actingAs($admin)
             ->get(route('filament.admin.resources.countries.edit', ['record' => $country]))
             ->assertOk()
-            ->assertSee('نسبة عمولة المنصة');
+            ->assertSee('نسبة عمولة المنصة')
+            ->assertSee('تفعيل الدفع عند الاستلام')
+            ->assertSee('مهلة تأكيد الفائز');
     }
 }
