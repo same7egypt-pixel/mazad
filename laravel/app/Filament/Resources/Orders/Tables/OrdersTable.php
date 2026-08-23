@@ -25,6 +25,11 @@ class OrdersTable
                 TextColumn::make('amount')
                     ->numeric()
                     ->sortable(),
+                TextColumn::make('commission_rate')
+                    ->label('نسبة العمولة')
+                    ->suffix('%')
+                    ->numeric(decimalPlaces: 2)
+                    ->sortable(),
                 TextColumn::make('commission_amount')
                     ->numeric()
                     ->sortable(),

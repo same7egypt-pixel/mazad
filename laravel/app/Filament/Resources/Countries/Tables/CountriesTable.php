@@ -22,6 +22,11 @@ class CountriesTable
                     ->searchable(),
                 TextColumn::make('currency.name')
                     ->searchable(),
+                TextColumn::make('platform_commission_rate')
+                    ->label('عمولة المنصة')
+                    ->suffix('%')
+                    ->numeric(decimalPlaces: 2)
+                    ->sortable(),
                 IconColumn::make('is_active')
                     ->boolean(),
                 TextColumn::make('created_at')

@@ -15,7 +15,7 @@ class CloseAuction
     public function handle(int $auctionId): ?Order
     {
         return DB::transaction(function () use ($auctionId): ?Order {
-            $auction = Auction::query()->with('product')->lockForUpdate()->findOrFail($auctionId);
+            $auction = Auction::query()->with(['product', 'country'])->lockForUpdate()->findOrFail($auctionId);
             if ($auction->status !== 'live' || now()->lt($auction->end_time)) {
                 return $auction->order;
             }
@@ -34,11 +34,12 @@ class CloseAuction
                 return null;
             }
 
-            $commission = Decimal::percentage((string) $auction->current_price, (string) config('marketplace.default_commission_rate'));
+            $commissionRate = (string) ($auction->country?->platform_commission_rate ?? config('marketplace.default_commission_rate'));
+            $commission = Decimal::percentage((string) $auction->current_price, $commissionRate);
             $order = Order::query()->firstOrCreate(['auction_id' => $auction->id], [
                 'seller_id' => $auction->product->user_id, 'buyer_id' => $auction->winner_id,
                 'country_id' => $auction->country_id, 'currency_id' => $auction->currency_id,
-                'amount' => $auction->current_price, 'commission_amount' => $commission,
+                'amount' => $auction->current_price, 'commission_rate' => $commissionRate, 'commission_amount' => $commission,
                 'seller_amount' => Decimal::subtract((string) $auction->current_price, $commission), 'status' => 'waiting_payment',
             ]);
             $auction->update(['status' => 'sold']);

@@ -130,6 +130,25 @@ class AuctionLifecycleTest extends TestCase
         Event::assertDispatched(AuctionLifecycleUpdated::class, fn (AuctionLifecycleUpdated $event) => $event->auction->id === $auction->id && $event->transition === 'sold');
     }
 
+    public function test_expired_winning_auction_snapshots_the_marketplace_commission_rate(): void
+    {
+        $market = $this->marketplace();
+        $market['country']->update(['platform_commission_rate' => '12.50']);
+        $seller = $this->user($market, ['auctions.create']);
+        $winner = $this->user($market, ['auctions.bid']);
+        $auction = $this->auction($market, $seller, 'live', now()->subHour(), now()->subMinute(), '120.00', $winner->id);
+
+        app(CloseAuction::class)->handle($auction->id);
+
+        $this->assertDatabaseHas('orders', [
+            'auction_id' => $auction->id,
+            'amount' => '120.00',
+            'commission_rate' => '12.50',
+            'commission_amount' => '15.00',
+            'seller_amount' => '105.00',
+        ]);
+    }
+
     public function test_atomic_bid_service_updates_the_price_once_and_rejects_an_underbid(): void
     {
         $market = $this->marketplace();

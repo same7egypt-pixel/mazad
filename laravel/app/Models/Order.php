@@ -9,8 +9,8 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Order extends Model
 {
-    protected $fillable = ['auction_id', 'seller_id', 'buyer_id', 'country_id', 'currency_id', 'amount', 'commission_amount', 'seller_amount', 'status', 'paid_at', 'completed_at'];
-    protected function casts(): array { return ['amount' => 'decimal:2', 'commission_amount' => 'decimal:2', 'seller_amount' => 'decimal:2', 'paid_at' => 'datetime', 'completed_at' => 'datetime']; }
+    protected $fillable = ['auction_id', 'seller_id', 'buyer_id', 'country_id', 'currency_id', 'amount', 'commission_rate', 'commission_amount', 'seller_amount', 'status', 'paid_at', 'completed_at'];
+    protected function casts(): array { return ['amount' => 'decimal:2', 'commission_rate' => 'decimal:2', 'commission_amount' => 'decimal:2', 'seller_amount' => 'decimal:2', 'paid_at' => 'datetime', 'completed_at' => 'datetime']; }
     public function auction(): BelongsTo { return $this->belongsTo(Auction::class); }
     public function seller(): BelongsTo { return $this->belongsTo(User::class, 'seller_id'); }
     public function buyer(): BelongsTo { return $this->belongsTo(User::class, 'buyer_id'); }
