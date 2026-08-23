@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { isLiveMarketplaceEnabled, mapLaravelAuction } from "./marketplaceApi";
+import { isLiveMarketplaceEnabled, mapLaravelAuction, resolveLaravelApiBaseUrl } from "./marketplaceApi";
 
 describe("محول Laravel Marketplace", () => {
   it("يحوّل استجابة مزاد Laravel إلى البيانات التي تتطلبها بطاقة الواجهة", () => {
@@ -23,9 +23,12 @@ describe("محول Laravel Marketplace", () => {
     expect(listing.price).toContain("ر.س");
   });
 
-  it("يعكس تهيئة عنوان API من البيئة", () => {
-    expect(isLiveMarketplaceEnabled()).toBe(
-      Boolean(process.env.VITE_LARAVEL_API_BASE_URL),
-    );
+  it("يستخدم عنوان Render التجريبي عند غياب إعداد البيئة", () => {
+    expect(resolveLaravelApiBaseUrl()).toBe("https://mazad-trial-api.onrender.com");
+    expect(isLiveMarketplaceEnabled()).toBe(true);
+  });
+
+  it("يمنح عنوان البيئة أولوية على fallback التجريبي", () => {
+    expect(resolveLaravelApiBaseUrl("https://api.example.test/")).toBe("https://api.example.test");
   });
 });

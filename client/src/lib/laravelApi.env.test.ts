@@ -16,7 +16,7 @@ describe("إعداد Laravel API الحي", () => {
     const response = await fetch(`${baseUrl}/up`);
 
     expect(response.ok).toBe(true);
-  });
+  }, 15_000);
 
   integrationTest("يكتشف السوق المرجعي عبر العنوان المهيأ", async () => {
     const response = await fetch(`${baseUrl}/api/marketplaces/countries`);
@@ -29,5 +29,5 @@ describe("إعداد Laravel API الحي", () => {
         ]),
       }),
     );
-  });
+  }, 15_000);
 });

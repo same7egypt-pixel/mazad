@@ -34,6 +34,9 @@ export type MarketplaceCountry = { id: number; code: string; name: string; curre
 const marketplaceCountryStorageKey = "mazad.marketplace-country-id";
 const laravelApiTokenStorageKey = "mazad.laravel-api-token";
 
+// Public trial endpoint only. VITE_LARAVEL_API_BASE_URL takes precedence for staging or production replacements.
+const deployedTrialLaravelApiBaseUrl = "https://mazad-trial-api.onrender.com";
+
 function normalizeBaseUrl(value: string | undefined): string | null {
   if (!value) return null;
   try {
@@ -44,7 +47,11 @@ function normalizeBaseUrl(value: string | undefined): string | null {
   }
 }
 
-export const laravelApiBaseUrl = normalizeBaseUrl(import.meta.env.VITE_LARAVEL_API_BASE_URL);
+export function resolveLaravelApiBaseUrl(configuredUrl?: string): string | null {
+  return normalizeBaseUrl(configuredUrl) || normalizeBaseUrl(deployedTrialLaravelApiBaseUrl);
+}
+
+export const laravelApiBaseUrl = resolveLaravelApiBaseUrl(import.meta.env.VITE_LARAVEL_API_BASE_URL);
 
 export function isLiveMarketplaceEnabled(): boolean {
   return laravelApiBaseUrl !== null;
