@@ -125,6 +125,8 @@
 - [x] Add Laravel coverage for the Render health-check endpoint `/up` to catch deployment readiness regressions.
 - [ ] Continue Render preparation and seller/admin interface work while retaining temporary data until a valid Laravel API URL is supplied.
 - [x] Build a clearly labelled temporary seller listing and auction-setup flow covering product details, media placeholders, country/city, and auction timing/pricing fields.
-- [ ] Publish the public React Marketplace on Netlify, configure the Render API origin, and verify end-user registration and login over HTTPS.
+- [x] Publish the public React Marketplace on Netlify, configure the Render API origin, and verify end-user registration and login over HTTPS.
 - [x] Enable the Netlify origin in the Render trial CORS policy and verify the public registration page loads active markets and cities.
-- [ ] Prevent the Netlify production storefront from showing temporary auction cards when the live Laravel API is unavailable.
+- [x] Prevent the Netlify production storefront from showing temporary auction cards when the live Laravel API is unavailable.
+- [x] Replace non-interactive account display cards with real Marketplace actions and hide all temporary account values for authenticated Netlify users.
+- [x] Preserve and display the authenticated Laravel session in the public homepage header after navigation from the account page.

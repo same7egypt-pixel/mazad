@@ -8,6 +8,7 @@ const mocks = vi.hoisted(() => ({
   getLiveAccountSnapshot: vi.fn(),
   getLiveMarketplaceToken: vi.fn(),
   getLiveMarketplaceUser: vi.fn(),
+  logoutLiveMarketplace: vi.fn(),
 }));
 
 vi.mock("@/lib/marketplaceApi", () => ({
@@ -15,12 +16,14 @@ vi.mock("@/lib/marketplaceApi", () => ({
   getLiveAccountSnapshot: mocks.getLiveAccountSnapshot,
   getLiveMarketplaceToken: mocks.getLiveMarketplaceToken,
   getLiveMarketplaceUser: mocks.getLiveMarketplaceUser,
+  logoutLiveMarketplace: mocks.logoutLiveMarketplace,
   getSavedMarketplaceCountryId: () => 7,
   isLiveMarketplaceEnabled: () => true,
 }));
 
 vi.mock("wouter", () => ({
   Link: ({ children, href, ...props }: { children: React.ReactNode; href: string }) => React.createElement("a", { href, ...props }, children),
+  useLocation: () => ["/account", vi.fn()],
 }));
 
 import Account from "./Account";
@@ -42,19 +45,19 @@ describe("الحساب الحي في Laravel", () => {
 
     render(<Account />);
 
-    expect((await screen.findAllByText("بيانات Laravel حية")).length).toBeGreaterThan(0);
+    expect((await screen.findAllByText("حساب Laravel حي")).length).toBeGreaterThan(0);
     expect(screen.getByText("مرحباً، بائع Laravel")).toBeTruthy();
     expect(await screen.findByText("ORD-100")).toBeTruthy();
     expect(screen.getByText("1,250 ر.س")).toBeTruthy();
     expect(screen.getByText("طلب حي")).toBeTruthy();
   });
 
-  it("يبقي بيانات العرض موسومة ويوجه إلى صفحة دخول Marketplace عند غياب جلسة المستخدم", async () => {
+  it("يوجه إلى صفحة دخول Marketplace عند غياب جلسة المستخدم من دون بيانات عرض", async () => {
     mocks.getLiveMarketplaceToken.mockReturnValue(null);
     render(<Account />);
 
-    expect(await screen.findByText("لعرض محفظتك وطلباتك الحية، سجّل الدخول أو أنشئ حساباً في Marketplace.")).toBeTruthy();
-    expect(screen.getAllByText("بيانات عرض مؤقتة").length).toBeGreaterThan(0);
+    expect(await screen.findByText("سجّل الدخول للوصول إلى طلباتك ومحفظتك وإشعاراتك الحية.")).toBeTruthy();
+    expect(screen.queryByText("بيانات عرض مؤقتة")).toBeNull();
     expect(screen.getByRole("link", { name: "دخول أو إنشاء حساب" }).getAttribute("href")).toBe("/auth");
   });
 });

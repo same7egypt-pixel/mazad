@@ -1,5 +1,5 @@
 import { demoAuctionLots, demoCountryOptions, getDemoCountry, type DemoAuction } from "@/data/marketplaceDemo";
-import { getLiveAuctions, getLiveMarketplaceCountries, isLiveMarketplaceEnabled, saveMarketplaceCountryId, type MarketplaceCountry } from "@/lib/marketplaceApi";
+import { clearLiveMarketplaceToken, getLiveAuctions, getLiveMarketplaceCountries, getLiveMarketplaceToken, getLiveMarketplaceUser, getSavedMarketplaceCountryId, isLiveMarketplaceEnabled, logoutLiveMarketplace, saveMarketplaceCountryId, type LiveMarketplaceUser, type MarketplaceCountry } from "@/lib/marketplaceApi";
 import { ArrowLeft, Bell, Clock3, Landmark, Menu, Search, ShieldCheck, Sparkles } from "lucide-react";
 import React, { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
@@ -26,6 +26,7 @@ export default function Home() {
   const [lots, setLots] = useState<DemoAuction[]>(isLiveMarketplaceEnabled() ? [] : demoAuctionLots);
   const [liveError, setLiveError] = useState(false);
   const [liveAuctionsLoading, setLiveAuctionsLoading] = useState(isLiveMarketplaceEnabled());
+  const [sessionUser, setSessionUser] = useState<LiveMarketplaceUser | null>(null);
   const isLive = isLiveMarketplaceEnabled();
   const countryOptions = useMemo(() => {
     if (liveCountries.length) return liveCountries.map((option) => ({ apiId: option.id, code: option.code.toLowerCase(), name: option.name, currency: option.currency?.symbol || option.currency?.code || "" }));
@@ -84,7 +85,37 @@ export default function Home() {
     if (activeCountry?.apiId) saveMarketplaceCountryId(activeCountry.apiId);
   }, [activeCountry?.apiId]);
 
+  useEffect(() => {
+    if (!isLive || !getLiveMarketplaceToken()) {
+      setSessionUser(null);
+      return;
+    }
+
+    const sessionCountryId = activeCountry?.apiId || getSavedMarketplaceCountryId();
+    if (!sessionCountryId) return;
+    let cancelled = false;
+    getLiveMarketplaceUser(sessionCountryId).then((user) => {
+      if (!cancelled) setSessionUser(user);
+    }).catch(() => {
+      clearLiveMarketplaceToken();
+      if (!cancelled) setSessionUser(null);
+    });
+
+    return () => { cancelled = true; };
+  }, [activeCountry?.apiId, isLive]);
+
   const reloadLiveData = () => window.location.reload();
+  const logout = async () => {
+    const sessionCountryId = activeCountry?.apiId || getSavedMarketplaceCountryId();
+    try {
+      if (sessionCountryId) await logoutLiveMarketplace(sessionCountryId);
+    } catch {
+      // Local revocation still prevents stale UI state if the network is unavailable.
+    }
+    clearLiveMarketplaceToken();
+    setSessionUser(null);
+    toast.success("تم تسجيل الخروج من حسابك.");
+  };
   const marketLabel = activeCountry?.name || (liveError ? "اتصال السوق غير متاح" : "جارٍ تحميل السوق");
 
   return <main dir="rtl" className="min-h-screen overflow-x-hidden bg-[#f7f6f1] text-[#143039]">
@@ -102,7 +133,7 @@ export default function Home() {
     <header className="market-container flex h-20 items-center justify-between gap-5">
       <Link href="/" className="flex items-center gap-3"><span className="grid h-10 w-10 place-items-center rounded-2xl bg-[#d96d46] text-xl font-black text-white shadow-lg">م</span><span className="font-serif text-2xl font-semibold">مِزَاد</span></Link>
       <nav className="hidden gap-7 text-sm font-semibold text-[#5b6d72] lg:flex"><a href="#auctions" className="text-[#12313a]">المزادات</a><a href="#discover">الاكتشاف</a><a href="#how">كيف يعمل</a><Link href="/sell">اعرض مقتناك</Link></nav>
-      <div className="flex items-center gap-2"><button onClick={() => toast.message("الإشعارات", { description: "سيتم ربط صندوق الإشعارات الحي في خطوة التكامل التالية." })} className="hidden h-10 w-10 place-items-center rounded-full border border-[#143039]/10 sm:grid" aria-label="إشعارات"><Bell size={18} /></button><Link href="/auth" className="rounded-full bg-[#12313a] px-5 py-2.5 text-sm font-bold text-white">دخول أو إنشاء حساب</Link><button onClick={() => toast.message("القائمة", { description: "التنقل الكامل متاح من روابط الصفحة في هذه النسخة الأولية." })} className="grid h-10 w-10 place-items-center rounded-full border border-[#143039]/10 lg:hidden" aria-label="القائمة"><Menu size={18} /></button></div>
+      <div className="flex items-center gap-2"><button onClick={() => toast.message("الإشعارات", { description: "سيتم ربط صندوق الإشعارات الحي في خطوة التكامل التالية." })} className="hidden h-10 w-10 place-items-center rounded-full border border-[#143039]/10 sm:grid" aria-label="إشعارات"><Bell size={18} /></button>{sessionUser ? <><Link href="/account" className="rounded-full bg-[#12313a] px-5 py-2.5 text-sm font-bold text-white">{sessionUser.name || "حسابي"}</Link><button type="button" onClick={logout} className="rounded-full border border-[#143039]/15 px-3 py-2 text-xs font-bold">خروج</button></> : <Link href="/auth" className="rounded-full bg-[#12313a] px-5 py-2.5 text-sm font-bold text-white">دخول أو إنشاء حساب</Link>}<button onClick={() => toast.message("القائمة", { description: "التنقل الكامل متاح من روابط الصفحة في هذه النسخة الأولية." })} className="grid h-10 w-10 place-items-center rounded-full border border-[#143039]/10 lg:hidden" aria-label="القائمة"><Menu size={18} /></button></div>
     </header>
 
     <section className="market-container pb-16 pt-5 md:pb-24 md:pt-10">

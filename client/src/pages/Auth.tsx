@@ -4,6 +4,7 @@ import {
   isLiveMarketplaceEnabled,
   loginLiveMarketplace,
   registerLiveMarketplace,
+  saveMarketplaceCountryId,
   type MarketplaceCountry,
   type SellerReferenceData,
 } from "@/lib/marketplaceApi";
@@ -81,6 +82,7 @@ export default function Auth() {
     setIsSubmitting(true);
     try {
       const user = await loginLiveMarketplace(selectedCountryId, email.trim(), password);
+      saveMarketplaceCountryId(selectedCountryId);
       toast.success(`مرحباً ${user.name}`, { description: "تم تسجيل الدخول إلى حسابك بنجاح." });
       navigate("/account");
     } catch {
@@ -111,6 +113,7 @@ export default function Auth() {
         password,
         password_confirmation: passwordConfirmation,
       });
+      saveMarketplaceCountryId(selectedCountryId);
       toast.success(`أهلاً ${user.name}`, { description: "تم إنشاء الحساب وتسجيل دخولك." });
       navigate("/account");
     } catch {

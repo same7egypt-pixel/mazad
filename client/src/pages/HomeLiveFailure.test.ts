@@ -7,6 +7,11 @@ const api = vi.hoisted(() => ({
   getLiveMarketplaceCountries: vi.fn(),
   getLiveAuctions: vi.fn(),
   isLiveMarketplaceEnabled: vi.fn(() => true),
+  getLiveMarketplaceToken: vi.fn(() => null),
+  getLiveMarketplaceUser: vi.fn(),
+  getSavedMarketplaceCountryId: vi.fn(() => 0),
+  clearLiveMarketplaceToken: vi.fn(),
+  logoutLiveMarketplace: vi.fn(),
   saveMarketplaceCountryId: vi.fn(),
 }));
 
