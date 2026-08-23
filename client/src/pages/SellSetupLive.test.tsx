@@ -125,6 +125,7 @@ describe("مسار البائع الحي", () => {
   });
 
   it("يرسل المنتج للمراجعة دون اشتراط جدولة المزاد قبل اعتماده", async () => {
+    const setTimeoutSpy = vi.spyOn(window, "setTimeout");
     mocks.createLiveProduct.mockResolvedValue({ id: 901 });
     mocks.submitLiveProductForReview.mockResolvedValue(undefined);
     await renderReadySellerFlow();
@@ -138,7 +139,12 @@ describe("مسار البائع الحي", () => {
       condition: "good",
     })));
     expect(mocks.toastError).not.toHaveBeenCalledWith("أكمل سعر البداية والزيادة وتوقيت البداية والنهاية.");
-    await waitFor(() => expect(mocks.navigate).toHaveBeenCalledWith("/"));
+    expect(await screen.findByText("أُرسل منتجك للمراجعة")).toBeTruthy();
+    expect(mocks.navigate).not.toHaveBeenCalledWith("/");
+    const redirectTimer = setTimeoutSpy.mock.calls.find(([, delay]) => delay === 1500)?.[0] as (() => void) | undefined;
+    expect(redirectTimer).toBeTruthy();
+    redirectTimer?.();
+    expect(mocks.navigate).toHaveBeenCalledWith("/");
   });
 
   it("يعرض خطأً مفهوماً إن رفض Laravel جدولة المنتج المعتمد", async () => {

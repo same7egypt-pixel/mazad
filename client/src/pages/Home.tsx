@@ -1,12 +1,25 @@
 import { demoAuctionLots, demoCountryOptions, getDemoCountry, type DemoAuction } from "@/data/marketplaceDemo";
 import { clearLiveMarketplaceToken, getLiveAuctions, getLiveMarketplaceCountries, getLiveMarketplaceToken, getLiveMarketplaceUser, getSavedMarketplaceCountryId, isLiveMarketplaceEnabled, logoutLiveMarketplace, saveMarketplaceCountryId, type LiveMarketplaceUser, type MarketplaceCountry } from "@/lib/marketplaceApi";
 import { BrandLogo } from "@/components/BrandLogo";
-import { ArrowLeft, Bell, Clock3, Landmark, Menu, Search, ShieldCheck, Sparkles } from "lucide-react";
+import { ArrowLeft, ArrowDownUp, Bell, Clock3, Landmark, Menu, Search, ShieldCheck, SlidersHorizontal, Sparkles, X } from "lucide-react";
 import React, { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { Link, useLocation } from "wouter";
 
 const categories = ["الكل", "فن واقتناء", "ساعات ومجوهرات", "تصوير وكاميرات", "تصميم وديكور"];
+type AuctionSort = "recommended" | "price-low" | "price-high" | "ending-soon";
+
+function auctionPriceValue(price: string) {
+  const normalized = price.replace(/[٠-٩]/g, (digit) => String("٠١٢٣٤٥٦٧٨٩".indexOf(digit))).replace(/[^\d.]/g, "");
+  return Number(normalized) || 0;
+}
+
+function auctionTimeValue(time: string) {
+  if (time.includes("غد")) return 86_400;
+  const [hours = "99", minutes = "59", seconds = "59"] = time.split(":");
+  const value = Number(hours) * 3600 + Number(minutes) * 60 + Number(seconds);
+  return Number.isFinite(value) ? value : Number.MAX_SAFE_INTEGER;
+}
 
 function LotImage({ lot, hero = false }: { lot: DemoAuction; hero?: boolean }) {
   return <div className={`relative overflow-hidden bg-gradient-to-br ${lot.paint} ${hero ? "h-[25rem] md:h-[31rem]" : "h-52"}`}>
@@ -23,6 +36,10 @@ export default function Home() {
   const [country, setCountry] = useState("sa");
   const [query, setQuery] = useState("");
   const [activeCategory, setActiveCategory] = useState("الكل");
+  const [selectedCity, setSelectedCity] = useState("الكل");
+  const [selectedCondition, setSelectedCondition] = useState("الكل");
+  const [sortBy, setSortBy] = useState<AuctionSort>("recommended");
+  const [advancedFiltersOpen, setAdvancedFiltersOpen] = useState(false);
   const [liveCountries, setLiveCountries] = useState<MarketplaceCountry[]>([]);
   const [lots, setLots] = useState<DemoAuction[]>(isLiveMarketplaceEnabled() ? [] : demoAuctionLots);
   const [liveError, setLiveError] = useState(false);
@@ -35,7 +52,25 @@ export default function Home() {
   }, [isLive, liveCountries]);
   const activeCountry = countryOptions.find((option) => option.code === country) || (isLive ? null : getDemoCountry(country));
   const heroLot = lots[0] || null;
-  const filteredLots = lots.filter((lot) => (activeCategory === "الكل" || lot.category === activeCategory) && `${lot.title} ${lot.category} ${lot.city}`.includes(query.trim()));
+  const cityOptions = useMemo(() => ["الكل", ...Array.from(new Set(lots.map((lot) => lot.city))).sort((left, right) => left.localeCompare(right, "ar"))], [lots]);
+  const conditionOptions = useMemo(() => ["الكل", ...Array.from(new Set(lots.map((lot) => lot.condition))).sort((left, right) => left.localeCompare(right, "ar"))], [lots]);
+  const filteredLots = useMemo(() => {
+    const normalizedQuery = query.trim().toLocaleLowerCase("ar");
+    const matchingLots = lots.filter((lot) => {
+      const searchable = `${lot.title} ${lot.category} ${lot.city} ${lot.condition}`.toLocaleLowerCase("ar");
+      return (activeCategory === "الكل" || lot.category === activeCategory)
+        && (selectedCity === "الكل" || lot.city === selectedCity)
+        && (selectedCondition === "الكل" || lot.condition === selectedCondition)
+        && (!normalizedQuery || searchable.includes(normalizedQuery));
+    });
+    return [...matchingLots].sort((left, right) => {
+      if (sortBy === "price-low") return auctionPriceValue(left.price) - auctionPriceValue(right.price);
+      if (sortBy === "price-high") return auctionPriceValue(right.price) - auctionPriceValue(left.price);
+      if (sortBy === "ending-soon") return auctionTimeValue(left.time) - auctionTimeValue(right.time);
+      return 0;
+    });
+  }, [activeCategory, lots, query, selectedCity, selectedCondition, sortBy]);
+  const activeFilterCount = Number(activeCategory !== "الكل") + Number(selectedCity !== "الكل") + Number(selectedCondition !== "الكل") + Number(Boolean(query.trim())) + Number(sortBy !== "recommended");
 
   useEffect(() => {
     if (!isLive) return;
@@ -81,6 +116,11 @@ export default function Home() {
 
     return () => { cancelled = true; };
   }, [country, isLive, liveCountries]);
+
+  useEffect(() => {
+    setSelectedCity("الكل");
+    setSelectedCondition("الكل");
+  }, [country]);
 
   useEffect(() => {
     if (activeCountry?.apiId) saveMarketplaceCountryId(activeCountry.apiId);
@@ -145,8 +185,8 @@ export default function Home() {
       </div>
     </section>
 
-    <section id="discover" className="border-y border-[#143039]/10 bg-[#ebe7dc] py-8"><div className="market-container grid gap-4 lg:grid-cols-[1fr_auto]"><label className="flex items-center gap-3 rounded-2xl bg-[#f8f7f2] px-4 py-3 shadow-sm"><Search className="shrink-0 text-[#d96d46]" size={20} /><input value={query} onChange={(event) => setQuery(event.target.value)} aria-label="ابحث في المزادات" placeholder="ابحث عن قطعة، فئة أو مدينة" className="w-full bg-transparent text-sm outline-none placeholder:text-[#879497]" /></label><div className="flex gap-2 overflow-x-auto pb-1 lg:max-w-[39rem]">{categories.map((name) => <button key={name} onClick={() => setActiveCategory(name)} className={`shrink-0 rounded-xl border px-4 py-3 text-sm font-semibold transition ${activeCategory === name ? "border-[#12313a] bg-[#12313a] text-white" : "border-[#143039]/10 bg-[#f8f7f2] hover:border-[#d96d46]"}`}>{name}</button>)}</div></div></section>
-    <section id="auctions" className="market-container py-16 md:py-24"><div className="mb-9 flex items-end justify-between"><div><p className="text-xs font-bold tracking-[.16em] text-[#d96d46]">مزادات حية الآن</p><h2 className="mt-2 font-serif text-4xl md:text-5xl">فرص لا تتكرر</h2></div><span className="hidden text-sm text-[#6f8084] sm:block">{filteredLots.length} مزادات مطابقة</span></div>{filteredLots.length ? <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">{filteredLots.map((lot) => <article key={lot.id} className="group overflow-hidden rounded-[1.35rem] bg-white shadow-[0_10px_35px_rgba(20,48,57,.08)] transition hover:-translate-y-1 hover:shadow-[0_18px_45px_rgba(20,48,57,.15)]"><Link href={`/auction/${lot.id}?countryId=${activeCountry?.apiId ?? 0}`}><LotImage lot={lot} /></Link><div className="p-5"><p className="text-xs font-bold text-[#d96d46]">{lot.category}</p><Link href={`/auction/${lot.id}?countryId=${activeCountry?.apiId ?? 0}`}><h3 className="mt-2 font-serif text-xl font-semibold transition group-hover:text-[#d96d46]">{lot.title}</h3></Link><p className="mt-2 text-xs text-[#718187]">{lot.city} · مزاد مباشر</p><div className="mt-5 flex items-end justify-between border-t border-[#143039]/8 pt-4"><span className="text-xs text-[#718187]">المزايدة الحالية</span><strong>{lot.price}</strong></div></div></article>)}</div> : <div className="rounded-3xl border border-dashed border-[#143039]/20 p-10 text-center text-[#6f8084]">{isLive && liveError ? "تعذر الاتصال بالمزادات الحية. لا توجد بيانات بديلة معروضة." : isLive && !liveAuctionsLoading ? "لا توجد مزادات حية في السوق المحدد حالياً." : "لم نجد مزاداً مطابقاً. جرّب فئة أخرى أو كلمات بحث مختلفة."}</div>}</section>
+    <section id="discover" className="border-y border-[#143039]/10 bg-[#ebe7dc] py-8"><div className="market-container"><div className="grid gap-4 lg:grid-cols-[1fr_auto]"><label className="flex items-center gap-3 rounded-2xl bg-[#f8f7f2] px-4 py-3 shadow-sm"><Search className="shrink-0 text-[#d96d46]" size={20} /><input value={query} onChange={(event) => setQuery(event.target.value)} aria-label="ابحث في المزادات والقطع المعروضة" placeholder="ابحث عن قطعة، فئة أو مدينة" className="w-full bg-transparent text-sm outline-none placeholder:text-[#879497]" /></label><div className="flex gap-2 overflow-x-auto pb-1 lg:max-w-[39rem]">{categories.map((name) => <button key={name} onClick={() => setActiveCategory(name)} className={`shrink-0 rounded-xl border px-4 py-3 text-sm font-semibold transition ${activeCategory === name ? "border-[#12313a] bg-[#12313a] text-white" : "border-[#143039]/10 bg-[#f8f7f2] hover:border-[#d96d46]"}`}>{name}</button>)}</div></div><div className="mt-4 flex flex-wrap items-center justify-between gap-3"><button type="button" onClick={() => setAdvancedFiltersOpen((isOpen) => !isOpen)} aria-expanded={advancedFiltersOpen} aria-controls="advanced-auction-filters" className="inline-flex items-center gap-2 rounded-xl border border-[#143039]/15 bg-[#f8f7f2] px-4 py-2.5 text-sm font-bold transition hover:border-[#d96d46]"><SlidersHorizontal size={17} />خيارات التصفية والفرز{activeFilterCount > 0 && <span className="grid h-5 min-w-5 place-items-center rounded-full bg-[#d96d46] px-1 text-[10px] text-white">{activeFilterCount}</span>}</button><span className="text-xs text-[#6d7f83]">البحث يشمل القطع المعروضة ضمن المزادات النشطة في السوق المختار.</span></div>{advancedFiltersOpen && <div id="advanced-auction-filters" className="filter-panel mt-4 grid gap-3 rounded-2xl border border-[#143039]/10 bg-[#f8f7f2] p-4 md:grid-cols-[1fr_1fr_1fr_auto]"><label className="grid gap-1.5 text-xs font-bold text-[#566b70]">المدينة<select value={selectedCity} onChange={(event) => setSelectedCity(event.target.value)} className="rounded-xl border border-[#143039]/15 bg-white px-3 py-2.5 text-sm font-normal text-[#143039] outline-none focus:border-[#d96d46]">{cityOptions.map((city) => <option key={city}>{city}</option>)}</select></label><label className="grid gap-1.5 text-xs font-bold text-[#566b70]">حالة القطعة<select value={selectedCondition} onChange={(event) => setSelectedCondition(event.target.value)} className="rounded-xl border border-[#143039]/15 bg-white px-3 py-2.5 text-sm font-normal text-[#143039] outline-none focus:border-[#d96d46]">{conditionOptions.map((condition) => <option key={condition}>{condition}</option>)}</select></label><label className="grid gap-1.5 text-xs font-bold text-[#566b70]">الفرز<select value={sortBy} onChange={(event) => setSortBy(event.target.value as AuctionSort)} className="rounded-xl border border-[#143039]/15 bg-white px-3 py-2.5 text-sm font-normal text-[#143039] outline-none focus:border-[#d96d46]"><option value="recommended">الأكثر صلة</option><option value="ending-soon">ينتهي قريباً</option><option value="price-low">السعر: الأقل أولاً</option><option value="price-high">السعر: الأعلى أولاً</option></select></label><button type="button" onClick={() => { setQuery(""); setActiveCategory("الكل"); setSelectedCity("الكل"); setSelectedCondition("الكل"); setSortBy("recommended"); }} disabled={activeFilterCount === 0} className="mt-auto inline-flex items-center justify-center gap-2 rounded-xl border border-[#143039]/15 px-4 py-2.5 text-sm font-bold text-[#143039] disabled:cursor-not-allowed disabled:opacity-45"><X size={16} />مسح الكل</button></div>}</div></section>
+    <section id="auctions" className="market-container py-16 md:py-24"><div className="mb-9 flex items-end justify-between"><div><p className="text-xs font-bold tracking-[.16em] text-[#d96d46]">مزادات حية الآن</p><h2 className="mt-2 font-serif text-4xl md:text-5xl">فرص لا تتكرر</h2></div><span className="flex items-center gap-2 text-sm text-[#6f8084]"><ArrowDownUp size={15} />{filteredLots.length} مزادات مطابقة</span></div>{filteredLots.length ? <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">{filteredLots.map((lot) => <article key={lot.id} className="group overflow-hidden rounded-[1.35rem] bg-white shadow-[0_10px_35px_rgba(20,48,57,.08)] transition hover:-translate-y-1 hover:shadow-[0_18px_45px_rgba(20,48,57,.15)]"><Link href={`/auction/${lot.id}?countryId=${activeCountry?.apiId ?? 0}`}><LotImage lot={lot} /></Link><div className="p-5"><p className="text-xs font-bold text-[#d96d46]">{lot.category}</p><Link href={`/auction/${lot.id}?countryId=${activeCountry?.apiId ?? 0}`}><h3 className="mt-2 font-serif text-xl font-semibold transition group-hover:text-[#d96d46]">{lot.title}</h3></Link><p className="mt-2 text-xs text-[#718187]">{lot.city} · مزاد مباشر</p><div className="mt-5 flex items-end justify-between border-t border-[#143039]/8 pt-4"><span className="text-xs text-[#718187]">المزايدة الحالية</span><strong>{lot.price}</strong></div></div></article>)}</div> : <div className="rounded-3xl border border-dashed border-[#143039]/20 p-10 text-center text-[#6f8084]">{isLive && liveError ? "تعذر الاتصال بالمزادات الحية. لا توجد بيانات بديلة معروضة." : isLive && !liveAuctionsLoading && lots.length === 0 ? "لا توجد مزادات حية في السوق المحدد حالياً." : "لا توجد نتائج تطابق التصفية الحالية. جرّب مسح الخيارات أو كلمات بحث مختلفة."}</div>}</section>
     <section id="how" className="bg-[#e6e2d6] py-16 md:py-24"><div className="market-container grid gap-10 lg:grid-cols-[.8fr_1.2fr]"><div><p className="text-xs font-bold tracking-[.16em] text-[#d96d46]">مزاد يضع الوضوح أولاً</p><h2 className="mt-3 font-serif text-4xl leading-tight md:text-5xl">تجربة مدروسة<br />من أول مزايدة.</h2></div><div className="grid gap-px overflow-hidden rounded-3xl bg-[#143039]/10 sm:grid-cols-3">{[["01", "تحقق من القطعة", "البيانات والوسائط وسياق البائع في مكان واحد."], ["02", "زايد بثقة", "سعر حي وحد أدنى واضح وحماية ذرية."], ["03", "أكمل الاستلام", "طلب منظم وشحن قابل للمتابعة."]].map(([num, title, copy]) => <div key={num} className="bg-[#f7f6f1] p-6"><span className="font-serif text-3xl text-[#d96d46]">{num}</span><h3 className="mt-8 font-serif text-xl font-semibold">{title}</h3><p className="mt-3 text-sm leading-6 text-[#65767b]">{copy}</p></div>)}</div></div></section>
     <section id="sell" className="market-container py-16 md:py-24"><div className="flex flex-col items-start justify-between gap-8 rounded-[2rem] bg-[#d96d46] p-8 text-white md:flex-row md:items-end md:p-12"><div><p className="text-xs font-bold tracking-[.16em] text-[#ffe3cc]">هل لديك قطعة استثنائية؟</p><h2 className="mt-3 max-w-2xl font-serif text-4xl leading-tight md:text-5xl">ابدأ مسار بيع واضحاً، من المسودة إلى المزاد.</h2></div><button onClick={() => navigate("/sell")} className="flex items-center gap-2 rounded-full bg-white px-6 py-3 text-sm font-bold text-[#b94f31]">اعرض مقتناك <ArrowLeft size={16} /></button></div></section>
     <footer className="border-t border-[#143039]/10 py-8"><div className="market-container flex flex-col justify-between gap-4 text-xs text-[#718187] sm:flex-row"><span>© 2026 Biddfy.ai · {isLive ? "منصة مزادات متصلة" : "تجربة استكشاف مؤقتة"}</span><div className="flex gap-5"><a href="#how">عن المنصة</a><a href="#auctions">المزادات</a><a href="#sell">البائعون</a></div></div></footer>

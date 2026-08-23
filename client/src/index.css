@@ -181,4 +181,13 @@
   .market-container { width: 100%; margin-inline: auto; padding-inline: 1.25rem; }
   @media (min-width: 640px) { .market-container { padding-inline: 2rem; } }
   @media (min-width: 1280px) { .market-container { max-width: 1380px; padding-inline: 3rem; } }
+  .submission-success-card { animation: submission-success-enter 360ms cubic-bezier(0.23, 1, 0.32, 1) both; }
+  .submission-success-orbit { animation: submission-success-orbit 1200ms cubic-bezier(0.77, 0, 0.175, 1) infinite alternate; }
+  .submission-success-progress { animation: submission-success-countdown 1500ms linear both; }
+  .filter-panel { animation: filter-panel-enter 180ms cubic-bezier(0.23, 1, 0.32, 1) both; }
+  @keyframes submission-success-enter { from { opacity: 0; transform: translateY(12px) scale(.96); } to { opacity: 1; transform: translateY(0) scale(1); } }
+  @keyframes submission-success-orbit { from { transform: scale(.84); opacity: .55; } to { transform: scale(1.16); opacity: 1; } }
+  @keyframes submission-success-countdown { from { width: 0; } to { width: 100%; } }
+  @keyframes filter-panel-enter { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: translateY(0); } }
+  @media (prefers-reduced-motion: reduce) { .submission-success-card, .submission-success-orbit, .submission-success-progress, .filter-panel { animation: none; } }
 }

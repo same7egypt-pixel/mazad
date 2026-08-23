@@ -101,6 +101,7 @@ export default function SellSetup() {
   const [registrationConfirmation, setRegistrationConfirmation] = useState("");
   const [isRegistering, setIsRegistering] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submissionComplete, setSubmissionComplete] = useState(false);
   const [isScheduling, setIsScheduling] = useState(false);
   const countryId = getSavedMarketplaceCountryId();
   const isLive = isLiveMarketplaceEnabled() && countryId > 0;
@@ -161,6 +162,12 @@ export default function SellSetup() {
     return () => { cancelled = true; };
   }, [countryId, isLive, liveSessionUser]);
 
+  useEffect(() => {
+    if (!submissionComplete) return;
+    const redirectTimer = window.setTimeout(() => navigate("/"), 1500);
+    return () => window.clearTimeout(redirectTimer);
+  }, [navigate, submissionComplete]);
+
   const changeCountry = (nextCountry: string) => {
     setCountry(nextCountry);
     setCity(fallbackCities[nextCountry]?.[0] || "");
@@ -200,7 +207,7 @@ export default function SellSetup() {
       await Promise.all(allMediaFiles.map((file) => uploadLiveProductMedia(countryId, product.id, file)));
       await submitLiveProductForReview(countryId, product.id);
       toast.success("أُرسل المنتج للمراجعة", { description: "تُحفظ الوسائط بشكل خاص. لا يمكن جدولة المزاد إلا بعد اعتماد المنتج من المشرف." });
-      navigate("/");
+      setSubmissionComplete(true);
     } catch {
       toast.error("تعذر إرسال المنتج. تحقق من تسجيل الدخول والسوق والملفات المسموح بها.");
     } finally {
@@ -328,6 +335,16 @@ export default function SellSetup() {
   const approvedProducts = sellerProducts.filter((product) => product.status === "approved" && !product.auction);
 
   return <main dir="rtl" className="min-h-screen bg-[#f7f6f1] text-[#143039]">
+    {submissionComplete && <div className="fixed inset-0 z-50 grid place-items-center bg-[#12313a]/35 p-5 backdrop-blur-sm" role="status" aria-live="polite">
+      <section className="submission-success-card relative w-full max-w-md overflow-hidden rounded-[2rem] bg-white p-8 text-center shadow-[0_30px_80px_rgba(18,49,58,.28)]">
+        <div className="submission-success-orbit absolute -right-12 -top-12 h-36 w-36 rounded-full bg-[#d96d46]/15" />
+        <div className="relative mx-auto grid h-16 w-16 place-items-center rounded-full bg-[#edf0e8] text-[#12313a]"><Check size={32} strokeWidth={2.8} /></div>
+        <p className="relative mt-6 text-xs font-bold tracking-[.14em] text-[#d96d46]">تم بنجاح</p>
+        <h2 className="relative mt-2 font-serif text-3xl">أُرسل منتجك للمراجعة</h2>
+        <p className="relative mt-3 text-sm leading-7 text-[#65767b]">سننقلك إلى الصفحة الرئيسية الآن. ستتمكن من جدولة المزاد بعد اعتماد المنتج.</p>
+        <div className="relative mx-auto mt-6 h-1.5 w-44 overflow-hidden rounded-full bg-[#edf0e8]"><span className="submission-success-progress block h-full rounded-full bg-[#d96d46]" /></div>
+      </section>
+    </div>}
     <header className="market-container flex h-20 items-center justify-between">
       <Link href="/" className="rounded-xl px-1 py-2" aria-label="Biddfy.ai"><BrandLogo /></Link>
       <Link href="/" className="flex items-center gap-2 text-sm font-bold"><ArrowRight size={17} />العودة إلى المزادات</Link>
