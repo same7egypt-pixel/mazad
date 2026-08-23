@@ -49,4 +49,19 @@ class ProvisionFirstAdminCommandTest extends TestCase
 
         $this->assertDatabaseMissing('users', ['email' => 'admin@example.test']);
     }
+
+    public function test_it_does_not_create_an_admin_with_an_invalid_email_address(): void
+    {
+        $this->seed(RolePermissionSeeder::class);
+        config()->set('marketplace.first_admin', [
+            'enabled' => true,
+            'name' => 'Trial Administrator',
+            'email' => 'admin-without-a-domain',
+            'password' => 'A-safe-temporary-password-123!',
+        ]);
+
+        $this->artisan('marketplace:provision-first-admin')->assertSuccessful();
+
+        $this->assertDatabaseMissing('users', ['email' => 'admin-without-a-domain']);
+    }
 }

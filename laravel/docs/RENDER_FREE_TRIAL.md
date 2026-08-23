@@ -28,7 +28,7 @@
 
 بعد ربط GitHub، أنشئ Blueprint من المستودع `same7egypt-pixel/mazad` والفرع `main`. سيقرأ Render ملف `render.yaml`، ثم اختر **Free** للخدمتين عند ظهور المراجعة. لا تستخدم الخطة المجانية `preDeployCommand`؛ لذلك يشغّل Blueprint السكربت التنفيذي `render-trial-web` الذي ينفذ `php artisan migrate --force --no-interaction` قبل تشغيل nginx في كل نشر GitHub، مع خمس محاولات اتصال قصيرة. أدخل القيم المطلوبة فقط من لوحة Render؛ لا تحفظ الأسرار في Git:
 
-لإنشاء المدير الأول من دون وضع كلمة مرور في المستودع، أضف في خدمة API فقط `FIRST_ADMIN_ENABLED=true` ومتغيرات `FIRST_ADMIN_NAME` و`FIRST_ADMIN_EMAIL` و`FIRST_ADMIN_PASSWORD`. عند بدء الخدمة، ينشئ الأمر المدير أو يعيد تثبيت دوره `GLOBAL_SUPER_ADMIN` بصورة idempotent، ويعلّم البريد موثقاً. بعد أول دخول، غيّر كلمة المرور واحذف `FIRST_ADMIN_PASSWORD` أو اجعل `FIRST_ADMIN_ENABLED=false` في Render ثم أعد النشر؛ لن تعيد الخدمة إنشاء كلمة مرور حساب قائم.
+لإنشاء المدير الأول من دون وضع كلمة مرور في المستودع، أضف في خدمة API فقط `FIRST_ADMIN_ENABLED=true` ومتغيرات `FIRST_ADMIN_NAME` و`FIRST_ADMIN_EMAIL` و`FIRST_ADMIN_PASSWORD`. يجب أن يكون البريد كاملاً وصالحاً مثل `admin@example.com`؛ يتخطى الأمر أي بريد غير صالح من دون إيقاف الخدمة. عند بدء الخدمة، ينشئ الأمر المدير أو يعيد تثبيت دوره `GLOBAL_SUPER_ADMIN` بصورة idempotent، ويعلّم البريد موثقاً. بعد أول دخول، غيّر كلمة المرور واحذف `FIRST_ADMIN_PASSWORD` أو اجعل `FIRST_ADMIN_ENABLED=false` في Render ثم أعد النشر؛ لن تعيد الخدمة إنشاء كلمة مرور حساب قائم.
 
 | المتغير | ما يُدخل |
 |---|---|

@@ -31,8 +31,16 @@ class ProvisionFirstAdmin extends Command
             return self::SUCCESS;
         }
 
+        $email = mb_strtolower(trim($email));
+
+        if (! filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            $this->warn('First administrator email is invalid; skipping provisioning.');
+
+            return self::SUCCESS;
+        }
+
         $role = Role::findByName('GLOBAL_SUPER_ADMIN', 'web');
-        $administrator = User::query()->firstOrNew(['email' => mb_strtolower($email)]);
+        $administrator = User::query()->firstOrNew(['email' => $email]);
 
         $administrator->fill([
             'name' => $name,
