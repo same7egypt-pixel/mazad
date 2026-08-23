@@ -174,4 +174,4 @@
 - [x] Add non-destructive COD order, collection, confirmation, and settlement fields with country-scoped configuration defaults.
 - [x] Create idempotent COD winner-confirmation, collection-recording, receipt-confirmation, and seller-settlement domain services with audited transitions.
 - [x] Build account-level COD order detail actions and role-scoped Filament operations for collection, fulfillment, failed collection, and settlement release.
-- [ ] Verify COD lifecycle, country isolation, finance safeguards, account UI, and Render deployment before enabling the workflow for live orders.
+- [x] Verify COD lifecycle, country isolation, finance safeguards, account UI, and Render deployment before enabling the workflow for live orders.
