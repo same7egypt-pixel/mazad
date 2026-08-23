@@ -144,3 +144,5 @@
 - [ ] Correct the Render trial startup seeder class invocation and verify that the service reaches a live state before enabling Neon migration.
 - [ ] Resolve the PostgreSQL client-library mismatch in the Render migration image and verify the Neon copy completes before switching application traffic.
 - [ ] Handle Neon's pre-existing public schema during pg_restore and verify the full Render data copy completes successfully.
+- [ ] Add a reversible Render configuration switch that routes Laravel to the verified Neon database only when explicitly enabled.
+- [ ] Enable Neon for the live Render service and verify health, public market discovery, authentication, and Filament admin access before decommissioning nothing.
