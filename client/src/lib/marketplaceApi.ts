@@ -44,6 +44,7 @@ export type MarketplaceCountry = { id: number; code: string; name: string; curre
 
 const marketplaceCountryStorageKey = "mazad.marketplace-country-id";
 const laravelApiTokenStorageKey = "mazad.laravel-api-token";
+let transientLiveMarketplaceToken: string | null = null;
 
 // Public trial endpoint only. VITE_LARAVEL_API_BASE_URL takes precedence for staging or production replacements.
 const deployedTrialLaravelApiBaseUrl = "https://mazad-trial-api.onrender.com";
@@ -97,16 +98,32 @@ export type LiveMarketplaceRegistrationInput = {
 };
 
 export function getLiveMarketplaceToken(): string | null {
-  if (typeof window === "undefined") return null;
-  return window.sessionStorage.getItem(laravelApiTokenStorageKey);
+  if (typeof window === "undefined") return transientLiveMarketplaceToken;
+  try {
+    return window.sessionStorage.getItem(laravelApiTokenStorageKey) || transientLiveMarketplaceToken;
+  } catch {
+    return transientLiveMarketplaceToken;
+  }
 }
 
 function saveLiveMarketplaceToken(token: string): void {
-  if (typeof window !== "undefined") window.sessionStorage.setItem(laravelApiTokenStorageKey, token);
+  transientLiveMarketplaceToken = token;
+  if (typeof window === "undefined") return;
+  try {
+    window.sessionStorage.setItem(laravelApiTokenStorageKey, token);
+  } catch {
+    // Some privacy modes deny browser storage. The active page can still use this token safely in memory.
+  }
 }
 
 export function clearLiveMarketplaceToken(): void {
-  if (typeof window !== "undefined") window.sessionStorage.removeItem(laravelApiTokenStorageKey);
+  transientLiveMarketplaceToken = null;
+  if (typeof window === "undefined") return;
+  try {
+    window.sessionStorage.removeItem(laravelApiTokenStorageKey);
+  } catch {
+    // Nothing else is required when browser storage is unavailable.
+  }
 }
 
 function formatMoney(amount: string | number, currency?: LaravelAuction["currency"]): string {

@@ -13,6 +13,7 @@ const liveUser = {
 describe("جلسة Laravel Marketplace", () => {
   afterEach(() => {
     window.sessionStorage.clear();
+    vi.restoreAllMocks();
     vi.unstubAllEnvs();
     vi.unstubAllGlobals();
     vi.resetModules();
@@ -55,6 +56,24 @@ describe("جلسة Laravel Marketplace", () => {
 
     const [, request] = fetchMock.mock.calls[0] as [string, RequestInit];
     expect(JSON.parse(request.body as string)).toMatchObject({ country_id: 7, city_id: 11, device_name: "Mazad Marketplace Web" });
+  });
+
+  it("يكمل الدخول داخل الصفحة عندما يمنع وضع الخصوصية تخزين الجلسة", async () => {
+    vi.stubEnv("VITE_LARAVEL_API_BASE_URL", "https://api.example.test");
+    vi.spyOn(Storage.prototype, "getItem").mockImplementation(() => { throw new DOMException("Storage is blocked", "SecurityError"); });
+    vi.spyOn(Storage.prototype, "setItem").mockImplementation(() => { throw new DOMException("Storage is blocked", "SecurityError"); });
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ ok: true, status: 201, json: async () => ({ user: liveUser, token: "memory-token-abc" }) }));
+
+    const api = await import("./marketplaceApi");
+    await expect(api.registerLiveMarketplace(7, {
+      city_id: 11,
+      name: liveUser.name,
+      email: liveUser.email,
+      password: "very-secure-password",
+      password_confirmation: "very-secure-password",
+    })).resolves.toEqual(liveUser);
+
+    expect(api.getLiveMarketplaceToken()).toBe("memory-token-abc");
   });
 
   it("يحفظ سبب التحقق من Laravel عندما يكون البريد مسجلاً بالفعل", async () => {

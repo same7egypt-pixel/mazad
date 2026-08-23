@@ -153,3 +153,4 @@
 - [ ] Serve the public React Marketplace from the existing Render Laravel service, including SPA routing and the live seller scheduling fix, before retiring reliance on Netlify.
 - [x] Remove the incompatible corepack enable step from the Render Static Site build command and verify a successful public deployment.
 - [ ] Diagnose and fix the Render public-site login failure before claiming seller scheduling works on the new host.
+- [ ] Diagnose and fix the Render public-site registration connectivity failure reported from the user session before continuing account-flow verification.
