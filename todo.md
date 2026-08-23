@@ -24,6 +24,7 @@
 - [x] Seed idempotent Marketplace reference data for the Render trial: supported country, currency, cities, and catalogue categories only.
 - [ ] Configure the published Marketplace frontend with the Render HTTPS API URL and verify live discovery behavior.
 - [ ] Add a documented non-secret Render API fallback because the static production build did not receive VITE_LARAVEL_API_BASE_URL.
+- [ ] Show an explicit empty state when the live Laravel auction list is successfully empty instead of retaining temporary display cards.
 - [x] Add the PHP zip extension to the Composer build stage after the Render retry exposed it as the next required platform dependency.
 - [x] Prevent Composer package discovery from running before artisan exists in the Docker vendor stage, then run discovery after the Laravel source is present.
 - [ ] Implement countries, cities, currencies, categories, role-scoped administration, and country-context enforcement.

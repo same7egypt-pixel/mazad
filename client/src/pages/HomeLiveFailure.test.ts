@@ -30,4 +30,16 @@ describe("فشل Laravel في صفحة الاكتشاف", () => {
     await waitFor(() => expect(screen.getByText("تعذر جلب المزادات الحية؛ نعرض بيانات العرض المؤقتة إلى أن تستعيد خدمة Laravel اتصالها.")).toBeTruthy());
     expect(screen.getAllByText("ساعة كرونوغراف كلاسيكية").length).toBeGreaterThan(0);
   });
+
+  it("يعرض حالة فارغة صريحة عندما يعيد Laravel قائمة مزادات خالية", async () => {
+    api.getLiveMarketplaceCountries.mockResolvedValueOnce([
+      { id: 1, code: "SA", name: "المملكة العربية السعودية", currency: { symbol: "ر.س" } },
+    ]);
+    api.getLiveAuctions.mockResolvedValueOnce([]);
+
+    render(React.createElement(Home));
+
+    await waitFor(() => expect(screen.getByText("لا توجد مزادات حية في السوق المحدد حالياً.")).toBeTruthy());
+    expect(screen.getByText("لا توجد مزادات حية حالياً")).toBeTruthy();
+  });
 });

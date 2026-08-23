@@ -27,9 +27,9 @@ describe("واجهة Marketplace التجريبية", () => {
 
     expect(html).toContain(
       isLiveMarketplaceEnabled()
-        ? "مزادات حية مقيدة بسياق الدولة"
+        ? "جارٍ تحميل المزادات الحية"
         : "بيانات عرض مؤقتة حتى اتصال Laravel",
     );
-    expect(html).toContain("ساعة كرونوغراف كلاسيكية");
+    if (!isLiveMarketplaceEnabled()) expect(html).toContain("ساعة كرونوغراف كلاسيكية");
   });
 });
