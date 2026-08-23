@@ -4,7 +4,7 @@ services:
   - type: web
     runtime: static
     name: mazad-marketplace-web
-    buildCommand: corepack enable && pnpm install --frozen-lockfile && pnpm exec vite build
+    buildCommand: pnpm install --frozen-lockfile && pnpm exec vite build
     staticPublishPath: ./dist/public
     routes:
       - type: rewrite

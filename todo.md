@@ -151,3 +151,4 @@
 - [ ] Fix the RTL date/time field state mismatch in Netlify seller auction scheduling that reports required fields despite visible values.
 - [ ] Restore Netlify deployment availability after the external account-usage limit, then publish and browser-verify the seller scheduling fix.
 - [ ] Serve the public React Marketplace from the existing Render Laravel service, including SPA routing and the live seller scheduling fix, before retiring reliance on Netlify.
+- [ ] Remove the incompatible corepack enable step from the Render Static Site build command and verify a successful public deployment.
