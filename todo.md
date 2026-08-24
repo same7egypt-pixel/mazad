@@ -175,3 +175,5 @@
 - [x] Create idempotent COD winner-confirmation, collection-recording, receipt-confirmation, and seller-settlement domain services with audited transitions.
 - [x] Build account-level COD order detail actions and role-scoped Filament operations for collection, fulfillment, failed collection, and settlement release.
 - [x] Verify COD lifecycle, country isolation, finance safeguards, account UI, and Render deployment before enabling the workflow for live orders.
+- [x] Add a dedicated Filament cash-on-delivery operations page with country-scoped queues, collection and settlement status filters, and safe record actions.
+- [x] Add tested COD operational counters and empty states without fabricating financial or order data.

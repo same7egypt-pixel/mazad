@@ -3,11 +3,14 @@
 namespace Tests\Feature;
 
 use App\Filament\Resources\AdminAccess\AdminAccessResource;
+use App\Filament\Resources\CashOnDeliveryOrders\CashOnDeliveryOrderResource;
+use App\Filament\Resources\CashOnDeliveryOrders\Widgets\CashOnDeliveryOverview;
 use App\Models\Country;
 use App\Models\Currency;
 use App\Models\User;
 use Filament\Panel;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Livewire\Livewire;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 use Tests\TestCase;
@@ -84,5 +87,26 @@ class FilamentAccessTest extends TestCase
             ->assertSee('نسبة عمولة المنصة')
             ->assertSee('تفعيل الدفع عند الاستلام')
             ->assertSee('مهلة تأكيد الفائز');
+    }
+
+    public function test_authorized_admin_can_open_the_cash_on_delivery_operations_queue(): void
+    {
+        $admin = User::factory()->create(['status' => 'active']);
+        $admin->assignRole(Role::findOrCreate('GLOBAL_SUPER_ADMIN', 'web'));
+        $admin->givePermissionTo(Permission::findOrCreate('orders.view', 'web'));
+
+        $this->actingAs($admin)
+            ->get(route('filament.admin.resources.cash-on-delivery-orders.index'))
+            ->assertOk()
+            ->assertSee('طلبات الدفع عند الاستلام')
+            ->assertSee('لا توجد طلبات دفع عند الاستلام في نطاقك حالياً');
+
+        Livewire::test(CashOnDeliveryOverview::class)
+            ->assertSee('تأكيدات الفائزين')
+            ->assertSee('بانتظار التحصيل')
+            ->assertSee('تعذر تحصيلها')
+            ->assertSee('مستحقات محررة');
+
+        $this->assertTrue(CashOnDeliveryOrderResource::canViewAny());
     }
 }
